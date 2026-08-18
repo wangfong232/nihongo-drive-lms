@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/NihongoLms.Api/NihongoLms.Api.csproj" />
+    <Project Path="src/NihongoLms.Application/NihongoLms.Application.csproj" />
+    <Project Path="src/NihongoLms.Domain/NihongoLms.Domain.csproj" />
+    <Project Path="src/NihongoLms.Infrastructure/NihongoLms.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/NihongoLms.Tests/NihongoLms.Tests.csproj" />
+  </Folder>
+</Solution>
