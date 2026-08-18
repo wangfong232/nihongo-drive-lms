@@ -10,9 +10,13 @@
 [![TailwindCSS](https://img.shields.io/badge/Tailwind-4.0-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**Nền tảng Quản lý và Học tập Tiếng Nhật Thông minh — Đồng bộ và chuyển hóa Google Drive thành khóa học JLPT tương tác chuẩn Prep / Riki.**
+**Nền tảng Quản lý và Học tập Tiếng Nhật Toàn Diện — Tự động đồng bộ và chuyển hóa Google Drive thành khóa học JLPT tương tác theo mô hình chuẩn Prep / Riki.**
 
-[Tính Năng](#-tính-năng-nổi-bật) • [Kiến Trúc](#-kiến-trúc-hệ-thống) • [Hướng Dẫn Cài Đặt](#-hướng-dẫn-cài-đặt--chạy-dự-án) • [Cấu Hình Google Drive](#-cấu-hình-google-drive-api) • [Tài Liệu API](#-tài-liệu-api) • [Đóng Góp](#-đóng-góp-phát-triển)
+[Hình Ảnh Demo](#-hình-ảnh-giao-diện-demo--showcase) • [Tính Năng](#-tính-năng-nổi-bật) • [Kiến Trúc](#-kiến-trúc-hệ-thống) • [Cài Đặt & Chạy](#-hướng-dẫn-cài-đặt--chạy-dự-án) • [Cấu Hình Google Drive](#-cấu-hình-google-drive-api) • [Tài Liệu API](#-danh-sách-api-chính-api-reference)
+
+---
+
+<img src="demo/course.png" alt="DriveLearn Course Player" width="100%" style="border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.12);" />
 
 </div>
 
@@ -20,45 +24,85 @@
 
 ## 📖 Giới Thiệu (Overview)
 
-**DriveLearn (Nihongo LMS)** là giải pháp LMS chuyên sâu cho việc học và giảng dạy tiếng Nhật (từ N5 đến N1). Hệ thống giải quyết bài toán lớn nhất của các trung tâm và giáo viên: **Kho học liệu khổng lồ trên Google Drive (Video, Audio, PDF, Đề thi, Flashcard) được tự động ánh xạ thành cây khóa học phân cấp (Course $\rightarrow$ Section $\rightarrow$ Lesson) mà không cần sao chép hay tốn chi phí lưu trữ máy chủ.**
+**DriveLearn (Nihongo LMS)** là giải pháp LMS mã nguồn mở chuyên sâu cho việc học và giảng dạy tiếng Nhật (từ N5 đến N1). Hệ thống giải quyết bài toán lớn nhất của các trung tâm và giáo viên: **Kho học liệu khổng lồ trên Google Drive (Video, Audio, PDF, Đề thi, Flashcard) được tự động ánh xạ thành cây khóa học phân cấp (Course $\rightarrow$ Section $\rightarrow$ Lesson) mà không cần sao chép tệp hay tốn chi phí lưu trữ server.**
+
+---
+
+## 📸 Hình Ảnh Giao Diện Demo (Showcase)
+
+### 1. 🎓 Giao Diện Học Tập Toàn Diện (Learner Experience)
+> Phát video bài giảng HD, tài liệu đính kèm, danh sách từ vựng & Kanji theo bài học, cùng trình phát âm thanh hỗ trợ luyện nghe Chōkai chuyên sâu.
+
+<p align="center">
+  <img src="demo/course.png" alt="Giao diện học tập DriveLearn" width="95%" />
+</p>
+
+---
+
+### 2. 🛠️ Trình Quản Lý & Xây Dựng Khóa Học (Course Builder CMS)
+> Quản lý cây bài học phân cấp (Course $\rightarrow$ Chặng $\rightarrow$ Bài học), kéo thả tự do, và công cụ **Auto-Suggest** tự động phân loại tài nguyên Google Drive.
+
+<p align="center">
+  <img src="demo/CMS.png" alt="Course Builder CMS" width="95%" />
+</p>
+
+---
+
+### 3. ⚡ Đồng Bộ Dữ Liệu Google Drive (Google Drive Sync Engine)
+> Quét cấu trúc thư mục Google Drive theo thời gian thực, quản lý phân quyền OAuth 2.0 an toàn và tự động ánh xạ siêu dữ liệu (Metadata).
+
+<p align="center">
+  <img src="demo/ImportData.png" alt="Google Drive Sync Engine" width="95%" />
+</p>
+
+---
+
+### 4. 🀄 Trung Tâm Kanji & Bảng Luyện Viết Tương Tác (Kanji Hub & Stroke Recognition)
+> Tra cứu Kanji N5–N1, phân tích bộ thủ, âm Hán Việt, On/Kun. Bảng vẽ tương tác Canvas hỗ trợ hiển thị hoạt họa thứ tự nét (KanjiVG) và chấm điểm nét vẽ trực tiếp.
+
+<p align="center">
+  <img src="demo/KanjiHub.png" alt="Kanji Hub Dictionary" width="48%" />
+  <img src="demo/KanjiCanvas.png" alt="Kanji Stroke Practice Canvas" width="48%" />
+</p>
+
+---
+
+### 5. 🧠 Thẻ Ghi Nhớ & Lặp Lại Ngắt Quãng SM-2 (Spaced Repetition Flashcards)
+> Thuật toán SuperMemo SM-2 tự động tính toán chu kỳ lặp lại tối ưu cho từng từ vựng dựa trên mức độ ghi nhớ (*Again, Hard, Good, Easy*).
+
+<p align="center">
+  <img src="demo/SRS.png" alt="Spaced Repetition System (SRS)" width="95%" />
+</p>
+
+---
+
+### 6. 📝 Hệ Thống Thi Thử JLPT N5–N1 & Làm Bài Tập Tương Tác (Exam & Quiz Hub)
+> Ngân hàng đề thi thử bấm giờ thực tế chuẩn format JLPT, đa dạng dạng câu hỏi (Trắc nghiệm, Điền từ, Nghe hiểu Audio, Sắp xếp từ) kèm phiếu chấm điểm tức thì.
+
+<p align="center">
+  <img src="demo/TestHub.png" alt="JLPT Exam Hub" width="48%" />
+  <img src="demo/Test.png" alt="Interactive Quiz Taking" width="48%" />
+</p>
+
+---
+
+### 7. 📚 Ngân Hàng Quản Lý Từ Vựng (Vocabulary CMS)
+> Tra cứu, lọc theo cấp độ JLPT, chỉnh sửa nghĩa, phiên âm Hiragana, ví dụ mẫu và phát âm từ vựng bằng công nghệ Speech Synthesis (TTS).
+
+<p align="center">
+  <img src="demo/VocabCMS.png" alt="Vocabulary Management CMS" width="95%" />
+</p>
 
 ---
 
 ## ✨ Tính Năng Nổi Bật (Key Features)
 
-### 1. 📂 Google Drive Raw Mirror & Smart Auto-Curator
-- Đồng bộ cây thư mục Google Drive theo thời gian thực (background Quartz.NET job).
-- **Auto-Suggest Pattern Engine**: Tự động nhận diện cấu trúc thư mục (`Bài 01`, `Lesson 1`, `Choukai`, `Dokkai`, v.v.) bằng Regex và gom nhóm thành bài học hoàn chỉnh chỉ với 1 click.
-- Kéo thả tự do tài nguyên (Video, Audio, PDF, Docs) vào từng bài học.
-
-### 2. 🎵 Trình Phát Đa Phương Tiện Thích Ứng (Adaptive Media Streaming)
-- **Zero-CORS Audio Streamer**: Backend proxy stream audio trực tiếp từ Google Drive với cơ chế **Thread-Safe Download Lock (`SemaphoreSlim`)** và bộ đệm cache cục bộ thông minh.
-- Hỗ trợ đầy đủ tính năng học ngoại ngữ chuyên sâu: Tua lại 5s/10s, A-B Repeat (lặp đoạn), điều chỉnh tốc độ $(0.5\times - 2\times)$, Text-to-Speech (TTS) tiếng Nhật tự nhiên, và Iframe Preview Fallback.
-- Tự động lưu tiến độ video/audio đến từng giây.
-
-### 3. 🧠 Thẻ Ghi Nhớ & Thuật Toán Lặp Lại Ngắt Quãng (SM-2 Spaced Repetition)
-- Thuật toán **SuperMemo SM-2** tính toán thời điểm ôn tập tối ưu cho từng từ vựng dựa trên độ nhớ (*Again, Hard, Good, Easy*).
-- Quản lý bộ thẻ theo cấp độ JLPT (N5 $\rightarrow$ N1) và thư mục chuyên đề tùy chỉnh.
-- Thống kê chuỗi ngày học liên tục (*Study Streak*), số thẻ cần ôn trong ngày.
-
-### 4. 📝 Hệ Thống Thi Thử JLPT N5–N1 & Bài Tập Đa Dạng
-- Hỗ trợ 8 loại câu hỏi tương tác:
-  - Trắc nghiệm 4 lựa chọn (Multiple Choice)
-  - Điền từ vào chỗ trống (Fill in the Blank)
-  - Nghe hiểu tích hợp Audio (Choukai)
-  - Sắp xếp trật tự từ / mẫu câu (Token Arrangement)
-  - Ghép cặp từ vựng / Kanji (Matching Pairs)
-- Chế độ thi thử bấm giờ thực tế (105 phút) với phiếu chấm điểm chi tiết và giải thích đáp án.
-- Tự động đánh dấu hoàn thành bài học khi vượt qua Quiz.
-
-### 5. 🀄 Bảng Luyện Viết Kanji Tương Tác (KanjiVG & HanziWriter)
-- Nạp động dữ liệu nét chữ chuẩn KanjiVG trên lưới điền tự (田).
-- Chế độ xem hoạt họa từng nét chữ theo thứ tự chuẩn.
-- Chế độ **Tập Viết & Chấm Điểm (Quiz Mode)**: Nhận diện cử chỉ chuột hoặc cảm ứng (Touch), phát hiện nét sai và chúc mừng khi hoàn thành.
-
-### 6. 🌐 Giao Diện Song Ngữ & Tối Ưu Hiệu Năng
-- Song ngữ Việt - Nhật - Anh với Dark/Light Mode.
-- Dynamic Import (`next/dynamic`) phân rã bundle, tốc độ tải trang cực nhanh.
+- **📂 Google Drive Raw Mirror & Smart Auto-Curator:** Đồng bộ hóa Google Drive sang database PostgreSQL theo mô hình phân cấp, hỗ trợ gom nhóm bài học tự động với Regex pattern.
+- **🎵 Zero-CORS Adaptive Media Streamer:** Tối ưu hóa phát Audio/Video trực tiếp với hỗ trợ HTTP 206 Partial Content (Byte Range requests), tự động chuyển đổi giữa Direct Stream và Google Drive Preview Player.
+- **🧠 SM-2 Spaced Repetition Engine:** Hệ thống Flashcard thông minh giúp ghi nhớ từ vựng vĩnh viễn, hỗ trợ quản lý theo chuyên đề và theo dõi chuỗi ngày học (*Streak*).
+- **🀄 Interactive Kanji Canvas:** Nhận diện nét viết Kanji với KanjiVG & HanziWriter, hỗ trợ cả chuột máy tính và màn hình cảm ứng Touch/Tablet.
+- **📝 JLPT Quiz & Exam Engine:** Chấm điểm tự động 8 dạng câu hỏi, hỗ trợ lưu lịch sử làm bài và tự động cập nhật tiến độ hoàn thành khóa học.
+- **🌓 Modern UI & Next.js 16 App Router:** Giao diện song ngữ Việt - Nhật - Anh, Dark/Light Mode, tối ưu SEO và Dynamic Import giúp tải trang mượt mà.
 
 ---
 
@@ -71,89 +115,80 @@ DriveLearn_v1.0/
 │   ├── NihongoLms.Application/      # DTOs, Interfaces (ICuratorService, ISrsService, IProgressService)
 │   ├── NihongoLms.Infrastructure/   # EF Core DbContext, PostgreSQL, Services, SM-2 Engine, Quartz Sync
 │   └── NihongoLms.Api/              # ASP.NET Core Web API Controllers, DI Registration, CORS
-└── frontend/                        # Next.js 16 (App Router), Tailwind CSS, TypeScript
-    ├── src/app/                     # Pages: / (LMS), /admin/builder, /admin/quizzes, /kanji, /quiz/mock
-    ├── src/components/              # Reusable UI, KanjiCanvas, AudioPlayer, Modals
-    └── src/lib/                     # API Client, SRS, TTS, i18n, Favorites
+├── frontend/                        # Next.js 16 (App Router), Tailwind CSS, TypeScript
+│   ├── src/app/                     # Pages: / (LMS), /admin/builder, /admin/quizzes, /kanji, /quiz/mock
+│   ├── src/components/              # Reusable UI, KanjiCanvas, AudioPlayer, Modals
+│   └── src/lib/                     # API Client, SRS, TTS, i18n, Favorites
+└── demo/                            # Screenshots & Interface Demo Assets
 ```
 
 ---
 
 ## 🚀 Hướng Dẫn Cài Đặt & Chạy Dự Án (Quick Start)
 
-### Yêu Cầu Môi Trường
-- **.NET 10 SDK** (hoặc .NET 9 trở lên)
+### Yêu Cầu Hệ Thống
+- **.NET 10 SDK** (hoặc .NET 9+)
 - **Node.js 18+** & **npm**
 - **Docker Desktop** (cho PostgreSQL)
 
 ---
 
-### Bước 1: Khởi Động Cơ Sở Dữ Liệu PostgreSQL
+### Khởi Chạy Tự Động 1-Click (Windows)
+Chỉ cần nhấp đúp file [`start.bat`](start.bat) hoặc chạy lệnh trong terminal:
+```bash
+.\start.bat
+```
+Hệ thống sẽ tự động khởi động cơ sở dữ liệu PostgreSQL container, biên dịch Backend .NET API (port `5222`) và chạy Frontend Next.js (port `3000`).
 
-Khởi chạy container PostgreSQL với Docker:
+---
 
+### Khởi Chạy Thủ Công
+
+#### 1. Khởi động PostgreSQL Container
 ```bash
 docker run --name nihongo-postgres -e POSTGRES_DB=nihongo_lms -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -p 5433:5432 -d postgres:16-alpine
 ```
 
----
+#### 2. Khởi chạy Backend .NET 10
+```bash
+dotnet ef database update --project src/NihongoLms.Infrastructure --startup-project src/NihongoLms.Api
+dotnet run --project src/NihongoLms.Api/NihongoLms.Api.csproj
+```
+* Backend API: `http://localhost:5222`
+* Swagger UI: `http://localhost:5222/swagger`
 
-### Bước 2: Cấu Hình & Chạy Backend (.NET 10)
-
-1. Mở file `src/NihongoLms.Api/appsettings.json` và kiểm tra chuỗi kết nối:
-   ```json
-   {
-     "ConnectionStrings": {
-       "DefaultConnection": "Host=localhost;Port=5433;Database=nihongo_lms;Username=postgres;Password=postgres"
-     }
-   }
-   ```
-
-2. Áp dụng Migration cơ sở dữ liệu:
-   ```bash
-   dotnet ef database update --project src/NihongoLms.Infrastructure --startup-project src/NihongoLms.Api
-   ```
-
-3. Khởi chạy Backend API:
-   ```bash
-   cd src/NihongoLms.Api
-   dotnet run
-   ```
-   * Swagger UI khả dụng tại: `https://localhost:7000/swagger` hoặc `http://localhost:5000/swagger`.
-
----
-
-### Bước 3: Cài Đặt & Chạy Frontend (Next.js 16)
-
-1. Mở terminal mới, di chuyển vào thư mục `frontend`:
-   ```bash
-   cd frontend
-   npm install
-   ```
-
-2. Tạo file cấu hình môi trường `.env.local`:
-   ```env
-   NEXT_PUBLIC_API_URL=http://localhost:5000/api
-   ```
-
-3. Khởi chạy máy chủ phát triển:
-   ```bash
-   npm run dev
-   ```
-   * Truy cập ứng dụng tại: `http://localhost:3000`
+#### 3. Khởi chạy Frontend Next.js 16
+```bash
+cd frontend
+npm install
+npm run dev
+```
+* Ứng dụng Web: `http://localhost:3000`
 
 ---
 
 ## 🔑 Cấu Hình Google Drive API
 
-Để đồng bộ học liệu trực tiếp từ Google Drive của bạn:
-
 1. Truy cập [Google Cloud Console](https://console.cloud.google.com/) và tạo một Project mới.
 2. Bật **Google Drive API**.
-3. Tạo **Service Account** hoặc **OAuth 2.0 Client ID**, tải file credentials JSON về máy.
-4. Chia sẻ thư mục Google Drive chứa tài liệu cho email của Service Account (quyền *Viewer* hoặc *Editor*).
-5. Lấy **Folder ID** từ URL Google Drive (ví dụ: `drive.google.com/drive/folders/xxx` $\rightarrow$ ID là `xxx`).
-6. Nhập Folder ID vào giao diện **Course Builder (`/admin/builder`)** và nhấn **"Đồng Bộ Google Drive"**.
+3. Tạo **OAuth 2.0 Client ID** (chọn *Web Application*):
+   - **Authorized redirect URIs:** `http://localhost:5222/api/auth/google/callback`
+4. Cập nhật thông tin vào file cấu hình môi trường phát triển:
+   ```json
+   {
+     "Authentication": {
+       "Google": {
+         "ClientId": "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com",
+         "ClientSecret": "YOUR_GOOGLE_CLIENT_SECRET",
+         "RedirectUri": "http://localhost:5222/api/auth/google/callback"
+       }
+     },
+     "GoogleDrive": {
+       "RootFolderId": "YOUR_GOOGLE_DRIVE_ROOT_FOLDER_ID"
+     }
+   }
+   ```
+5. Đăng nhập tại `http://localhost:5222/api/auth/google/login` hoặc nút **"Kết Nối Google OAuth"** trong trang Builder để bắt đầu đồng bộ.
 
 ---
 
@@ -165,28 +200,15 @@ docker run --name nihongo-postgres -e POSTGRES_DB=nihongo_lms -e POSTGRES_USER=p
 | `GET` | `/api/course/{id}` | Lấy chi tiết khóa học theo ID |
 | `POST` | `/api/sync/drive` | Kích hoạt quét và đồng bộ cấu trúc Google Drive |
 | `GET` | `/api/sync/nodes` | Lấy danh sách tệp/thư mục đã đồng bộ từ Drive |
-| `GET` | `/api/audio/stream/{driveFileId}` | Proxy stream âm thanh trực tiếp chống CORS |
+| `GET` | `/api/audio/proxy-drive` | Proxy & Cache stream âm thanh trực tiếp từ Google Drive |
 | `GET` | `/api/srs/due` | Lấy danh sách từ vựng đến hạn ôn tập hôm nay |
 | `POST` | `/api/srs/review` | Gửi đánh giá thẻ SRS (Cập nhật khoảng cách SM-2) |
-| `GET` | `/api/srs/stats` | Thống kê số thẻ, chuỗi ngày học liên tục |
+| `GET` | `/api/srs/stats` | Thống kê số thẻ và chuỗi ngày học liên tục |
 | `GET` | `/api/quiz/{id}` | Lấy đề thi dành cho học viên |
 | `POST` | `/api/quiz/{id}/submit` | Nộp bài và chấm điểm tự động |
 | `GET` | `/api/vocabulary` | Tra cứu danh sách từ vựng theo cấp độ JLPT / bài học |
 | `GET` | `/api/progress/{lessonId}` | Lấy tiến độ học và vị trí phát media của bài học |
 | `POST` | `/api/progress/playback` | Lưu vị trí phát video/audio theo thời gian thực |
-
----
-
-## 🧪 Kiểm Thử & Đóng Gói (Build & Verification)
-
-- **Kiểm tra Backend:**
-  ```bash
-  dotnet build
-  ```
-- **Kiểm tra Frontend:**
-  ```bash
-  cd frontend && npm run build
-  ```
 
 ---
 
