@@ -48,16 +48,7 @@
 
 ---
 
-### 3. ⚡ Đồng Bộ Dữ Liệu Google Drive (Google Drive Sync Engine)
-> Quét cấu trúc thư mục Google Drive theo thời gian thực, quản lý phân quyền OAuth 2.0 an toàn và tự động ánh xạ siêu dữ liệu (Metadata).
-
-<p align="center">
-  <img src="demo/ImportData.png" alt="Google Drive Sync Engine" width="95%" />
-</p>
-
----
-
-### 4. 🀄 Trung Tâm Kanji & Bảng Luyện Viết Tương Tác (Kanji Hub & Stroke Recognition)
+### 3. 🀄 Trung Tâm Kanji & Bảng Luyện Viết Tương Tác (Kanji Hub & Stroke Recognition)
 > Tra cứu Kanji N5–N1, phân tích bộ thủ, âm Hán Việt, On/Kun. Bảng vẽ tương tác Canvas hỗ trợ hiển thị hoạt họa thứ tự nét (KanjiVG) và chấm điểm nét vẽ trực tiếp.
 
 <p align="center">
@@ -67,7 +58,7 @@
 
 ---
 
-### 5. 🧠 Thẻ Ghi Nhớ & Lặp Lại Ngắt Quãng SM-2 (Spaced Repetition Flashcards)
+### 4. 🧠 Thẻ Ghi Nhớ & Lặp Lại Ngắt Quãng SM-2 (Spaced Repetition Flashcards)
 > Thuật toán SuperMemo SM-2 tự động tính toán chu kỳ lặp lại tối ưu cho từng từ vựng dựa trên mức độ ghi nhớ (*Again, Hard, Good, Easy*).
 
 <p align="center">
@@ -76,12 +67,21 @@
 
 ---
 
-### 6. 📝 Hệ Thống Thi Thử JLPT N5–N1 & Làm Bài Tập Tương Tác (Exam & Quiz Hub)
+### 5. 📝 Hệ Thống Thi Thử JLPT & Làm Bài Tập Tương Tác (Exam & Quiz Hub)
 > Ngân hàng đề thi thử bấm giờ thực tế chuẩn format JLPT, đa dạng dạng câu hỏi (Trắc nghiệm, Điền từ, Nghe hiểu Audio, Sắp xếp từ) kèm phiếu chấm điểm tức thì.
 
 <p align="center">
   <img src="demo/TestHub.png" alt="JLPT Exam Hub" width="48%" />
   <img src="demo/Test.png" alt="Interactive Quiz Taking" width="48%" />
+</p>
+
+---
+
+### 6. 📥 Import Đề Thi & Câu Hỏi Hàng Loạt (Bulk Quiz Importer)
+> Nhập nhanh hàng trăm câu hỏi trắc nghiệm từ file CSV, TXT, Excel với định dạng phân cách thông minh, tải file mẫu 1-click và phân bổ theo cấp độ JLPT.
+
+<p align="center">
+  <img src="demo/ImportData.png" alt="Bulk Quiz Importer (CSV / TXT / Excel)" width="95%" />
 </p>
 
 ---
@@ -101,7 +101,7 @@
 - **🎵 Zero-CORS Adaptive Media Streamer:** Tối ưu hóa phát Audio/Video trực tiếp với hỗ trợ HTTP 206 Partial Content (Byte Range requests), tự động chuyển đổi giữa Direct Stream và Google Drive Preview Player.
 - **🧠 SM-2 Spaced Repetition Engine:** Hệ thống Flashcard thông minh giúp ghi nhớ từ vựng vĩnh viễn, hỗ trợ quản lý theo chuyên đề và theo dõi chuỗi ngày học (*Streak*).
 - **🀄 Interactive Kanji Canvas:** Nhận diện nét viết Kanji với KanjiVG & HanziWriter, hỗ trợ cả chuột máy tính và màn hình cảm ứng Touch/Tablet.
-- **📝 JLPT Quiz & Exam Engine:** Chấm điểm tự động 8 dạng câu hỏi, hỗ trợ lưu lịch sử làm bài và tự động cập nhật tiến độ hoàn thành khóa học.
+- **📝 JLPT Quiz & Exam Engine:** Chấm điểm tự động 8 dạng câu hỏi, hỗ trợ lưu lịch sử làm bài và công cụ **Bulk Import câu hỏi từ CSV/TXT/Excel**.
 - **🌓 Modern UI & Next.js 16 App Router:** Giao diện song ngữ Việt - Nhật - Anh, Dark/Light Mode, tối ưu SEO và Dynamic Import giúp tải trang mượt mà.
 
 ---

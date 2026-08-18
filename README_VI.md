@@ -40,14 +40,7 @@ Quản lý cây bài học phân cấp (Khóa học $\rightarrow$ Chặng $\righ
   <img src="demo/CMS.png" alt="Course Builder CMS" width="95%" />
 </p>
 
-### 3. ⚡ Đồng Bộ Dữ Liệu Google Drive
-Quét cây thư mục Google Drive theo thời gian thực, quản lý phân quyền OAuth 2.0 an toàn và tự động ánh xạ siêu dữ liệu (Metadata).
-
-<p align="center">
-  <img src="demo/ImportData.png" alt="Google Drive Sync Engine" width="95%" />
-</p>
-
-### 4. 🀄 Trung Tâm Kanji & Bảng Luyện Viết Tương Tác
+### 3. 🀄 Trung Tâm Kanji & Bảng Luyện Viết Tương Tác
 Tra cứu Kanji N5–N1, phân tích bộ thủ, âm Hán Việt, On/Kun. Bảng vẽ tương tác Canvas hỗ trợ hiển thị hoạt họa thứ tự nét (KanjiVG) và nhận diện nét vẽ trực tiếp.
 
 <p align="center">
@@ -55,19 +48,26 @@ Tra cứu Kanji N5–N1, phân tích bộ thủ, âm Hán Việt, On/Kun. Bảng
   <img src="demo/KanjiCanvas.png" alt="Kanji Stroke Practice Canvas" width="48%" />
 </p>
 
-### 5. 🧠 Thẻ Ghi Nhớ & Lặp Lại Ngắt Quãng SM-2
+### 4. 🧠 Thẻ Ghi Nhớ & Lặp Lại Ngắt Quãng SM-2
 Thuật toán SuperMemo SM-2 tự động tính toán chu kỳ lặp lại tối ưu cho từng từ vựng dựa trên mức độ ghi nhớ (*Again, Hard, Good, Easy*).
 
 <p align="center">
   <img src="demo/SRS.png" alt="Spaced Repetition System (SRS)" width="95%" />
 </p>
 
-### 6. 📝 Hệ Thống Thi Thử JLPT N5–N1 & Làm Bài Tập Tương Tác
+### 5. 📝 Hệ Thống Thi Thử JLPT N5–N1 & Làm Bài Tập Tương Tác
 Ngân hàng đề thi thử bấm giờ thực tế chuẩn format JLPT, đa dạng dạng câu hỏi (Trắc nghiệm, Điền từ, Nghe hiểu Audio, Sắp xếp từ) kèm phiếu chấm điểm tức thì.
 
 <p align="center">
   <img src="demo/TestHub.png" alt="JLPT Exam Hub" width="48%" />
   <img src="demo/Test.png" alt="Interactive Quiz Taking" width="48%" />
+</p>
+
+### 6. 📥 Import Đề Thi & Câu Hỏi Hàng Loạt (Bulk Quiz Importer)
+Nhập nhanh hàng trăm câu hỏi trắc nghiệm từ file CSV, TXT, Excel với định dạng phân cách thông minh, tải file mẫu 1-click và phân bổ theo cấp độ JLPT.
+
+<p align="center">
+  <img src="demo/ImportData.png" alt="Bulk Quiz Importer (CSV / TXT / Excel)" width="95%" />
 </p>
 
 ### 7. 📚 Ngân Hàng Quản Lý Từ Vựng (Vocabulary CMS)
