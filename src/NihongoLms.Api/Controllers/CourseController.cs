@@ -100,6 +100,13 @@ public class CourseController : ControllerBase
         return Ok(new { message = "Lessons reordered successfully." });
     }
 
+    [HttpPost("reorder-sections")]
+    public async Task<IActionResult> ReorderSections([FromBody] ReorderSectionsDto dto, CancellationToken cancellationToken)
+    {
+        await _curatorService.ReorderSectionsAsync(dto, cancellationToken);
+        return Ok(new { message = "Sections reordered successfully." });
+    }
+
     [HttpPost("assign-quiz")]
     public async Task<IActionResult> AssignQuiz([FromBody] AssignQuizRequestDto dto, CancellationToken cancellationToken)
     {

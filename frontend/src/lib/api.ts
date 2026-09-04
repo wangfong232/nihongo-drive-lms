@@ -1316,7 +1316,7 @@ export const api = {
     );
   },
 
-  // ─── Lesson Reordering & Quiz Assignment ─────────────────────────────────
+  // ─── Lesson & Section Reordering & Quiz Assignment ───────────────────────
   async reorderLessons(sectionId: string, lessonIds: string[]) {
     return safeFetch(
       `${API_BASE}/course/reorder-lessons`,
@@ -1324,6 +1324,18 @@ export const api = {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sectionId, lessonIds }),
+      },
+      { success: true }
+    );
+  },
+
+  async reorderSections(courseId: string, sectionIds: string[]) {
+    return safeFetch(
+      `${API_BASE}/course/reorder-sections`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ courseId, sectionIds }),
       },
       { success: true }
     );

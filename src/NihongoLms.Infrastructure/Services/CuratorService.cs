@@ -94,12 +94,19 @@ public class CuratorService : ICuratorService
 
     public async Task<SectionDto> CreateSectionAsync(CreateSectionDto dto, CancellationToken cancellationToken = default)
     {
+        int order = dto.DisplayOrder;
+        if (order <= 0)
+        {
+            var maxOrder = await _dbContext.Sections.Where(s => s.CourseId == dto.CourseId).Select(s => (int?)s.DisplayOrder).MaxAsync(cancellationToken) ?? 0;
+            order = maxOrder + 1;
+        }
+
         var section = new Section
         {
             CourseId = dto.CourseId,
             Title = dto.Title,
             Description = dto.Description,
-            DisplayOrder = dto.DisplayOrder,
+            DisplayOrder = order,
             CreatedAtUtc = DateTime.UtcNow
         };
 
@@ -151,12 +158,19 @@ public class CuratorService : ICuratorService
 
     public async Task<LessonDto> CreateLessonAsync(CreateLessonDto dto, CancellationToken cancellationToken = default)
     {
+        int order = dto.DisplayOrder;
+        if (order <= 0)
+        {
+            var maxOrder = await _dbContext.Lessons.Where(l => l.SectionId == dto.SectionId).Select(l => (int?)l.DisplayOrder).MaxAsync(cancellationToken) ?? 0;
+            order = maxOrder + 1;
+        }
+
         var lesson = new Lesson
         {
             SectionId = dto.SectionId,
             Title = dto.Title,
             Description = dto.Description,
-            DisplayOrder = dto.DisplayOrder,
+            DisplayOrder = order,
             IsPublished = true,
             CreatedAtUtc = DateTime.UtcNow
         };
@@ -306,6 +320,21 @@ public class CuratorService : ICuratorService
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task ReorderSectionsAsync(ReorderSectionsDto dto, CancellationToken cancellationToken = default)
+    {
+        var sections = await _dbContext.Sections.Where(s => s.CourseId == dto.CourseId).ToListAsync(cancellationToken);
+        for (int i = 0; i < dto.SectionIds.Count; i++)
+        {
+            var id = dto.SectionIds[i];
+            var section = sections.FirstOrDefault(s => s.Id == id);
+            if (section != null)
+            {
+                section.DisplayOrder = i + 1;
+            }
+        }
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task AssignQuizToLessonAsync(AssignQuizRequestDto dto, CancellationToken cancellationToken = default)
     {
         var quiz = await _dbContext.Quizzes.FirstOrDefaultAsync(q => q.Id == dto.QuizId, cancellationToken);
@@ -326,14 +355,14 @@ public class CuratorService : ICuratorService
             JlptLevel = c.JlptLevel,
             DisplayOrder = c.DisplayOrder,
             IsPublished = c.IsPublished,
-            Sections = c.Sections.Select(s => new SectionDto
+            Sections = c.Sections.OrderBy(s => s.DisplayOrder).Select(s => new SectionDto
             {
                 Id = s.Id,
                 CourseId = s.CourseId,
                 Title = s.Title,
                 Description = s.Description,
                 DisplayOrder = s.DisplayOrder,
-                Lessons = s.Lessons.Select(l => new LessonDto
+                Lessons = s.Lessons.OrderBy(l => l.DisplayOrder).Select(l => new LessonDto
                 {
                     Id = l.Id,
                     SectionId = l.SectionId,
@@ -342,7 +371,7 @@ public class CuratorService : ICuratorService
                     DisplayOrder = l.DisplayOrder,
                     EstimatedDurationMinutes = l.EstimatedDurationMinutes,
                     IsPublished = l.IsPublished,
-                    Resources = l.Resources.Select(r => new ResourceDto
+                    Resources = l.Resources.OrderBy(r => r.DisplayOrder).Select(r => new ResourceDto
                     {
                         Id = r.Id,
                         LessonId = r.LessonId,

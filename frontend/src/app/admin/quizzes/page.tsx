@@ -397,9 +397,9 @@ export default function AdminQuizzesPage() {
     const csvContent =
       "Câu hỏi;Lựa chọn A;Lựa chọn B;Lựa chọn C;Lựa chọn D;Đáp án đúng (A/B/C/D);Giải thích chi tiết;Điểm\n" +
       "「先生」の読み方はどれですか。;せんせい;がくせい;いしゃ;かいしゃいん;A;「先生」là thầy cô giáo, phát âm là せんせい.;2\n" +
-      "田中さん _____ どこに行きますか。;は;が;を;に;A;Trợ từ は (wa) dùng để đánh dấu chủ đề của câu hỏi.;2\n" +
-      "きのう 友達と 映画を _____。;見ました;見ます;見ない;見よう;A;Thì quá khứ của 見る là 見ました.;2\n" +
-      "机の _____ に 猫が います。;うえ;した;なか;まえ;A;Trên bàn là 机の 上 (うえ).;2\n";
+      "わたしは _____ です。;ねこ;がくせい;くるま;ほん;B;Tôi là học sinh (がくせい).;2\n" +
+      "机の _____ に 猫が います。;した;なか;うえ;まえ;C;Trên bàn là 机の 上 (うえ).;2\n" +
+      "きのう 友達と 映画を _____。;見ます;見ない;見よう;見ました;D;Thì quá khứ của 見る là 見ました.;2\n";
 
     const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);

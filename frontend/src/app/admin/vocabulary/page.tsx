@@ -8,6 +8,7 @@ import { playJapaneseSpeech } from "@/lib/tts";
 import { useI18n } from "@/lib/i18n";
 import { useFavorites } from "@/lib/favorites";
 import { useVocabFolders, VocabFolder } from "@/lib/vocabFolders";
+import { customKanjiService } from "@/lib/customKanji";
 import {
   BookOpen,
   Plus,
@@ -127,6 +128,9 @@ export default function AdminVocabularyPage() {
       ]);
       setVocabList(vData);
       setCourses(cData);
+      if (vData && vData.length > 0) {
+        customKanjiService.syncKanjiFromVocab(vData);
+      }
     } catch (err) {
       console.error("Failed to load vocabulary data", err);
     } finally {
@@ -176,6 +180,17 @@ export default function AdminVocabularyPage() {
           tagsJson: JSON.stringify(meta),
         });
       }
+
+      // Automatically sync Kanji into Kanji Hub
+      customKanjiService.syncKanjiFromVocab([
+        {
+          word: word.trim(),
+          reading: reading.trim(),
+          meaning: meaning.trim(),
+          jlptLevel,
+          tagsJson: JSON.stringify(meta),
+        },
+      ]);
 
       setWord("");
       setReading("");
@@ -368,6 +383,21 @@ export default function AdminVocabularyPage() {
         successCount++;
         setImportProgress({ current: i + 1, total: validItems.length });
       }
+
+      // Automatically sync all imported Kanji into Kanji Hub
+      customKanjiService.syncKanjiFromVocab(
+        validItems.map((item) => ({
+          word: item.word,
+          reading: item.reading,
+          meaning: item.meaning,
+          jlptLevel: item.jlptLevel,
+          tagsJson: JSON.stringify({
+            imageUrl: item.imageUrl ? item.imageUrl.trim() : undefined,
+            hanViet: item.hanViet ? item.hanViet.trim() : undefined,
+            folderId: importFolderId || undefined,
+          }),
+        }))
+      );
 
       setShowImportModal(false);
       setImportText("");

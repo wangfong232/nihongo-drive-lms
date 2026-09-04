@@ -52,6 +52,12 @@ public class ReorderLessonsDto
     public List<Guid> LessonIds { get; set; } = new();
 }
 
+public class ReorderSectionsDto
+{
+    public Guid CourseId { get; set; }
+    public List<Guid> SectionIds { get; set; } = new();
+}
+
 public class AssignQuizRequestDto
 {
     public Guid QuizId { get; set; }

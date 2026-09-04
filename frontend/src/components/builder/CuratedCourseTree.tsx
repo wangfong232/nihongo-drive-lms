@@ -43,6 +43,8 @@ interface CuratedCourseTreeProps {
   onEditCourse?: (course: Course) => void;
   onAddSection: (courseId: string) => void;
   onEditSection?: (section: Section) => void;
+  onMoveSectionUp?: (course: Course, sectionIndex: number) => void;
+  onMoveSectionDown?: (course: Course, sectionIndex: number) => void;
   onAddLesson: (sectionId: string) => void;
   onEditLesson?: (lesson: Lesson) => void;
   onMoveLessonUp?: (section: Section, lessonIndex: number) => void;
@@ -62,6 +64,8 @@ export const CuratedCourseTree: React.FC<CuratedCourseTreeProps> = ({
   onEditCourse,
   onAddSection,
   onEditSection,
+  onMoveSectionUp,
+  onMoveSectionDown,
   onAddLesson,
   onEditLesson,
   onMoveLessonUp,
@@ -366,7 +370,7 @@ export const CuratedCourseTree: React.FC<CuratedCourseTreeProps> = ({
                         </button>
                       </div>
                     ) : (
-                      course.sections.map((section) => {
+                      course.sections.map((section, sIdx) => {
                         const isSectionCollapsed = !!collapsedSections[section.id];
                         return (
                           <div
@@ -375,21 +379,50 @@ export const CuratedCourseTree: React.FC<CuratedCourseTreeProps> = ({
                           >
                             {/* Section header */}
                             <div className="p-2.5 bg-slate-100/70 dark:bg-slate-700/40 flex items-center justify-between border-b border-slate-200/60 dark:border-slate-700/50 gap-2">
-                              <button
-                                onClick={() => toggleSection(section.id)}
-                                className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200 hover:text-indigo-500 transition-colors flex-1 min-w-0"
-                              >
-                                {isSectionCollapsed ? (
-                                  <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-                                ) : (
-                                  <ChevronDown className="w-3.5 h-3.5 shrink-0" />
-                                )}
-                                <FolderKanban className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                                <span className="truncate">{section.title}</span>
-                                <span className="text-[10px] text-slate-400 font-normal shrink-0 ml-1">
-                                  {section.lessons.length} bài
-                                </span>
-                              </button>
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                {/* Section Reorder Buttons (Move Up / Down) */}
+                                <div className="flex items-center gap-0.5 shrink-0 bg-slate-200/80 dark:bg-slate-700/80 p-0.5 rounded-md">
+                                  {onMoveSectionUp && (
+                                    <button
+                                      onClick={() => onMoveSectionUp(course, sIdx)}
+                                      disabled={sIdx === 0}
+                                      className="p-1 rounded text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-white dark:hover:bg-slate-600 disabled:opacity-20 transition-all cursor-pointer disabled:cursor-not-allowed"
+                                      title="Chuyển chặng lên trên (Thứ tự)"
+                                    >
+                                      <ArrowUp className="w-3 h-3" />
+                                    </button>
+                                  )}
+                                  {onMoveSectionDown && (
+                                    <button
+                                      onClick={() => onMoveSectionDown(course, sIdx)}
+                                      disabled={sIdx === course.sections.length - 1}
+                                      className="p-1 rounded text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-white dark:hover:bg-slate-600 disabled:opacity-20 transition-all cursor-pointer disabled:cursor-not-allowed"
+                                      title="Chuyển chặng xuống dưới (Thứ tự)"
+                                    >
+                                      <ArrowDown className="w-3 h-3" />
+                                    </button>
+                                  )}
+                                </div>
+
+                                <button
+                                  onClick={() => toggleSection(section.id)}
+                                  className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200 hover:text-indigo-500 transition-colors flex-1 min-w-0 text-left"
+                                >
+                                  {isSectionCollapsed ? (
+                                    <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+                                  ) : (
+                                    <ChevronDown className="w-3.5 h-3.5 shrink-0" />
+                                  )}
+                                  <span className="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 font-mono font-bold text-[10px]">
+                                    #{sIdx + 1}
+                                  </span>
+                                  <FolderKanban className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                                  <span className="truncate">{section.title}</span>
+                                  <span className="text-[10px] text-slate-400 font-normal shrink-0 ml-1">
+                                    {section.lessons.length} bài
+                                  </span>
+                                </button>
+                              </div>
 
                               <div className="flex items-center gap-1 shrink-0">
                                 {onEditSection && (
@@ -470,6 +503,9 @@ export const CuratedCourseTree: React.FC<CuratedCourseTreeProps> = ({
                                               )}
                                             </div>
 
+                                            <span className="px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-mono font-bold text-[10px]">
+                                              #{lIdx + 1}
+                                            </span>
                                             <BookOpen className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
                                             <span className="font-semibold text-xs text-slate-800 dark:text-slate-200 truncate">
                                               {lesson.title}

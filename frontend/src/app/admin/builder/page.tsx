@@ -267,6 +267,51 @@ export default function CourseBuilderPage() {
     }
   };
 
+  // ─── Reorder Sections (Move Up / Down) ──────────────────────────────────
+  const handleMoveSectionUp = async (course: Course, sectionIndex: number) => {
+    if (sectionIndex <= 0) return;
+    const currentSections = [...course.sections];
+    const targetSection = currentSections[sectionIndex];
+    currentSections.splice(sectionIndex, 1);
+    currentSections.splice(sectionIndex - 1, 0, targetSection);
+
+    const newIds = currentSections.map((s) => s.id);
+    setCourses((prevCourses) =>
+      prevCourses.map((c) =>
+        c.id === course.id ? { ...c, sections: currentSections } : c
+      )
+    );
+
+    try {
+      await api.reorderSections(course.id, newIds);
+    } catch (err: any) {
+      console.error("Failed to reorder sections", err);
+      await loadData();
+    }
+  };
+
+  const handleMoveSectionDown = async (course: Course, sectionIndex: number) => {
+    if (sectionIndex >= course.sections.length - 1) return;
+    const currentSections = [...course.sections];
+    const targetSection = currentSections[sectionIndex];
+    currentSections.splice(sectionIndex, 1);
+    currentSections.splice(sectionIndex + 1, 0, targetSection);
+
+    const newIds = currentSections.map((s) => s.id);
+    setCourses((prevCourses) =>
+      prevCourses.map((c) =>
+        c.id === course.id ? { ...c, sections: currentSections } : c
+      )
+    );
+
+    try {
+      await api.reorderSections(course.id, newIds);
+    } catch (err: any) {
+      console.error("Failed to reorder sections", err);
+      await loadData();
+    }
+  };
+
   // ─── Reorder Lessons (Move Up / Down) ────────────────────────────────────
   const handleMoveLessonUp = async (section: Section, lessonIndex: number) => {
     if (lessonIndex <= 0) return;
@@ -452,6 +497,8 @@ export default function CourseBuilderPage() {
                 setEditingSection(section);
                 setEditSectionTitle(section.title);
               }}
+              onMoveSectionUp={handleMoveSectionUp}
+              onMoveSectionDown={handleMoveSectionDown}
               onAddLesson={(sectionId) => setAddLessonSectionId(sectionId)}
               onEditLesson={(lesson) => {
                 setEditingLesson(lesson);
