@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Video, ExternalLink, Info, Tv, Maximize2, Minimize2, X, BookmarkCheck } from "lucide-react";
+import { Video, ExternalLink, Info, Tv, Maximize2, Minimize2, X, BookmarkCheck, EyeOff } from "lucide-react";
 import { api } from "@/lib/api";
+import { useUserSettings } from "@/lib/userSettings";
 
 interface DriveVideoPlayerProps {
   driveFileId?: string;
@@ -12,6 +13,7 @@ interface DriveVideoPlayerProps {
 }
 
 export const DriveVideoPlayer: React.FC<DriveVideoPlayerProps> = ({ driveFileId, title, customUrl, lessonId }) => {
+  const { settings } = useUserSettings();
   const [showSignInBanner, setShowSignInBanner] = useState(true);
   const [isTheaterMode, setIsTheaterMode] = useState(false);
   const [resumeToast, setResumeToast] = useState<string | null>(null);
@@ -30,14 +32,14 @@ export const DriveVideoPlayer: React.FC<DriveVideoPlayerProps> = ({ driveFileId,
     return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
-  // Reset and load saved position whenever lessonId changes
+  // Reset and load saved position whenever lessonId changes (only if tracking & resume prompt are enabled)
   useEffect(() => {
     elapsedRef.current = 0;
     setSavedPositionSecs(0);
     setTotalDurationSecs(0);
     setShowResumeModal(false);
     setResumeToast(null);
-    if (!lessonId) return;
+    if (!lessonId || !settings.trackVideoWatchTime || !settings.showResumePrompt) return;
 
     api.getLessonProgress(lessonId).then((prog) => {
       if (prog && prog.lastPlaybackPositionSeconds && prog.lastPlaybackPositionSeconds > 2) {
@@ -53,11 +55,11 @@ export const DriveVideoPlayer: React.FC<DriveVideoPlayerProps> = ({ driveFileId,
       }
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lessonId]);
+  }, [lessonId, settings.trackVideoWatchTime, settings.showResumePrompt]);
 
-  // Periodic save of playback position (every 5 seconds)
+  // Periodic save of playback position (every 5 seconds) - only if tracking is enabled
   useEffect(() => {
-    if (!lessonId) return;
+    if (!lessonId || !settings.trackVideoWatchTime) return;
 
     // Tick increment
     const tickInterval = setInterval(() => {
@@ -81,7 +83,7 @@ export const DriveVideoPlayer: React.FC<DriveVideoPlayerProps> = ({ driveFileId,
       if (saveIntervalRef.current) clearInterval(saveIntervalRef.current);
       clearInterval(tickInterval);
     };
-  }, [lessonId, totalDurationSecs]);
+  }, [lessonId, totalDurationSecs, settings.trackVideoWatchTime]);
 
   if (!driveFileId && !customUrl) {
     return (
@@ -219,10 +221,16 @@ export const DriveVideoPlayer: React.FC<DriveVideoPlayerProps> = ({ driveFileId,
               <Tv className="w-4 h-4 text-orange-500" />
               <span>Trình Phát Bài Giảng HD (Drive Player)</span>
             </span>
-            {resumeToast && (
+            {resumeToast && settings.showResumePrompt && (
               <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-lg border border-emerald-500/30 animate-pulse">
                 <BookmarkCheck className="w-3.5 h-3.5" />
                 {resumeToast}
+              </span>
+            )}
+            {!settings.trackVideoWatchTime && (
+              <span className="flex items-center gap-1 text-[10px] font-semibold text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md" title="Theo dõi số phút xem đang tắt trong Cài Đặt">
+                <EyeOff className="w-3 h-3 text-slate-400" />
+                Theo dõi xem: Tắt
               </span>
             )}
           </div>

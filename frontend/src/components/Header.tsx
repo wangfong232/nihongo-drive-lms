@@ -7,9 +7,10 @@ import { useI18n } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
 import { api, isBackendConnected } from "@/lib/api";
 import { SrsFlashcardModal } from "@/components/learner/SrsFlashcardModal";
+import { UserSettingsModal } from "@/components/learner/UserSettingsModal";
 import {
   Moon, Sun, Languages, BookOpen, Layers, CheckCircle2,
-  HelpCircle, Sparkles, Server, Zap, Target, Flame
+  HelpCircle, Sparkles, Server, Zap, Target, Flame, Settings
 } from "lucide-react";
 
 interface HeaderProps {
@@ -26,6 +27,7 @@ export const Header: React.FC<HeaderProps> = ({ srsStats }) => {
   const { lang, setLang, t } = useI18n();
   const { theme, toggleTheme } = useTheme();
   const [showSrsModal, setShowSrsModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
@@ -183,6 +185,15 @@ export const Header: React.FC<HeaderProps> = ({ srsStats }) => {
               )}
             </button>
 
+            {/* Settings (Watch Time & Resume Prompts) */}
+            <button
+              onClick={() => setShowSettingsModal(true)}
+              className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors border border-slate-200 dark:border-slate-700 shrink-0"
+              title="Cài đặt học tập (Theo dõi xem video & Thông báo)"
+            >
+              <Settings className="w-4 h-4 text-orange-500" />
+            </button>
+
             {/* Language Switcher */}
             <button
               onClick={() => setLang(lang === "en" ? "vi" : "en")}
@@ -210,6 +221,12 @@ export const Header: React.FC<HeaderProps> = ({ srsStats }) => {
       {showSrsModal && (
         <SrsFlashcardModal onClose={() => setShowSrsModal(false)} />
       )}
+
+      {/* Global Learning Settings Modal */}
+      <UserSettingsModal
+        isOpen={showSettingsModal}
+        onClose={() => setShowSettingsModal(false)}
+      />
     </>
   );
 };
