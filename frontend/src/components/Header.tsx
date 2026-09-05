@@ -5,12 +5,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useI18n } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
-import { api, isBackendConnected } from "@/lib/api";
+import { api, isBackendConnected, WeeklyPacing } from "@/lib/api";
 import { SrsFlashcardModal } from "@/components/learner/SrsFlashcardModal";
 import { UserSettingsModal } from "@/components/learner/UserSettingsModal";
 import {
   Moon, Sun, Languages, BookOpen, Layers, CheckCircle2,
-  HelpCircle, Sparkles, Server, Zap, Target, Flame, Settings, KeyRound
+  HelpCircle, Sparkles, Server, Zap, Target, Flame, Settings, KeyRound,
+  CalendarCheck2, ChevronDown
 } from "lucide-react";
 
 interface HeaderProps {
@@ -29,6 +30,8 @@ export const Header: React.FC<HeaderProps> = ({ srsStats }) => {
   const [showSrsModal, setShowSrsModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [connected, setConnected] = useState(false);
+  const [weeklyPacing, setWeeklyPacing] = useState<WeeklyPacing | null>(null);
+  const [showPacingMenu, setShowPacingMenu] = useState(false);
 
   useEffect(() => {
     const checkServer = async () => {
@@ -41,10 +44,30 @@ export const Header: React.FC<HeaderProps> = ({ srsStats }) => {
     };
     checkServer();
 
+    const loadPacing = async () => {
+      try {
+        const pacing = await api.getWeeklyPacing();
+        setWeeklyPacing(pacing);
+      } catch {
+        // demo / fallback
+      }
+    };
+    loadPacing();
+
     const handleOpenSrs = () => setShowSrsModal(true);
     window.addEventListener("open-srs-modal", handleOpenSrs);
     return () => window.removeEventListener("open-srs-modal", handleOpenSrs);
   }, []);
+
+  const handleSetWeeklyGoal = async (target: number) => {
+    try {
+      const res = await api.setWeeklyGoal(target);
+      setWeeklyPacing((prev) => prev ? { ...prev, targetLessonsPerWeek: res.targetLessonsPerWeek } : null);
+      setShowPacingMenu(false);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const srsDueCount = srsStats?.dueToday ?? 0;
 
@@ -163,6 +186,56 @@ export const Header: React.FC<HeaderProps> = ({ srsStats }) => {
               <div className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-xl text-[10px] font-extrabold bg-orange-500/10 border border-orange-500/20 text-orange-600 dark:text-orange-400 shrink-0">
                 <Flame className="w-3 h-3 shrink-0" />
                 {srsStats.streak}d
+              </div>
+            )}
+
+            {/* Weekly Pacing Widget */}
+            {weeklyPacing && (
+              <div className="relative">
+                {(() => {
+                  const isGoalMet = weeklyPacing.completedLessonsThisWeek >= weeklyPacing.targetLessonsPerWeek;
+                  return (
+                    <button
+                      onClick={() => setShowPacingMenu(!showPacingMenu)}
+                      className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                        isGoalMet
+                          ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+                          : "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+                      }`}
+                      title={`Mục tiêu tuần: ${weeklyPacing.completedLessonsThisWeek}/${weeklyPacing.targetLessonsPerWeek} bài`}
+                    >
+                      <CalendarCheck2 className="w-3.5 h-3.5 text-orange-500 shrink-0" />
+                      <span>
+                        Tuần này: <b className={isGoalMet ? "text-emerald-500" : "text-orange-500"}>{weeklyPacing.completedLessonsThisWeek}</b>/{weeklyPacing.targetLessonsPerWeek}
+                      </span>
+                      <ChevronDown className="w-3 h-3 opacity-60 shrink-0" />
+                    </button>
+                  );
+                })()}
+
+                {showPacingMenu && (
+                  <div className="absolute right-0 mt-2 w-56 p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 animate-in fade-in zoom-in-95">
+                    <p className="text-[11px] font-extrabold uppercase text-slate-400 mb-2">🎯 Mục tiêu học tuần</p>
+                    <div className="grid grid-cols-4 gap-1 mb-2">
+                      {[1, 2, 3, 4, 5, 7, 10].map((num) => (
+                        <button
+                          key={num}
+                          onClick={() => handleSetWeeklyGoal(num)}
+                          className={`py-1 text-xs font-bold rounded-lg transition-all ${
+                            weeklyPacing.targetLessonsPerWeek === num
+                              ? "bg-orange-600 text-white shadow-sm"
+                              : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200"
+                          }`}
+                        >
+                          {num} bài
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-[10px] text-slate-400">
+                      Đã hoàn thành {weeklyPacing.completedLessonsThisWeek} bài trong tuần hiện tại.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 

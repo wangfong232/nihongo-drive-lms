@@ -7,6 +7,7 @@ import React, { useState, useRef, useCallback } from 'react';
 interface SuggestedDriveFile {
   driveNodeId: string;
   fileName: string;
+  rawPath?: string;
   webViewLink?: string;
   matchScore: number;
   matchedKeyword: string;
@@ -234,6 +235,9 @@ export default function SyllabusImportModal({
         totalMinutes: saved.totalEstimatedMinutes ?? 0,
       });
       onTemplateCreated?.(saved.id);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('roadmap-template-created', { detail: { id: saved.id } }));
+      }
       setStep(3);
     } catch (err: any) {
       setError(err.message);
@@ -436,26 +440,36 @@ export default function SyllabusImportModal({
                                 <div className="mt-2 space-y-1">
                                   {lesson.suggestedDriveFiles.map((file: SuggestedDriveFile) => {
                                     const isConfirmed = lesson._confirmedFileIds.includes(file.driveNodeId);
+                                    const typeIcon = file.resourceType === 0 ? '🎬' : file.resourceType === 1 ? '🎧' : file.resourceType === 2 ? '📝' : '📄';
                                     return (
                                       <div
                                         key={file.driveNodeId}
-                                        className={`flex items-center gap-2 text-xs px-2 py-1 rounded-lg border transition-all cursor-pointer
+                                        className={`flex items-center gap-2 text-xs px-2.5 py-1.5 rounded-lg border transition-all cursor-pointer
                                           ${isConfirmed
-                                            ? 'border-emerald-300 bg-emerald-50'
+                                            ? 'border-emerald-300 bg-emerald-50/80 shadow-xs'
                                             : 'border-gray-200 bg-gray-50 opacity-60'}`}
                                         onClick={() => toggleConfirmedFile(sIdx, lIdx, file.driveNodeId)}
                                       >
-                                        <span>{isConfirmed ? '✅' : '⬜'}</span>
+                                        <span className="text-sm">{isConfirmed ? '✅' : '⬜'}</span>
+                                        <span className="text-sm">{typeIcon}</span>
                                         <MatchScoreBadge score={file.matchScore} />
-                                        <span className="flex-1 truncate text-gray-700 font-mono">{file.fileName}</span>
-                                        <span className="text-gray-400 italic">{file.matchedKeyword}</span>
+                                        <div className="flex-1 min-w-0 flex flex-col">
+                                          <span className="truncate text-gray-800 font-semibold">{file.fileName}</span>
+                                          {file.rawPath && (
+                                            <span className="truncate text-[10px] text-gray-400 font-mono">📂 {file.rawPath}</span>
+                                          )}
+                                        </div>
+                                        <span className="px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-600 text-[10px] font-medium border border-indigo-100 flex-shrink-0">
+                                          {file.matchedKeyword}
+                                        </span>
                                         {file.webViewLink && (
                                           <a
                                             href={file.webViewLink}
                                             target="_blank"
                                             rel="noreferrer"
                                             onClick={e => e.stopPropagation()}
-                                            className="text-indigo-500 hover:text-indigo-700"
+                                            className="text-indigo-500 hover:text-indigo-700 p-0.5 ml-1"
+                                            title="Xem trên Drive"
                                           >🔗</a>
                                         )}
                                       </div>

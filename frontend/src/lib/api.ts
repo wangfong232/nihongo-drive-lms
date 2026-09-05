@@ -1470,4 +1470,142 @@ export const api = {
       }
     );
   },
+
+  // ─── AI Auto-Course Builder & Weekly Pacing ─────────────────────
+  async scanAutoBuildCourse(data: {
+    courseTitle: string;
+    jlptLevel: string;
+    rootFolderNodeId?: string;
+  }) {
+    return safeFetch<AutoBuildScanResult>(
+      `${API_BASE}/curator/auto-build/scan`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      },
+      {
+        courseTitle: data.courseTitle,
+        jlptLevel: data.jlptLevel,
+        totalSections: 0,
+        totalLessons: 0,
+        totalFilesMatched: 0,
+        sections: [],
+      }
+    );
+  },
+
+  async scanAutoBuildCourseWithPdf(formData: FormData) {
+    const res = await fetch(`${API_BASE}/curator/auto-build/scan-pdf`, {
+      method: "POST",
+      body: formData,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ message: res.statusText }));
+      throw new Error(err.message || "Lỗi khi bóc tách lộ trình từ PDF.");
+    }
+    return (await res.json()) as AutoBuildScanResult;
+  },
+
+  async applyAutoBuildCourse(data: {
+    courseTitle: string;
+    jlptLevel: string;
+    description?: string;
+    sections: AutoBuildSectionPreview[];
+  }) {
+    return safeFetch<Course>(
+      `${API_BASE}/curator/auto-build/apply`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      },
+      {
+        id: "new-course",
+        title: data.courseTitle,
+        slug: "auto-course",
+        jlptLevel: data.jlptLevel,
+        displayOrder: 0,
+        isPublished: true,
+        sections: [],
+      }
+    );
+  },
+
+  async getWeeklyPacing() {
+    return safeFetch<WeeklyPacing>(
+      `${API_BASE}/progress/weekly-pacing`,
+      { method: "GET" },
+      {
+        targetLessonsPerWeek: 2,
+        completedLessonsThisWeek: 0,
+        percentage: 0,
+        weekStartDateUtc: new Date().toISOString(),
+        weekEndDateUtc: new Date().toISOString(),
+        statusMessage: "Mục tiêu 2 bài/tuần",
+      }
+    );
+  },
+
+  async setWeeklyGoal(targetLessonsPerWeek: number) {
+    return safeFetch<WeeklyPacing>(
+      `${API_BASE}/progress/weekly-goal`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetLessonsPerWeek }),
+      },
+      {
+        targetLessonsPerWeek,
+        completedLessonsThisWeek: 0,
+        percentage: 0,
+        weekStartDateUtc: new Date().toISOString(),
+        weekEndDateUtc: new Date().toISOString(),
+        statusMessage: `Mục tiêu ${targetLessonsPerWeek} bài/tuần`,
+      }
+    );
+  },
 };
+
+export interface AutoBuildResourcePreview {
+  driveNodeId: string;
+  title: string;
+  rawPath?: string;
+  webViewLink?: string;
+  resourceType: number;
+  matchScore: number;
+  sourceTier: string;
+}
+
+export interface AutoBuildLessonPreview {
+  title: string;
+  flowOrder: number;
+  skill: string;
+  estimatedDurationMinutes: number;
+  resources: AutoBuildResourcePreview[];
+}
+
+export interface AutoBuildSectionPreview {
+  title: string;
+  displayOrder: number;
+  lessonNumber: number;
+  lessons: AutoBuildLessonPreview[];
+}
+
+export interface AutoBuildScanResult {
+  courseTitle: string;
+  jlptLevel: string;
+  totalSections: number;
+  totalLessons: number;
+  totalFilesMatched: number;
+  sections: AutoBuildSectionPreview[];
+}
+
+export interface WeeklyPacing {
+  targetLessonsPerWeek: number;
+  completedLessonsThisWeek: number;
+  percentage: number;
+  weekStartDateUtc: string;
+  weekEndDateUtc: string;
+  statusMessage: string;
+}

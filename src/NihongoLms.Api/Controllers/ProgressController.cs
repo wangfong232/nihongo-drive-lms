@@ -61,4 +61,19 @@ public class ProgressController : ControllerBase
         var progress = await _progressService.ToggleLessonCompleteAsync(parsedId, isManual, "default-user", cancellationToken);
         return Ok(progress);
     }
+
+    [HttpGet("weekly-pacing")]
+    public async Task<IActionResult> GetWeeklyPacing(CancellationToken cancellationToken)
+    {
+        var pacing = await _progressService.GetWeeklyPacingAsync("default-user", cancellationToken);
+        return Ok(pacing);
+    }
+
+    [HttpPost("weekly-goal")]
+    public async Task<IActionResult> SetWeeklyGoal([FromBody] SetWeeklyGoalDto dto, CancellationToken cancellationToken)
+    {
+        int target = dto?.TargetLessonsPerWeek ?? 2;
+        var pacing = await _progressService.SetWeeklyGoalAsync(target, "default-user", cancellationToken);
+        return Ok(pacing);
+    }
 }

@@ -159,43 +159,43 @@ export const LearnerSidebar: React.FC<LearnerSidebarProps> = ({
                             {/* Lessons List */}
                             {!isCollapsed && (
                               <div className="flex flex-col gap-1 pl-4 border-l-2 border-slate-200 dark:border-slate-800 my-1">
-                                {matchingLessons.map((lesson) => {
-                                  const isActive = lesson.id === activeLessonId;
-                                  const isCompleted = completedLessonIds[lesson.id];
+                                  {matchingLessons.map((lesson) => {
+                                    const isActive = lesson.id === activeLessonId;
+                                    const isCompleted = completedLessonIds[lesson.id];
 
-                                  return (
-                                    <button
-                                      key={lesson.id}
-                                      onClick={() => onSelectLesson(lesson, course, section)}
-                                      className={`flex items-center justify-between py-2 px-2.5 rounded-xl text-xs font-semibold transition-all text-left group ${
-                                        isActive
-                                          ? "bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-md shadow-orange-500/20"
-                                          : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
-                                      }`}
-                                    >
-                                      <div className="flex items-center gap-2 overflow-hidden flex-1 mr-2">
-                                        {getLessonIcon(lesson, isActive)}
-                                        <span className="truncate">{lesson.title}</span>
-                                      </div>
+                                    return (
+                                      <button
+                                        key={lesson.id}
+                                        onClick={() => onSelectLesson(lesson, course, section)}
+                                        className={`flex items-center justify-between py-2 px-2.5 rounded-xl text-xs font-semibold transition-all text-left group ${
+                                          isActive
+                                            ? "bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-md shadow-orange-500/20"
+                                            : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
+                                        }`}
+                                      >
+                                        <div className="flex items-center gap-1.5 overflow-hidden flex-1 mr-1.5">
+                                          {getLessonIcon(lesson, isActive)}
+                                          <span className="truncate">{lesson.title}</span>
+                                        </div>
 
-                                      <div className="flex items-center gap-1 shrink-0">
-                                        {isCompleted ? (
-                                          <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded-md ${isActive ? "bg-white/20 text-white" : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"}`}>
-                                            Đã học ✓
-                                          </span>
-                                        ) : isActive ? (
-                                          <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded-md bg-white/20 text-white animate-pulse">
-                                            Đang học
-                                          </span>
-                                        ) : (
-                                          <span className="text-[10px] font-medium text-slate-400 px-1">
-                                            {lesson.estimatedDurationMinutes ? `${lesson.estimatedDurationMinutes}m` : ""}
-                                          </span>
-                                        )}
-                                      </div>
-                                    </button>
-                                  );
-                                })}
+                                        <div className="flex items-center gap-1 shrink-0">
+                                          {isCompleted ? (
+                                            <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded-md ${isActive ? "bg-white/20 text-white" : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"}`}>
+                                              Đã học ✓
+                                            </span>
+                                          ) : isActive ? (
+                                            <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded-md bg-white/20 text-white animate-pulse">
+                                              Đang học
+                                            </span>
+                                          ) : (
+                                            <span className="text-[10px] font-medium text-slate-400 px-1">
+                                              {lesson.estimatedDurationMinutes ? `${lesson.estimatedDurationMinutes}m` : ""}
+                                            </span>
+                                          )}
+                                        </div>
+                                      </button>
+                                    );
+                                  })}
                               </div>
                             )}
                           </div>

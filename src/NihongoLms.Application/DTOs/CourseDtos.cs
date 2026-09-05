@@ -109,3 +109,61 @@ public class AssignDriveNodeRequestDto
     public string Title { get; set; } = string.Empty;
     public ResourceType ResourceType { get; set; }
 }
+
+// ═══════════════════════════════════════════════════════════
+//  AI Auto-Course Builder DTOs (Drive Folder to Standard Course)
+// ═══════════════════════════════════════════════════════════
+
+public class AutoBuildScanRequestDto
+{
+    public string CourseTitle { get; set; } = string.Empty;
+    public string JlptLevel { get; set; } = "N4";
+    public Guid? RootFolderNodeId { get; set; }
+}
+
+public class AutoBuildScanResultDto
+{
+    public string CourseTitle { get; set; } = string.Empty;
+    public string JlptLevel { get; set; } = "N4";
+    public int TotalSections { get; set; }
+    public int TotalLessons { get; set; }
+    public int TotalFilesMatched { get; set; }
+    public List<AutoBuildSectionPreviewDto> Sections { get; set; } = new();
+}
+
+public class AutoBuildSectionPreviewDto
+{
+    public string Title { get; set; } = string.Empty;
+    public int DisplayOrder { get; set; }
+    public int LessonNumber { get; set; }
+    public List<AutoBuildLessonPreviewDto> Lessons { get; set; } = new();
+}
+
+public class AutoBuildLessonPreviewDto
+{
+    public string Title { get; set; } = string.Empty;
+    public int FlowOrder { get; set; } // 1: Từ vựng, 2: Chữ Hán, 3: Ngữ pháp, 4: Hội thoại/Nghe, 5: Test
+    public string Skill { get; set; } = string.Empty;
+    public int EstimatedDurationMinutes { get; set; } = 45;
+    public List<AutoBuildResourcePreviewDto> Resources { get; set; } = new();
+}
+
+public class AutoBuildResourcePreviewDto
+{
+    public Guid DriveNodeId { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string? RawPath { get; set; }
+    public string? WebViewLink { get; set; }
+    public ResourceType ResourceType { get; set; }
+    public int MatchScore { get; set; }
+    public string SourceTier { get; set; } = "LessonFolder"; // LessonFolder, CrossFolder, SharedGeneral
+}
+
+public class AutoBuildApplyRequestDto
+{
+    public string CourseTitle { get; set; } = string.Empty;
+    public string JlptLevel { get; set; } = "N4";
+    public string? Description { get; set; }
+    public List<AutoBuildSectionPreviewDto> Sections { get; set; } = new();
+}
+

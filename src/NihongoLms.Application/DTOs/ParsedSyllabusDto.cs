@@ -53,6 +53,7 @@ public class SuggestedDriveFileDto
 {
     public Guid DriveNodeId { get; set; }
     public string FileName { get; set; } = string.Empty;
+    public string? RawPath { get; set; }
     public string? WebViewLink { get; set; }
 
     /// <summary>Điểm tương đồng fuzzy match, 0–100.</summary>

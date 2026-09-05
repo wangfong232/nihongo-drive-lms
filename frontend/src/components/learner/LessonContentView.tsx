@@ -35,6 +35,8 @@ interface LessonContentViewProps {
   isCompleted: boolean;
   onToggleComplete: () => void;
   onLaunchQuiz?: () => void;
+  onNextLesson?: () => void;
+  hasNextLesson?: boolean;
 }
 
 export const LessonContentView: React.FC<LessonContentViewProps> = ({
@@ -44,6 +46,8 @@ export const LessonContentView: React.FC<LessonContentViewProps> = ({
   isCompleted,
   onToggleComplete,
   onLaunchQuiz,
+  onNextLesson,
+  hasNextLesson,
 }) => {
   const { t } = useI18n();
   const { isVocabFavorite, toggleVocabFavorite, isKanjiFavorite, toggleKanjiFavorite } = useFavorites();
@@ -155,18 +159,31 @@ export const LessonContentView: React.FC<LessonContentViewProps> = ({
           )}
         </div>
 
-        {/* Mark as Completed Button */}
-        <button
-          onClick={onToggleComplete}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all shadow-sm active:scale-95 ${
-            isCompleted
-              ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
-              : "bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-orange-500/20"
-          }`}
-        >
-          <CheckCircle2 className="w-4 h-4" />
-          {isCompleted ? "Đã Hoàn Thành ✓" : "Đánh Dấu Hoàn Thành"}
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Mark as Completed Button */}
+          <button
+            onClick={onToggleComplete}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all shadow-sm active:scale-95 ${
+              isCompleted
+                ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+                : "bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-orange-500/20"
+            }`}
+          >
+            <CheckCircle2 className="w-4 h-4" />
+            {isCompleted ? "Đã Hoàn Thành ✓" : "Đánh Dấu Hoàn Thành"}
+          </button>
+
+          {/* Next Lesson Button */}
+          {hasNextLesson && onNextLesson && (
+            <button
+              onClick={onNextLesson}
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-extrabold bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 shadow-sm active:scale-95 transition-all"
+            >
+              <span>Bài Tiếp Theo</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* ── Resource Switcher Bar (when lesson has multiple resources or assigned quiz) ── */}
@@ -730,6 +747,43 @@ export const LessonContentView: React.FC<LessonContentViewProps> = ({
                 <KanjiCanvas kanji={activeKanji || "私"} size={260} />
               </div>
             </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Bottom Step Navigation Footer ── */}
+      <div className="flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm mt-auto">
+        <div className="flex items-center gap-2">
+          <div className="w-2.5 h-2.5 rounded-full bg-orange-500 animate-ping" />
+          <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
+            {isCompleted ? "Bạn đã hoàn thành bài học này 🎉" : "Đang học: " + lesson.title}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onToggleComplete}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+              isCompleted
+                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+                : "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200"
+            }`}
+          >
+            <CheckCircle2 className="w-4 h-4" />
+            <span>{isCompleted ? "Đã xong" : "Đánh dấu hoàn thành"}</span>
+          </button>
+
+          {hasNextLesson && onNextLesson && (
+            <button
+              onClick={() => {
+                if (!isCompleted) onToggleComplete();
+                onNextLesson();
+              }}
+              className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-extrabold text-xs shadow-md shadow-orange-500/20 active:scale-95 transition-all"
+            >
+              <span>{isCompleted ? "Bài tiếp theo" : "Xong & Sang bài tiếp"}</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
           )}
         </div>
       </div>

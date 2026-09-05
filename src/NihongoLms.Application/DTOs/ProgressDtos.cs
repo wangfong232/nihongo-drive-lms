@@ -25,3 +25,18 @@ public class MarkCompleteDto
 {
     public bool IsManuallyCompleted { get; set; } = true;
 }
+
+public class WeeklyPacingDto
+{
+    public int TargetLessonsPerWeek { get; set; } = 2;
+    public int CompletedLessonsThisWeek { get; set; }
+    public int Percentage { get; set; }
+    public DateTime WeekStartDateUtc { get; set; }
+    public DateTime WeekEndDateUtc { get; set; }
+    public string StatusMessage { get; set; } = string.Empty;
+}
+
+public class SetWeeklyGoalDto
+{
+    public int TargetLessonsPerWeek { get; set; } = 2;
+}

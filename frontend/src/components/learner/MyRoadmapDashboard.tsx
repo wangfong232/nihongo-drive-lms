@@ -129,6 +129,12 @@ export default function MyRoadmapDashboard() {
   useEffect(() => {
     loadTemplates();
     loadEnrollments();
+
+    const handleCreated = () => {
+      loadTemplates();
+    };
+    window.addEventListener('roadmap-template-created', handleCreated);
+    return () => window.removeEventListener('roadmap-template-created', handleCreated);
   }, []);
 
   useEffect(() => {
@@ -141,7 +147,7 @@ export default function MyRoadmapDashboard() {
     try {
       const res = await fetch(`${API_BASE}/templates`);
       const data = await res.json();
-      setTemplates(data.filter((t: RoadmapTemplate) => t.isPublished));
+      setTemplates(Array.isArray(data) ? data : []);
     } catch { setError('Không tải được danh sách template.'); }
   };
 

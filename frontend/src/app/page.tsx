@@ -101,6 +101,34 @@ export default function LearnerPortalPage() {
     } catch {}
   };
 
+  const getNextLesson = () => {
+    if (!activeCourse || !activeSection || !activeLesson) return null;
+    for (let cIdx = 0; cIdx < courses.length; cIdx++) {
+      const c = courses[cIdx];
+      for (let sIdx = 0; sIdx < c.sections.length; sIdx++) {
+        const s = c.sections[sIdx];
+        for (let lIdx = 0; lIdx < s.lessons.length; lIdx++) {
+          const l = s.lessons[lIdx];
+          if (l.id === activeLesson.id) {
+            if (lIdx + 1 < s.lessons.length) {
+              return { lesson: s.lessons[lIdx + 1], course: c, section: s };
+            }
+            if (sIdx + 1 < c.sections.length && c.sections[sIdx + 1].lessons.length > 0) {
+              return { lesson: c.sections[sIdx + 1].lessons[0], course: c, section: c.sections[sIdx + 1] };
+            }
+            if (cIdx + 1 < courses.length && courses[cIdx + 1].sections.length > 0 && courses[cIdx + 1].sections[0].lessons.length > 0) {
+              return { lesson: courses[cIdx + 1].sections[0].lessons[0], course: courses[cIdx + 1], section: courses[cIdx + 1].sections[0] };
+            }
+            return null;
+          }
+        }
+      }
+    }
+    return null;
+  };
+
+  const nextTarget = getNextLesson();
+
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
       <Header srsStats={srsStats} />
@@ -203,6 +231,10 @@ export default function LearnerPortalPage() {
               isCompleted={!!completedLessonIds[activeLesson.id]}
               onToggleComplete={handleToggleComplete}
               onLaunchQuiz={handleLaunchQuiz}
+              hasNextLesson={!!nextTarget}
+              onNextLesson={() => {
+                if (nextTarget) handleSelectLesson(nextTarget.lesson, nextTarget.course, nextTarget.section);
+              }}
             />
           ) : (
             /* Empty state — shown before any lesson is selected */

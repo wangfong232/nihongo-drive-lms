@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -24,7 +25,7 @@ public class SyllabusParserService : ISyllabusParserService
     // ─── Định dạng file media được phép fuzzy match ───
     private static readonly HashSet<string> AllowedExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
-        ".mp4", ".mp3", ".m4a", ".pdf"
+        ".mp4", ".mp3", ".m4a", ".pdf", ".docx", ".doc"
     };
 
     // ─── System Prompt nhúng sẵn cho LLM ───
@@ -39,8 +40,8 @@ public class SyllabusParserService : ISyllabusParserService
            A separate parser will normalize it — do NOT convert yourself.
         4. For skills: detect keywords like Ngữ pháp/Bunpou→Grammar, Từ vựng/Kotoba→Vocabulary, Chữ Hán/Kanji→Kanji, 
            Nghe/Choukai→Choukai, Hội thoại/Kaiwa→Kaiwa, Đọc/Dokkai→Dokkai, Test/Kiểm tra→Quiz.
-        5. For searchKeywords: generate 3–5 tokens likely present in Google Drive filenames 
-           (e.g., ["B26", "Bai 26", "Kanji 26", "Tu vung 26"]).
+        5. For searchKeywords: generate 3–5 tokens likely present in Google Drive filenames or folder paths
+           (e.g., ["B26", "Bai 26", "Kanji 26", "Tu vung 26", "Ngu phap 26"]).
         6. Discard administrative details, fees, contact info, promotional text, page numbers.
         7. Maintain original chronological order. Set displayOrder and dayNumber starting from 1.
 
@@ -73,23 +74,23 @@ public class SyllabusParserService : ISyllabusParserService
 
     private readonly LmsDbContext _db;
     private readonly IHttpClientFactory _httpFactory;
-    private readonly ISystemSettingsService _settingsService;
+    private readonly IConfiguration _config;
     private readonly ILogger<SyllabusParserService> _logger;
 
     public SyllabusParserService(
         LmsDbContext db,
         IHttpClientFactory httpFactory,
-        ISystemSettingsService settingsService,
+        IConfiguration config,
         ILogger<SyllabusParserService> logger)
     {
         _db = db;
         _httpFactory = httpFactory;
-        _settingsService = settingsService;
+        _config = config;
         _logger = logger;
     }
 
     // ═══════════════════════════════════════════════════════════
-    //  BƯỚC 1-3: Parse PDF → LLM → Fuzzy Match
+    //  BƯỚC 1-3: Parse PDF → LLM → Path-Aware Context Matching
     // ═══════════════════════════════════════════════════════════
 
     public async Task<ParsedSyllabusDto> ParseFromPdfAsync(
@@ -106,8 +107,8 @@ public class SyllabusParserService : ISyllabusParserService
         _logger.LogInformation("[SyllabusParser] Bước 2: Gọi LLM, text length = {Len} chars", rawText.Length);
         var llmResult = await CallLlmAsync(rawText, ct);
 
-        // BƯỚC 3 — Fuzzy match Drive files
-        _logger.LogInformation("[SyllabusParser] Bước 3: Fuzzy match DriveNodes cho {N} sections", llmResult.Sections.Count);
+        // BƯỚC 3 — Path-Aware matching Drive files
+        _logger.LogInformation("[SyllabusParser] Bước 3: Path-Aware matching DriveNodes cho {N} sections", llmResult.Sections.Count);
         await AttachDriveSuggestionsAsync(llmResult, ct);
 
         return llmResult;
@@ -120,32 +121,27 @@ public class SyllabusParserService : ISyllabusParserService
         using var document = PdfDocument.Open(pdfStream);
         foreach (var page in document.GetPages())
         {
-            // Lấy text theo thứ tự đọc tự nhiên (top-to-bottom, left-to-right)
             var words = page.GetWords();
             foreach (var word in words)
                 sb.Append(word.Text).Append(' ');
-            sb.AppendLine(); // Ngắt dòng giữa các trang
+            sb.AppendLine();
         }
         return sb.ToString();
     }
 
-    // ─── BƯỚC 2: LLM call (OpenAI-compatible / Google Gemini endpoint) ───
+    // ─── BƯỚC 2: LLM call ───
     private async Task<ParsedSyllabusDto> CallLlmAsync(string rawText, CancellationToken ct)
     {
-        var (apiKey, baseUrl, model) = await _settingsService.GetEffectiveAiConfigAsync(ct);
+        var baseUrl  = _config["AiProvider:BaseUrl"]  ?? "https://generativelanguage.googleapis.com/v1beta/openai/";
+        var apiKey   = _config["AiProvider:ApiKey"]   ?? "";
+        var model    = _config["AiProvider:Model"]    ?? "gemini-3.6-flash";
+        int maxChars = 80_000;
 
         if (string.IsNullOrWhiteSpace(apiKey))
-        {
-            throw new InvalidOperationException("Chưa cấu hình API Key AI (Google Gemini / OpenAI). Vui lòng cấu hình tại trang Cài Đặt Hệ Thống (/admin/settings) hoặc qua biến môi trường GEMINI_API_KEY.");
-        }
-
-        int maxChars = 80_000; // giới hạn để tránh vượt context window
+            throw new InvalidOperationException("Chưa cấu hình API Key AI.");
 
         if (rawText.Length > maxChars)
-        {
-            _logger.LogWarning("[SyllabusParser] Text quá dài ({L} chars), truncate về {M}", rawText.Length, maxChars);
             rawText = rawText[..maxChars];
-        }
 
         var requestBody = new
         {
@@ -174,20 +170,12 @@ public class SyllabusParserService : ISyllabusParserService
         if (!response.IsSuccessStatusCode)
         {
             _logger.LogError("[SyllabusParser] LLM API error {Status}: {Body}", response.StatusCode, body);
-            throw new HttpRequestException($"LLM API trả về lỗi {(int)response.StatusCode}: {body[..Math.Min(300, body.Length)]}");
+            throw new HttpRequestException($"LLM API trả về lỗi {(int)response.StatusCode}");
         }
 
-        // Trích content từ response OpenAI format
-        using var doc    = JsonDocument.Parse(body);
-        var messageContent = doc.RootElement
-            .GetProperty("choices")[0]
-            .GetProperty("message")
-            .GetProperty("content")
-            .GetString() ?? "{}";
-
-        // Parse JSON trả về từ LLM thành intermediate object
-        var llmJson = JsonDocument.Parse(messageContent).RootElement;
-        return MapLlmJsonToDto(llmJson);
+        using var doc = JsonDocument.Parse(body);
+        var messageContent = doc.RootElement.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString() ?? "{}";
+        return MapLlmJsonToDto(JsonDocument.Parse(messageContent).RootElement);
     }
 
     private static ParsedSyllabusDto MapLlmJsonToDto(JsonElement root)
@@ -220,7 +208,6 @@ public class SyllabusParserService : ISyllabusParserService
                         lOrder++;
                         globalDayNumber++;
 
-                        // estimatedDurationMinutes có thể là string hoặc number từ LLM
                         int durationMinutes = 45;
                         if (lesson.TryGetProperty("estimatedDurationMinutes", out var durEl))
                         {
@@ -240,55 +227,89 @@ public class SyllabusParserService : ISyllabusParserService
                             Skills                    = GetStringArray(lesson, "skills"),
                             SearchKeywords            = GetStringArray(lesson, "searchKeywords"),
                         };
-
                         sectionDto.Lessons.Add(lessonDto);
                     }
                 }
-
                 result.Sections.Add(sectionDto);
             }
         }
-
         return result;
     }
 
-    // ─── BƯỚC 3: Levenshtein Fuzzy Match ───
+    // ─── BƯỚC 3: Multi-Tier Path-Aware Context Matching ───
     private async Task AttachDriveSuggestionsAsync(ParsedSyllabusDto syllabus, CancellationToken ct)
     {
-        // Chỉ load file media hợp lệ, tránh full scan cả bảng DriveNodes
-        var driveFiles = await _db.DriveNodes
+        // 1. Tải toàn bộ files media hợp lệ từ DriveNodes — KHÔNG dùng Take(500)
+        var allDriveFiles = await _db.DriveNodes
             .AsNoTracking()
             .Where(n => n.NodeType == Domain.Enums.NodeType.File
                      && !n.IsDeletedInDrive
                      && n.FileExtension != null
-                     && AllowedExtensions.Contains(n.FileExtension))
-            .Select(n => new { n.Id, n.Name, n.WebViewLink, n.FileExtension, n.MimeType })
+                     && AllowedExtensions.Contains(n.FileExtension.ToLower()))
+            .Select(n => new
+            {
+                n.Id,
+                n.Name,
+                n.RawPath,
+                n.WebViewLink,
+                n.FileExtension,
+                n.MimeType
+            })
             .ToListAsync(ct);
 
-        _logger.LogInformation("[SyllabusParser] Fuzzy matching với {Count} DriveNodes media", driveFiles.Count);
+        _logger.LogInformation("[SyllabusParser] Đã tải {Count} file media trong DB cho Multi-Tier Matching", allDriveFiles.Count);
+
+        // Pre-compute normalized path & file metadata
+        var candidatePool = allDriveFiles.Select(f =>
+        {
+            var raw = f.RawPath ?? string.Empty;
+            var fullPath = string.IsNullOrWhiteSpace(raw) ? f.Name : $"{raw.TrimEnd('/')}/{f.Name}";
+            var normFullPath = RemoveDiacritics(fullPath);
+            var normName = RemoveDiacritics(f.Name);
+            var ext = (f.FileExtension ?? string.Empty).ToLowerInvariant();
+            return new
+            {
+                f.Id,
+                f.Name,
+                f.RawPath,
+                FullPath = fullPath,
+                NormFullPath = normFullPath,
+                NormName = normName,
+                f.WebViewLink,
+                FileExtension = ext,
+                f.MimeType
+            };
+        }).ToList();
+
+        var courseLevel = syllabus.JlptLevel ?? "N4";
 
         foreach (var section in syllabus.Sections)
         {
             foreach (var lesson in section.Lessons)
             {
-                if (!lesson.SearchKeywords.Any())
-                    continue;
+                var lessonNumber = ExtractLessonNumber(lesson.Title, lesson.SearchKeywords);
+                var scored = new List<(Guid Id, string DisplayName, string? RawPath, string? WebViewLink, int Score, string MatchedKeyword, ResourceType Type)>();
 
-                // Với mỗi keyword, tính score tốt nhất với từng file
-                var scored = new List<(Guid Id, string Name, string? WebViewLink, string Ext, int Score, string Keyword)>();
-
-                foreach (var keyword in lesson.SearchKeywords)
+                foreach (var file in candidatePool)
                 {
-                    foreach (var file in driveFiles)
+                    int score = ComputeMultiTierScore(
+                        file.NormFullPath,
+                        file.NormName,
+                        file.FileExtension,
+                        lesson,
+                        lessonNumber,
+                        courseLevel,
+                        out string bestKeyword);
+
+                    if (score >= 40) // Ngưỡng điểm chấp nhận
                     {
-                        int score = FuzzyScore(keyword, file.Name);
-                        if (score >= 30) // ngưỡng tối thiểu 30%
-                            scored.Add((file.Id, file.Name, file.WebViewLink, file.FileExtension ?? "", score, keyword));
+                        var resType = InferResourceType(file.FileExtension, file.NormFullPath);
+                        scored.Add((file.Id, file.Name, file.RawPath, file.WebViewLink, score, bestKeyword, resType));
                     }
                 }
 
-                // Dedup theo DriveNodeId, lấy score cao nhất, top 3
-                var top3 = scored
+                // Sắp xếp theo score giảm dần, lấy top 3 không trùng Id
+                lesson.SuggestedDriveFiles = scored
                     .GroupBy(x => x.Id)
                     .Select(g => g.OrderByDescending(x => x.Score).First())
                     .OrderByDescending(x => x.Score)
@@ -296,70 +317,291 @@ public class SyllabusParserService : ISyllabusParserService
                     .Select(x => new SuggestedDriveFileDto
                     {
                         DriveNodeId     = x.Id,
-                        FileName        = x.Name,
+                        FileName        = x.DisplayName,
+                        RawPath         = x.RawPath,
                         WebViewLink     = x.WebViewLink,
-                        MatchScore      = x.Score,
-                        MatchedKeyword  = x.Keyword,
-                        ResourceType    = InferResourceType(x.Ext)
+                        MatchScore      = Math.Min(100, x.Score),
+                        MatchedKeyword  = x.MatchedKeyword,
+                        ResourceType    = x.Type
                     })
                     .ToList();
-
-                lesson.SuggestedDriveFiles = top3;
             }
         }
     }
 
     /// <summary>
-    /// Tính điểm Levenshtein similarity giữa keyword và tên file.
-    /// Chuẩn hóa cả hai về lowercase, bỏ dấu cách thừa trước khi so sánh.
-    /// Trả về 0–100.
+    /// Thuật toán chấm điểm Multi-Tier Context Matching:
+    /// Tier 1: Khớp chính xác thư mục bài học & thư mục con kỹ năng (1. Chữ hán, 2. Ngữ pháp, 4. Từ vựng...) (80-100đ)
+    /// Tier 2: Khớp tài liệu riêng theo bài nằm ở folder ngoài (Tổng hợp ngữ pháp tài liệu bài 25-50 minna/...) (70-85đ)
+    /// Tier 3: Khớp giáo trình/audio dùng chung cho toàn khóa (0.0 Tài liệu khóa học N4, Audio 50 bài minna...) (50-65đ)
     /// </summary>
-    private static int FuzzyScore(string keyword, string fileName)
+    private static int ComputeMultiTierScore(
+        string normFullPath,
+        string normFileName,
+        string fileExt,
+        ParsedLessonDto lesson,
+        int? lessonNumber,
+        string courseLevel,
+        out string bestKeyword)
     {
-        var kw   = keyword.ToLowerInvariant().Trim();
-        var name = fileName.ToLowerInvariant().Trim();
+        int score = 0;
+        bestKeyword = string.Empty;
+        var ext = fileExt.ToLowerInvariant();
 
-        // Bonus: chứa chuỗi con trực tiếp → score cao hơn
-        if (name.Contains(kw))
-            return 90 + Math.Min(10, kw.Length); // 90–100
+        // ─── Phân tích kỹ năng mục tiêu của bài học ───
+        var titleLower = RemoveDiacritics(lesson.Title);
+        var skillsLower = lesson.Skills.Select(s => RemoveDiacritics(s)).ToList();
 
-        int dist = LevenshteinDistance(kw, name.Length > 50 ? name[..50] : name);
-        int maxLen = Math.Max(kw.Length, name.Length);
-        if (maxLen == 0) return 100;
+        bool isKanji   = skillsLower.Any(s => s.Contains("kanji") || s.Contains("han")) || titleLower.Contains("kanji") || titleLower.Contains("chu han") || titleLower.Contains("bo thu");
+        bool isGrammar = skillsLower.Any(s => s.Contains("grammar") || s.Contains("ngu phap") || s.Contains("bunpou") || s.Contains("bunpo")) || titleLower.Contains("ngu phap") || titleLower.Contains("bunpou");
+        bool isVocab   = skillsLower.Any(s => s.Contains("vocab") || s.Contains("tu vung") || s.Contains("kotoba")) || titleLower.Contains("tu vung") || titleLower.Contains("kotoba");
+        bool isChoukai = skillsLower.Any(s => s.Contains("choukai") || s.Contains("chokai") || s.Contains("nghe")) || titleLower.Contains("nghe") || titleLower.Contains("choukai");
+        bool isKaiwa   = skillsLower.Any(s => s.Contains("kaiwa") || s.Contains("hoi thoai")) || titleLower.Contains("kaiwa") || titleLower.Contains("hoi thoai");
+        bool isDokkai  = skillsLower.Any(s => s.Contains("dokkai") || s.Contains("doc")) || titleLower.Contains("doc") || titleLower.Contains("dokkai");
+        bool isQuiz    = skillsLower.Any(s => s.Contains("quiz") || s.Contains("test") || s.Contains("kiem tra") || s.Contains("bai tap")) || titleLower.Contains("test") || titleLower.Contains("kiem tra") || titleLower.Contains("bai tap");
 
-        int score = (int)((1.0 - (double)dist / maxLen) * 100);
-        return Math.Max(0, score);
-    }
+        // ─── TIER 1 & TIER 2: Có số bài học ───
+        if (lessonNumber.HasValue)
+        {
+            int num = lessonNumber.Value;
+            var numStr = num.ToString();
+            var numPadded = num < 10 ? $"0{num}" : numStr;
 
-    /// <summary>Pure C# Levenshtein distance — không cần NuGet thêm.</summary>
-    private static int LevenshteinDistance(string s, string t)
-    {
-        if (s.Length == 0) return t.Length;
-        if (t.Length == 0) return s.Length;
+            // Kiểm tra xem file có thuộc bài học này không (trong folder "Bài 26" hoặc tên file "bài 26", "bai 26-min", "026"...)
+            bool isLessonFile = normFullPath.Contains($"bai {numStr}")
+                             || normFullPath.Contains($"bai_{numStr}")
+                             || normFullPath.Contains($"bai-{numStr}")
+                             || normFullPath.Contains($"bai{numStr}")
+                             || normFullPath.Contains($"b{numStr}")
+                             || normFullPath.Contains($"/{numStr}/")
+                             || normFullPath.Contains($"lesson {numStr}")
+                             || normFullPath.Contains($"minna bai {numStr}")
+                             || normFullPath.Contains($"bai {numPadded}")
+                             || normFullPath.Contains($"track {numStr}")
+                             || normFullPath.Contains($"track {numPadded}")
+                             || normFullPath.Contains($"_{numPadded}.");
 
-        int[,] dp = new int[s.Length + 1, t.Length + 1];
-        for (int i = 0; i <= s.Length; i++) dp[i, 0] = i;
-        for (int j = 0; j <= t.Length; j++) dp[0, j] = j;
-
-        for (int i = 1; i <= s.Length; i++)
-            for (int j = 1; j <= t.Length; j++)
+            if (isLessonFile)
             {
-                int cost = s[i - 1] == t[j - 1] ? 0 : 1;
-                dp[i, j] = Math.Min(
-                    Math.Min(dp[i - 1, j] + 1, dp[i, j - 1] + 1),
-                    dp[i - 1, j - 1] + cost);
-            }
+                // Kiểm tra xem có bị dính sang bài khác không (ví dụ "bài 26" vs "bài 27")
+                bool wrongLesson = false;
+                for (int other = 1; other <= 50; other++)
+                {
+                    if (other == num) continue;
+                    var oStr = other.ToString();
+                    // Nếu đường dẫn chứa rõ ràng bài khác mà không chứa bài hiện tại
+                    if ((normFullPath.Contains($"bai {oStr}") || normFullPath.Contains($"/{oStr}/")) && !normFullPath.Contains($"bai {numStr}") && !normFullPath.Contains($"/{numStr}/"))
+                    {
+                        wrongLesson = true;
+                        break;
+                    }
+                }
 
-        return dp[s.Length, t.Length];
+                if (!wrongLesson)
+                {
+                    score += 55;
+                    bestKeyword = $"Bài {numStr}";
+
+                    // ─── Phân giải sâu ngữ cảnh Sub-folder & File cụ thể trong Bài ───
+
+                    // 1. Kỹ năng Kanji (Chữ hán)
+                    if (isKanji)
+                    {
+                        if (normFullPath.Contains("1. chu han") || normFullPath.Contains("chu han") || normFullPath.Contains("kanji") || normFullPath.Contains("bo thu"))
+                        {
+                            score += 35;
+                            bestKeyword = "Chữ Hán";
+                            if (ext == ".mp4") score += 10; // Video bài giảng chữ Hán
+                            if (normFullPath.Contains("bai tap chu han")) score += 5;
+                        }
+                        else if (normFullPath.Contains("2. ngu phap") || normFullPath.Contains("4. nghe hieu") || normFullPath.Contains("5. doc hieu"))
+                        {
+                            score -= 30; // Tránh nhầm video Ngữ pháp/Nghe hiểu vào tiết Chữ hán
+                        }
+                    }
+
+                    // 2. Kỹ năng Ngữ pháp (Grammar)
+                    if (isGrammar)
+                    {
+                        if (normFullPath.Contains("2. ngu phap") || normFullPath.Contains("3. tong hop ngu phap") || normFullPath.Contains("ngu phap") || normFullPath.Contains("bunpou"))
+                        {
+                            score += 35;
+                            bestKeyword = "Ngữ pháp";
+                            if (ext == ".mp4") score += 10; // Video ngữ pháp
+                            if (ext == ".pdf" && normFullPath.Contains("minna")) score += 8; // PDF tổng hợp ngữ pháp
+                        }
+                        else if (normFullPath.Contains("1. chu han") || normFullPath.Contains("4. nghe hieu") || normFullPath.Contains("5. doc hieu"))
+                        {
+                            score -= 30;
+                        }
+                    }
+
+                    // 3. Kỹ năng Từ vựng (Vocabulary)
+                    if (isVocab)
+                    {
+                        if (normFullPath.Contains("tu vung") || normFullPath.Contains("kotoba"))
+                        {
+                            score += 35;
+                            bestKeyword = "Từ vựng";
+                            if (ext == ".mp4" || ext == ".pdf") score += 10;
+                        }
+                    }
+
+                    // 4. Kỹ năng Hội thoại (Kaiwa)
+                    if (isKaiwa)
+                    {
+                        if (normFullPath.Contains("hoi thoai") || normFullPath.Contains("kaiwa") || normFullPath.Contains("7. hoi thoai"))
+                        {
+                            score += 40;
+                            bestKeyword = "Hội thoại";
+                            if (ext == ".mp4") score += 10;
+                        }
+                    }
+
+                    // 5. Kỹ năng Nghe hiểu (Choukai)
+                    if (isChoukai)
+                    {
+                        if (normFullPath.Contains("4. nghe hieu") || normFullPath.Contains("nghe hieu") || normFullPath.Contains("choukai") || normFullPath.Contains("chokai") || normFullPath.Contains("audio"))
+                        {
+                            score += 35;
+                            bestKeyword = "Nghe hiểu";
+                            if (ext == ".mp3" || ext == ".m4a" || ext == ".mp4") score += 10;
+                        }
+                    }
+
+                    // 6. Kỹ năng Đọc hiểu (Dokkai)
+                    if (isDokkai)
+                    {
+                        if (normFullPath.Contains("5. doc hieu") || normFullPath.Contains("doc hieu") || normFullPath.Contains("dokkai"))
+                        {
+                            score += 40;
+                            bestKeyword = "Đọc hiểu";
+                            if (ext == ".mp4" || ext == ".pdf") score += 10;
+                        }
+                    }
+
+                    // 7. Kỹ năng Test / Quiz / Bài tập
+                    if (isQuiz)
+                    {
+                        if (normFullPath.Contains("test tong hop") || normFullPath.Contains("test") || normFullPath.Contains("kiem tra") || normFullPath.Contains("bai tap"))
+                        {
+                            score += 40;
+                            bestKeyword = "Test / Bài tập";
+                            if (ext == ".docx" || ext == ".pdf" || ext == ".doc") score += 10;
+                        }
+                    }
+                }
+            }
+        }
+
+        // ─── TIER 3: Tài liệu & Giáo trình DÙNG CHUNG cho cả khóa (0.0 Tài liệu khóa học N4, Audio 50 bài...) ───
+        if (score < 60)
+        {
+            var normLevel = RemoveDiacritics(courseLevel); // e.g. "n4", "n5"
+            bool isCourseLevelFile = normFullPath.Contains(normLevel) || normFullPath.Contains("tai lieu khoa hoc") || normFullPath.Contains("50 bai minna");
+
+            if (isCourseLevelFile)
+            {
+                if (isKanji && (normFullPath.Contains("kanji") || normFullPath.Contains("chu han")))
+                {
+                    score = Math.Max(score, 62);
+                    bestKeyword = $"{courseLevel} Kanji (Tài liệu chung)";
+                }
+                else if (isGrammar && (normFullPath.Contains("giai thich ngu phap") || normFullPath.Contains("ngu phap") || normFullPath.Contains("sach giao khoa")))
+                {
+                    score = Math.Max(score, 62);
+                    bestKeyword = $"{courseLevel} Ngữ pháp (Tài liệu chung)";
+                }
+                else if (isVocab && (normFullPath.Contains("tu vung") || normFullPath.Contains("kotoba")))
+                {
+                    score = Math.Max(score, 62);
+                    bestKeyword = $"{courseLevel} Từ vựng (Tài liệu chung)";
+                }
+                else if (isDokkai && normFullPath.Contains("doc hieu"))
+                {
+                    score = Math.Max(score, 62);
+                    bestKeyword = $"{courseLevel} Sách đọc hiểu";
+                }
+                else if (isChoukai && (normFullPath.Contains("nghe hieu") || normFullPath.Contains("audio")))
+                {
+                    score = Math.Max(score, 62);
+                    bestKeyword = $"{courseLevel} Sách nghe hiểu";
+                }
+                else if (normFullPath.Contains("sach giao khoa"))
+                {
+                    score = Math.Max(score, 55);
+                    bestKeyword = $"{courseLevel} Sách giáo khoa";
+                }
+            }
+        }
+
+        // Khớp thêm các search keywords bổ trợ từ LLM
+        foreach (var kw in lesson.SearchKeywords)
+        {
+            if (string.IsNullOrWhiteSpace(kw)) continue;
+            var normKw = RemoveDiacritics(kw);
+            if (normFullPath.Contains(normKw))
+            {
+                score += 15;
+                if (string.IsNullOrEmpty(bestKeyword)) bestKeyword = kw;
+            }
+        }
+
+        return score;
     }
 
-    private static ResourceType InferResourceType(string ext) => ext.ToLowerInvariant() switch
+    private static int? ExtractLessonNumber(string title, List<string> keywords)
     {
-        ".mp4"        => ResourceType.PrimaryVideo,
-        ".mp3" or ".m4a" => ResourceType.Audio,
-        ".pdf"        => ResourceType.ExercisePdf,
-        _             => ResourceType.Other
-    };
+        var m = Regex.Match(title, @"(?:bài|bai|b|lesson)\s*(\d{1,3})", RegexOptions.IgnoreCase);
+        if (m.Success && int.TryParse(m.Groups[1].Value, out int n1)) return n1;
+
+        foreach (var kw in keywords)
+        {
+            var km = Regex.Match(kw, @"(?:bài|bai|b|lesson)?\s*(\d{1,3})", RegexOptions.IgnoreCase);
+            if (km.Success && int.TryParse(km.Groups[1].Value, out int nk) && nk >= 1 && nk <= 150)
+                return nk;
+        }
+
+        var nm = Regex.Match(title, @"ngày\s*(\d{1,3})", RegexOptions.IgnoreCase);
+        if (nm.Success && int.TryParse(nm.Groups[1].Value, out int nd) && nd >= 1 && nd <= 50)
+            return nd;
+
+        return null;
+    }
+
+    private static string RemoveDiacritics(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return string.Empty;
+        var normalized = text.Normalize(NormalizationForm.FormD);
+        var sb = new StringBuilder();
+        foreach (var c in normalized)
+        {
+            if (System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark)
+                sb.Append(c);
+        }
+        return sb.ToString().Normalize(NormalizationForm.FormC).ToLowerInvariant();
+    }
+
+    private static ResourceType InferResourceType(string ext, string normFullPath)
+    {
+        var e = ext.ToLowerInvariant();
+        if (e == ".mp4") return ResourceType.PrimaryVideo;
+        if (e == ".mp3" || e == ".m4a") return ResourceType.Audio;
+        if (e == ".pdf")
+        {
+            if (normFullPath.Contains("test") || normFullPath.Contains("bai tap") || normFullPath.Contains("kiem tra") || normFullPath.Contains("de thi"))
+                return ResourceType.ExercisePdf;
+            return ResourceType.Document;
+        }
+        if (e == ".docx" || e == ".doc")
+        {
+            if (normFullPath.Contains("test") || normFullPath.Contains("bai tap") || normFullPath.Contains("kiem tra"))
+                return ResourceType.ExercisePdf;
+            return ResourceType.Document;
+        }
+        if (e == ".png" || e == ".jpg" || e == ".jpeg") return ResourceType.Image;
+        return ResourceType.Other;
+    }
 
     // ═══════════════════════════════════════════════════════════
     //  BƯỚC 4: Lưu Template vào DB
@@ -368,20 +610,16 @@ public class SyllabusParserService : ISyllabusParserService
     public async Task<RoadmapTemplateDto> SaveRoadmapTemplateAsync(
         SaveRoadmapTemplateRequestDto dto, CancellationToken ct = default)
     {
-        // Flatten tất cả lessons để tính tổng
         var allLessons = dto.Sections.SelectMany(s => s.Lessons).ToList();
-        int totalDays      = allLessons.Count;
-        int totalMinutes   = allLessons.Sum(l => l.EstimatedDurationMinutes);
-
         var template = new RoadmapTemplate
         {
             Title                 = dto.Title,
             JlptLevel             = dto.JlptLevel,
             Description           = dto.Description,
             SourcePdfName         = dto.SourcePdfName,
-            TotalDays             = totalDays,
-            TotalEstimatedMinutes = totalMinutes,
-            IsPublished           = false,
+            TotalDays             = allLessons.Count,
+            TotalEstimatedMinutes = allLessons.Sum(l => l.EstimatedDurationMinutes),
+            IsPublished           = true,
             CreatedAtUtc          = DateTime.UtcNow
         };
 
@@ -415,18 +653,15 @@ public class SyllabusParserService : ISyllabusParserService
                         DisplayOrder = file.DisplayOrder,
                     });
                 }
-
                 template.Items.Add(item);
             }
         }
 
         await _db.SaveChangesAsync(ct);
-        _logger.LogInformation("[SyllabusParser] Đã lưu template '{Title}' với {N} items", template.Title, template.Items.Count);
-
+        _logger.LogInformation("[SyllabusParser] Đã lưu template '{Title}' (IsPublished=true) với {N} items", template.Title, template.Items.Count);
         return await BuildTemplateDtoAsync(template.Id, ct);
     }
 
-    // ─── Helper: Build RoadmapTemplateDto với eager load ───
     private async Task<RoadmapTemplateDto> BuildTemplateDtoAsync(Guid templateId, CancellationToken ct)
     {
         var t = await _db.RoadmapTemplates

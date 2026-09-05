@@ -44,4 +44,35 @@ public class CuratorController : ControllerBase
         int createdCount = await _curatorService.ApplyAutoSuggestAsync(dto, cancellationToken);
         return Ok(new { message = $"Successfully created {createdCount} lessons from auto-suggest pattern.", count = createdCount });
     }
+
+    [HttpPost("auto-build/scan")]
+    public async Task<IActionResult> ScanAutoBuildCourse([FromBody] AutoBuildScanRequestDto dto, CancellationToken cancellationToken)
+    {
+        var preview = await _curatorService.ScanAndPreviewCourseFromDriveAsync(dto, cancellationToken);
+        return Ok(preview);
+    }
+
+    [HttpPost("auto-build/scan-pdf")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> ScanAutoBuildCourseFromPdf(
+        [FromForm] IFormFile file,
+        [FromForm] string? courseTitle,
+        [FromForm] string? jlptLevel,
+        CancellationToken cancellationToken)
+    {
+        if (file == null || file.Length == 0)
+            return BadRequest(new { message = "Vui lòng chọn file PDF lộ trình." });
+
+        using var stream = file.OpenReadStream();
+        var preview = await _curatorService.ScanAndPreviewCourseFromPdfAsync(
+            stream, file.FileName, courseTitle, jlptLevel, cancellationToken);
+        return Ok(preview);
+    }
+
+    [HttpPost("auto-build/apply")]
+    public async Task<IActionResult> ApplyAutoBuildCourse([FromBody] AutoBuildApplyRequestDto dto, CancellationToken cancellationToken)
+    {
+        var course = await _curatorService.ApplyAutoBuiltCourseAsync(dto, cancellationToken);
+        return Ok(course);
+    }
 }

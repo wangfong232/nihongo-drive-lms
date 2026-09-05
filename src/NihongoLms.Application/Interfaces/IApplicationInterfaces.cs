@@ -30,6 +30,11 @@ public interface ICuratorService
     Task ReorderLessonsAsync(ReorderLessonsDto dto, CancellationToken cancellationToken = default);
     Task ReorderSectionsAsync(ReorderSectionsDto dto, CancellationToken cancellationToken = default);
     Task AssignQuizToLessonAsync(AssignQuizRequestDto dto, CancellationToken cancellationToken = default);
+
+    // AI Auto-Course Builder (Drive Folder -> Standard Course with 5 Pedagogical Lessons)
+    Task<AutoBuildScanResultDto> ScanAndPreviewCourseFromDriveAsync(AutoBuildScanRequestDto dto, CancellationToken cancellationToken = default);
+    Task<AutoBuildScanResultDto> ScanAndPreviewCourseFromPdfAsync(Stream pdfStream, string fileName, string? courseTitle, string? jlptLevel, CancellationToken cancellationToken = default);
+    Task<CourseDto> ApplyAutoBuiltCourseAsync(AutoBuildApplyRequestDto dto, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
@@ -109,6 +114,8 @@ public interface IProgressService
     Task<LessonProgressDto> GetLessonProgressAsync(Guid lessonId, string userId = "default-user", CancellationToken cancellationToken = default);
     Task<LessonProgressDto> SavePlaybackPositionAsync(Guid lessonId, double positionSeconds, double durationSeconds, string userId = "default-user", CancellationToken cancellationToken = default);
     Task<LessonProgressDto> ToggleLessonCompleteAsync(Guid lessonId, bool isManuallyCompleted = true, string userId = "default-user", CancellationToken cancellationToken = default);
+    Task<WeeklyPacingDto> GetWeeklyPacingAsync(string userId = "default-user", CancellationToken cancellationToken = default);
+    Task<WeeklyPacingDto> SetWeeklyGoalAsync(int targetLessonsPerWeek, string userId = "default-user", CancellationToken cancellationToken = default);
 }
 
 public interface ISrsService

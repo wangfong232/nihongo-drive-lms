@@ -8,6 +8,7 @@ import { AutoSuggestModal } from "@/components/builder/AutoSuggestModal";
 import { ConfirmDeleteModal } from "@/components/builder/ConfirmDeleteModal";
 import { AssignQuizModal } from "@/components/builder/AssignQuizModal";
 import SyllabusImportModal from "@/components/builder/SyllabusImportModal";
+import AutoCourseBuilderModal from "@/components/builder/AutoCourseBuilderModal";
 import { DriveNode, Course, Section, Lesson, api, DriveSyncResult } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
 import {
@@ -18,6 +19,7 @@ import {
   Key,
   CheckCircle2,
   Sparkles,
+  Zap,
 } from "lucide-react";
 
 // ─── Drag payload (mirrors RawDriveTree's dataTransfer) ─────────────────────
@@ -44,6 +46,7 @@ export default function CourseBuilderPage() {
   const [loading, setLoading] = useState(true);
 
   // ─── Create Modals ─────────────────────────────────────────────────────────
+  const [showAutoCourseBuilder, setShowAutoCourseBuilder] = useState(false);
   const [showSyllabusImport, setShowSyllabusImport] = useState(false);
   const [autoSuggestNode, setAutoSuggestNode] = useState<DriveNode | null>(null);
   const [showAddCourse, setShowAddCourse] = useState(false);
@@ -456,16 +459,23 @@ export default function CourseBuilderPage() {
             </div>
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setShowSyllabusImport(true)}
-                className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:to-pink-700 text-white text-xs font-extrabold shadow-md transition-all active:scale-95 shrink-0"
+                onClick={() => setShowAutoCourseBuilder(true)}
+                className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-700 hover:to-indigo-700 text-white text-xs font-extrabold shadow-md shadow-emerald-500/20 transition-all active:scale-95 shrink-0"
               >
-                <Sparkles className="w-3.5 h-3.5" />
-                Import Syllabus PDF (AI)
+                <Zap className="w-3.5 h-3.5 text-amber-300" />
+                AI Auto-Build Khóa Học (Drive)
+              </button>
+              <button
+                onClick={() => setShowSyllabusImport(true)}
+                className="flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all active:scale-95 shrink-0"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
+                Import PDF Lộ trình
               </button>
               <button
                 onClick={handleTriggerSync}
                 disabled={syncing}
-                className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 disabled:opacity-50 text-white text-xs font-extrabold shadow-md transition-all active:scale-95 shrink-0"
+                className="flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 disabled:opacity-50 text-white text-xs font-extrabold shadow-md transition-all active:scale-95 shrink-0"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${syncing ? "animate-spin" : ""}`} />
                 {syncing ? "Đang Đồng Bộ..." : "Sync Drive"}
@@ -1008,7 +1018,17 @@ export default function CourseBuilderPage() {
         isOpen={showSyllabusImport}
         onClose={() => setShowSyllabusImport(false)}
         onTemplateCreated={() => {
-          // Template created callback
+          loadData();
+        }}
+      />
+
+      {/* ── AI Auto-Course Builder Modal (Drive -> 5 Standard Lessons) ── */}
+      <AutoCourseBuilderModal
+        isOpen={showAutoCourseBuilder}
+        onClose={() => setShowAutoCourseBuilder(false)}
+        driveNodes={driveNodes}
+        onCourseCreated={() => {
+          loadData();
         }}
       />
     </div>
