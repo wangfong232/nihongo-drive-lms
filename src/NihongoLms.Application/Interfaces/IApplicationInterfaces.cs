@@ -38,6 +38,18 @@ public interface ICuratorService
 }
 
 /// <summary>
+/// Dịch vụ dựng Khóa học linh hoạt từ Cây thư mục Google Drive (Flexible Folder-to-Course Builder)
+/// Hỗ trợ Heuristic Auto-Detection, AI Prompt Tree Analysis, RawPath Skill Matching, Cross-Folder Resource Ingestion & Natural Number Sorting.
+/// </summary>
+public interface IFolderCourseBuilderService
+{
+    Task<AutoDetectFolderResultDto> DetectFolderStructureAsync(Guid rootFolderId, CancellationToken ct = default);
+    Task<FolderMappingConfigDto> AnalyzeFolderTreeWithAiAsync(Guid rootFolderId, string? customPrompt = null, CancellationToken ct = default);
+    Task<AutoBuildScanResultDto> GeneratePreviewAsync(FolderMappingConfigDto config, CancellationToken ct = default);
+    Task<CourseDto> MaterializeCourseAsync(AutoBuildApplyRequestDto request, CancellationToken ct = default);
+}
+
+/// <summary>
 /// Pipeline bóc tách lộ trình từ PDF và lưu vào bảng RoadmapTemplates.
 /// Bước 1-3: Parse PDF + gọi LLM + Fuzzy match DriveNodes → preview JSON.
 /// Bước 4: Curator confirm → SaveRoadmapTemplateAsync lưu vào DB.

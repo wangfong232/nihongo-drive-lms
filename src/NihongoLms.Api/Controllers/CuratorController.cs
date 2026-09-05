@@ -10,11 +10,16 @@ public class CuratorController : ControllerBase
 {
     private readonly ICuratorService _curatorService;
     private readonly IAutoSuggestPatternEngine _autoSuggestEngine;
+    private readonly IFolderCourseBuilderService _folderCourseBuilder;
 
-    public CuratorController(ICuratorService curatorService, IAutoSuggestPatternEngine autoSuggestEngine)
+    public CuratorController(
+        ICuratorService curatorService,
+        IAutoSuggestPatternEngine autoSuggestEngine,
+        IFolderCourseBuilderService folderCourseBuilder)
     {
         _curatorService = curatorService;
         _autoSuggestEngine = autoSuggestEngine;
+        _folderCourseBuilder = folderCourseBuilder;
     }
 
     [HttpPost("assign")]
@@ -73,6 +78,38 @@ public class CuratorController : ControllerBase
     public async Task<IActionResult> ApplyAutoBuildCourse([FromBody] AutoBuildApplyRequestDto dto, CancellationToken cancellationToken)
     {
         var course = await _curatorService.ApplyAutoBuiltCourseAsync(dto, cancellationToken);
+        return Ok(course);
+    }
+
+    // ═════════════════════════════════════════════════════════════════════════
+    //  Flexible Folder-to-Course Builder Endpoints
+    // ═════════════════════════════════════════════════════════════════════════
+
+    [HttpPost("folder-builder/detect")]
+    public async Task<IActionResult> DetectFolderStructure([FromBody] DetectFolderRequestDto dto, CancellationToken cancellationToken)
+    {
+        var result = await _folderCourseBuilder.DetectFolderStructureAsync(dto.FolderId, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPost("folder-builder/ai-analyze")]
+    public async Task<IActionResult> AnalyzeFolderTreeWithAi([FromBody] AiAnalyzeTreeRequestDto dto, CancellationToken cancellationToken)
+    {
+        var result = await _folderCourseBuilder.AnalyzeFolderTreeWithAiAsync(dto.RootFolderId, dto.CustomPromptInstruction, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPost("folder-builder/preview")]
+    public async Task<IActionResult> GenerateFolderCoursePreview([FromBody] FolderMappingConfigDto config, CancellationToken cancellationToken)
+    {
+        var preview = await _folderCourseBuilder.GeneratePreviewAsync(config, cancellationToken);
+        return Ok(preview);
+    }
+
+    [HttpPost("folder-builder/apply")]
+    public async Task<IActionResult> ApplyFolderCourse([FromBody] AutoBuildApplyRequestDto dto, CancellationToken cancellationToken)
+    {
+        var course = await _folderCourseBuilder.MaterializeCourseAsync(dto, cancellationToken);
         return Ok(course);
     }
 }

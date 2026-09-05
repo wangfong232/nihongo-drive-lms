@@ -247,6 +247,56 @@ export interface DriveSyncResult {
   message?: string;
 }
 
+export interface FolderTreeNode {
+  id: string;
+  name: string;
+  nodeType: number;
+  rawPath: string;
+  relativeDepth: number;
+  subFolderCount: number;
+  fileCount: number;
+  children: FolderTreeNode[];
+}
+
+export interface FolderPresetInfo {
+  presetId: string;
+  name: string;
+  description: string;
+  sectionDepth: number;
+  lessonDepth: number;
+  includeLeafFilesAsLessons: boolean;
+  samplePathPattern: string;
+}
+
+export interface FolderMappingConfig {
+  rootFolderNodeId: string;
+  courseTitle: string;
+  jlptLevel: string;
+  presetName: string;
+  sectionFolderDepth: number;
+  lessonFolderDepth: number;
+  includeLeafFilesAsLessons: boolean;
+  excludeFolderPatterns: string[];
+  excludeFileExtensions: string[];
+  skillKeywordRules: Record<string, string>;
+  defaultLessonDurationMinutes: number;
+  enableCrossFolderMatching: boolean;
+}
+
+export interface AutoDetectFolderResult {
+  rootFolderId: string;
+  rootFolderName: string;
+  detectedPreset: string;
+  confidence: number;
+  rationale: string;
+  totalSubFolders: number;
+  totalFiles: number;
+  maxDepth: number;
+  suggestedConfig: FolderMappingConfig;
+  folderTreePreview: FolderTreeNode[];
+  availablePresets: FolderPresetInfo[];
+}
+
 // Global server connection state tracking
 export let isBackendConnected = false;
 
@@ -1524,6 +1574,116 @@ export const api = {
         id: "new-course",
         title: data.courseTitle,
         slug: "auto-course",
+        jlptLevel: data.jlptLevel,
+        displayOrder: 0,
+        isPublished: true,
+        sections: [],
+      }
+    );
+  },
+
+  // ─── Flexible Folder-to-Course Builder ─────────────────────────
+  async detectFolderStructure(folderId: string) {
+    return safeFetch<AutoDetectFolderResult>(
+      `${API_BASE}/curator/folder-builder/detect`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ folderId }),
+      },
+      {
+        rootFolderId: folderId,
+        rootFolderName: "Thư mục Drive",
+        detectedPreset: "minna-lesson",
+        confidence: 0.9,
+        rationale: "Tự động phân tích cây thư mục",
+        totalSubFolders: 0,
+        totalFiles: 0,
+        maxDepth: 1,
+        suggestedConfig: {
+          rootFolderNodeId: folderId,
+          courseTitle: "Khóa học Tiếng Nhật",
+          jlptLevel: "N4",
+          presetName: "minna-lesson",
+          sectionFolderDepth: 1,
+          lessonFolderDepth: 2,
+          includeLeafFilesAsLessons: true,
+          excludeFolderPatterns: ["*lộ trình*", "*file sách*"],
+          excludeFileExtensions: [".exe", ".zip"],
+          skillKeywordRules: { "chu han": "Kanji", "ngu phap": "Grammar" },
+          defaultLessonDurationMinutes: 45,
+          enableCrossFolderMatching: true,
+        },
+        folderTreePreview: [],
+        availablePresets: [],
+      }
+    );
+  },
+
+  async analyzeFolderTreeWithAi(data: {
+    rootFolderId: string;
+    customPromptInstruction?: string;
+  }) {
+    return safeFetch<FolderMappingConfig>(
+      `${API_BASE}/curator/folder-builder/ai-analyze`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      },
+      {
+        rootFolderNodeId: data.rootFolderId,
+        courseTitle: "Khóa học AI",
+        jlptLevel: "N4",
+        presetName: "custom",
+        sectionFolderDepth: 1,
+        lessonFolderDepth: 2,
+        includeLeafFilesAsLessons: true,
+        excludeFolderPatterns: ["*lộ trình*", "*file sách*"],
+        excludeFileExtensions: [".exe", ".zip"],
+        skillKeywordRules: { "chu han": "Kanji", "ngu phap": "Grammar" },
+        defaultLessonDurationMinutes: 45,
+        enableCrossFolderMatching: true,
+      }
+    );
+  },
+
+  async generateFolderCoursePreview(config: FolderMappingConfig) {
+    return safeFetch<AutoBuildScanResult>(
+      `${API_BASE}/curator/folder-builder/preview`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(config),
+      },
+      {
+        courseTitle: config.courseTitle,
+        jlptLevel: config.jlptLevel,
+        totalSections: 0,
+        totalLessons: 0,
+        totalFilesMatched: 0,
+        sections: [],
+      }
+    );
+  },
+
+  async applyFolderCourse(data: {
+    courseTitle: string;
+    jlptLevel: string;
+    description?: string;
+    sections: AutoBuildSectionPreview[];
+  }) {
+    return safeFetch<Course>(
+      `${API_BASE}/curator/folder-builder/apply`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      },
+      {
+        id: "new-course",
+        title: data.courseTitle,
+        slug: "folder-course",
         jlptLevel: data.jlptLevel,
         displayOrder: 0,
         isPublished: true,

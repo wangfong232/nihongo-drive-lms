@@ -58,9 +58,10 @@ builder.Services.AddSingleton<IQuizGradingEngine, QuizGradingEngine>();
 // System Settings & Encrypted Keys
 builder.Services.AddScoped<ISystemSettingsService, SystemSettingsService>();
 
-// Roadmap Template System
+// Roadmap Template & Flexible Folder Course Builder System
 builder.Services.AddScoped<ISyllabusParserService, SyllabusParserService>();
 builder.Services.AddScoped<IRoadmapService, RoadmapService>();
+builder.Services.AddScoped<IFolderCourseBuilderService, FolderCourseBuilderService>();
 
 // Quartz.NET Background Sync Job Setup
 builder.Services.AddQuartz(q =>
