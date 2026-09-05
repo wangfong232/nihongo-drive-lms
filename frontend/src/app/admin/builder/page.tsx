@@ -7,6 +7,7 @@ import { CuratedCourseTree } from "@/components/builder/CuratedCourseTree";
 import { AutoSuggestModal } from "@/components/builder/AutoSuggestModal";
 import { ConfirmDeleteModal } from "@/components/builder/ConfirmDeleteModal";
 import { AssignQuizModal } from "@/components/builder/AssignQuizModal";
+import SyllabusImportModal from "@/components/builder/SyllabusImportModal";
 import { DriveNode, Course, Section, Lesson, api, DriveSyncResult } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
 import {
@@ -16,6 +17,7 @@ import {
   RefreshCw,
   Key,
   CheckCircle2,
+  Sparkles,
 } from "lucide-react";
 
 // ─── Drag payload (mirrors RawDriveTree's dataTransfer) ─────────────────────
@@ -42,6 +44,7 @@ export default function CourseBuilderPage() {
   const [loading, setLoading] = useState(true);
 
   // ─── Create Modals ─────────────────────────────────────────────────────────
+  const [showSyllabusImport, setShowSyllabusImport] = useState(false);
   const [autoSuggestNode, setAutoSuggestNode] = useState<DriveNode | null>(null);
   const [showAddCourse, setShowAddCourse] = useState(false);
   const [newCourseTitle, setNewCourseTitle] = useState("");
@@ -451,14 +454,23 @@ export default function CourseBuilderPage() {
                 className="flex-1 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white font-mono focus:ring-2 focus:ring-orange-500/50 focus:outline-none min-w-0"
               />
             </div>
-            <button
-              onClick={handleTriggerSync}
-              disabled={syncing}
-              className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-extrabold shadow-md transition-all active:scale-95 shrink-0"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${syncing ? "animate-spin" : ""}`} />
-              {syncing ? "Đang Đồng Bộ..." : "Sync Drive"}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowSyllabusImport(true)}
+                className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:to-pink-700 text-white text-xs font-extrabold shadow-md transition-all active:scale-95 shrink-0"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                Import Syllabus PDF (AI)
+              </button>
+              <button
+                onClick={handleTriggerSync}
+                disabled={syncing}
+                className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 disabled:opacity-50 text-white text-xs font-extrabold shadow-md transition-all active:scale-95 shrink-0"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${syncing ? "animate-spin" : ""}`} />
+                {syncing ? "Đang Đồng Bộ..." : "Sync Drive"}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -990,6 +1002,15 @@ export default function CourseBuilderPage() {
           </div>
         </div>
       )}
+
+      {/* ── Syllabus Import Modal (AI PDF Extractor) ─────────── */}
+      <SyllabusImportModal
+        isOpen={showSyllabusImport}
+        onClose={() => setShowSyllabusImport(false)}
+        onTemplateCreated={() => {
+          // Template created callback
+        }}
+      />
     </div>
   );
 }

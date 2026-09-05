@@ -52,16 +52,30 @@ export const userSettingsService = {
     return this.update({ trackVideoWatchTime: enabled });
   },
 
+  toggleTrackVideoWatchTime(): boolean {
+    const current = getStoredUserSettings();
+    const nextVal = !current.trackVideoWatchTime;
+    this.update({ trackVideoWatchTime: nextVal });
+    return nextVal;
+  },
+
   setShowResumePrompt(enabled: boolean): UserSettings {
     return this.update({ showResumePrompt: enabled });
   },
 };
 
 export function useUserSettings() {
-  const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
+  const [settings, setSettings] = useState<UserSettings>(() => {
+    if (typeof window !== "undefined") {
+      return getStoredUserSettings();
+    }
+    return DEFAULT_SETTINGS;
+  });
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const refresh = useCallback(() => {
     setSettings(getStoredUserSettings());
+    setIsLoaded(true);
   }, []);
 
   useEffect(() => {
@@ -77,8 +91,10 @@ export function useUserSettings() {
 
   return {
     settings,
+    isLoaded,
     updateSettings: userSettingsService.update.bind(userSettingsService),
     setTrackVideoWatchTime: userSettingsService.setTrackVideoWatchTime.bind(userSettingsService),
+    toggleTrackVideoWatchTime: userSettingsService.toggleTrackVideoWatchTime.bind(userSettingsService),
     setShowResumePrompt: userSettingsService.setShowResumePrompt.bind(userSettingsService),
   };
 }

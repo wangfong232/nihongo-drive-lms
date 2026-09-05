@@ -13,7 +13,7 @@ interface DriveVideoPlayerProps {
 }
 
 export const DriveVideoPlayer: React.FC<DriveVideoPlayerProps> = ({ driveFileId, title, customUrl, lessonId }) => {
-  const { settings } = useUserSettings();
+  const { settings, isLoaded, toggleTrackVideoWatchTime } = useUserSettings();
   const [showSignInBanner, setShowSignInBanner] = useState(true);
   const [isTheaterMode, setIsTheaterMode] = useState(false);
   const [resumeToast, setResumeToast] = useState<string | null>(null);
@@ -55,7 +55,15 @@ export const DriveVideoPlayer: React.FC<DriveVideoPlayerProps> = ({ driveFileId,
       }
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lessonId, settings.trackVideoWatchTime, settings.showResumePrompt]);
+  }, [lessonId, settings.trackVideoWatchTime, settings.showResumePrompt, isLoaded]);
+
+  // If tracking is disabled, immediately dismiss any active modal/toast
+  useEffect(() => {
+    if (!settings.trackVideoWatchTime || !settings.showResumePrompt) {
+      setShowResumeModal(false);
+      setResumeToast(null);
+    }
+  }, [settings.trackVideoWatchTime, settings.showResumePrompt]);
 
   // Periodic save of playback position (every 5 seconds) - only if tracking is enabled
   useEffect(() => {
@@ -102,8 +110,8 @@ export const DriveVideoPlayer: React.FC<DriveVideoPlayerProps> = ({ driveFileId,
 
   return (
     <>
-      {/* Resume Modal - Show when saved position exists */}
-      {showResumeModal && savedPositionSecs > 0 && (
+      {/* Resume Modal - Show only when tracking is enabled and saved position exists */}
+      {showResumeModal && settings.trackVideoWatchTime && settings.showResumePrompt && savedPositionSecs > 0 && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-md w-full border-2 border-emerald-500/30 shadow-2xl flex flex-col gap-4">
             <div className="flex items-center gap-3">
@@ -178,6 +186,40 @@ export const DriveVideoPlayer: React.FC<DriveVideoPlayerProps> = ({ driveFileId,
             </div>
 
             <div className="flex items-center gap-3">
+              {/* Theater Tracking Toggle */}
+              <button
+                type="button"
+                onClick={() => {
+                  const next = toggleTrackVideoWatchTime();
+                  if (!next) {
+                    setShowResumeModal(false);
+                    setResumeToast(null);
+                  }
+                }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                  settings.trackVideoWatchTime
+                    ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+                    : "bg-slate-800 text-slate-400 border-slate-700"
+                }`}
+                title={
+                  settings.trackVideoWatchTime
+                    ? "Đang bật tự động theo dõi số phút đã xem. Bấm để TẮT."
+                    : "Đã tắt theo dõi số phút đã xem video. Bấm để BẬT lại."
+                }
+              >
+                {settings.trackVideoWatchTime ? (
+                  <>
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                    <span>Theo dõi: BẬT</span>
+                  </>
+                ) : (
+                  <>
+                    <EyeOff className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span>Theo dõi: ĐÃ TẮT</span>
+                  </>
+                )}
+              </button>
+
               {driveFileId && (
                 <a
                   href={`https://drive.google.com/file/d/${driveFileId}/view`}
@@ -227,12 +269,39 @@ export const DriveVideoPlayer: React.FC<DriveVideoPlayerProps> = ({ driveFileId,
                 {resumeToast}
               </span>
             )}
-            {!settings.trackVideoWatchTime && (
-              <span className="flex items-center gap-1 text-[10px] font-semibold text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md" title="Theo dõi số phút xem đang tắt trong Cài Đặt">
-                <EyeOff className="w-3 h-3 text-slate-400" />
-                Theo dõi xem: Tắt
-              </span>
-            )}
+            {/* Quick Toggle Watch Time Switch */}
+            <button
+              type="button"
+              onClick={() => {
+                const next = toggleTrackVideoWatchTime();
+                if (!next) {
+                  setShowResumeModal(false);
+                  setResumeToast(null);
+                }
+              }}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold transition-all border shadow-2xs active:scale-95 ${
+                settings.trackVideoWatchTime
+                  ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                  : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 border-slate-300 dark:border-slate-700"
+              }`}
+              title={
+                settings.trackVideoWatchTime
+                  ? "Đang bật tự động theo dõi số phút đã xem. Bấm để TẮT."
+                  : "Đã tắt theo dõi số phút đã xem video. Bấm để BẬT lại."
+              }
+            >
+              {settings.trackVideoWatchTime ? (
+                <>
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                  <span>Theo dõi: BẬT</span>
+                </>
+              ) : (
+                <>
+                  <EyeOff className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <span>Theo dõi: ĐÃ TẮT</span>
+                </>
+              )}
+            </button>
           </div>
 
           <div className="flex items-center gap-2">

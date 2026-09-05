@@ -266,3 +266,141 @@ public class LessonProgress
     public DateTime? CompletedAtUtc { get; set; }
     public DateTime LastAccessedAtUtc { get; set; } = DateTime.UtcNow;
 }
+
+// ─────────────────────────────────────────────────
+//  ROADMAP TEMPLATE SYSTEM
+// ─────────────────────────────────────────────────
+
+/// <summary>
+/// Blueprint lộ trình học (vd: N4 180 ngày, N5 150 ngày).
+/// Được Curator tạo ra bằng cách upload PDF và dùng AI bóc tách.
+/// Không thay thế Course/Section/Lesson — đây là kế hoạch học tập theo ngày.
+/// </summary>
+public class RoadmapTemplate
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string Title { get; set; } = string.Empty;
+    public string JlptLevel { get; set; } = "N5";
+    public string? Description { get; set; }
+
+    /// <summary>Tổng số ngày học trong lộ trình (ví dụ: 150, 180).</summary>
+    public int TotalDays { get; set; }
+
+    /// <summary>Tổng thời lượng ước tính toàn lộ trình (phút).</summary>
+    public int? TotalEstimatedMinutes { get; set; }
+
+    /// <summary>Tên file PDF gốc đã upload để parse.</summary>
+    public string? SourcePdfName { get; set; }
+
+    public string CreatedByUserId { get; set; } = "default-user";
+    public bool IsPublished { get; set; } = false;
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+
+    public ICollection<RoadmapItem> Items { get; set; } = new List<RoadmapItem>();
+}
+
+/// <summary>
+/// Một "ngày học" trong blueprint RoadmapTemplate.
+/// DayNumber là số thứ tự ngày (1, 2, ... N).
+/// </summary>
+public class RoadmapItem
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid RoadmapTemplateId { get; set; }
+
+    [JsonIgnore]
+    public RoadmapTemplate? RoadmapTemplate { get; set; }
+
+    /// <summary>Số ngày trong lộ trình, bắt đầu từ 1.</summary>
+    public int DayNumber { get; set; }
+
+    public string Title { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public int EstimatedDurationMinutes { get; set; } = 45;
+
+    /// <summary>JSON array của kỹ năng: ["Kanji","Grammar","Vocabulary","Choukai","Quiz"]</summary>
+    public string SkillsJson { get; set; } = "[]";
+
+    /// <summary>JSON array các từ khóa để match file Drive: ["Bai 26","B26","Kanji 26"]</summary>
+    public string SearchKeywordsJson { get; set; } = "[]";
+
+    /// <summary>
+    /// FK tuỳ chọn trỏ đến Lesson trong Course/Section/Lesson.
+    /// Nếu có → hiển thị nút chuyển hướng sang Lesson video.
+    /// Nếu null → hiển thị danh sách file Drive từ DriveFiles.
+    /// </summary>
+    public Guid? LinkedLessonId { get; set; }
+
+    [JsonIgnore]
+    public Lesson? LinkedLesson { get; set; }
+
+    public ICollection<RoadmapItemDriveFile> DriveFiles { get; set; } = new List<RoadmapItemDriveFile>();
+}
+
+/// <summary>
+/// File Drive được AI gợi ý (fuzzy match) và Curator xác nhận cho một RoadmapItem.
+/// Lưu tối đa 3 file per item, ranked theo MatchScore.
+/// </summary>
+public class RoadmapItemDriveFile
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid RoadmapItemId { get; set; }
+
+    [JsonIgnore]
+    public RoadmapItem? RoadmapItem { get; set; }
+
+    public Guid DriveNodeId { get; set; }
+    public DriveNode? DriveNode { get; set; }
+
+    /// <summary>Điểm tương đồng fuzzy match, 0–100.</summary>
+    public int MatchScore { get; set; }
+
+    public ResourceType ResourceType { get; set; } = ResourceType.PrimaryVideo;
+    public int DisplayOrder { get; set; } = 0;
+}
+
+/// <summary>
+/// Học viên đăng ký một RoadmapTemplate và tùy chỉnh nhịp học.
+/// Mỗi học viên chỉ có thể enroll một template một lần (unique UserId + RoadmapTemplateId).
+/// </summary>
+public class UserRoadmapEnrollment
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string UserId { get; set; } = "default-user";
+
+    public Guid RoadmapTemplateId { get; set; }
+    public RoadmapTemplate? RoadmapTemplate { get; set; }
+
+    /// <summary>Ngày bắt đầu học thực tế của học viên.</summary>
+    public DateOnly StartDate { get; set; }
+
+    /// <summary>Nhịp độ học: Normal (1/ngày), Intensive (2/ngày), Relaxed (1/2 ngày).</summary>
+    public PaceMode PaceMode { get; set; } = PaceMode.Normal;
+
+    public bool IsActive { get; set; } = true;
+    public DateTime EnrolledAtUtc { get; set; } = DateTime.UtcNow;
+
+    public ICollection<UserRoadmapDayProgress> DayProgresses { get; set; } = new List<UserRoadmapDayProgress>();
+}
+
+/// <summary>
+/// Ghi nhận tiến độ học của học viên theo từng DayNumber.
+/// DayNumber tương ứng với RoadmapItem.DayNumber trong template.
+/// </summary>
+public class UserRoadmapDayProgress
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid EnrollmentId { get; set; }
+
+    [JsonIgnore]
+    public UserRoadmapEnrollment? Enrollment { get; set; }
+
+    /// <summary>Số ngày (1..N) tương ứng với RoadmapItem.DayNumber.</summary>
+    public int DayNumber { get; set; }
+
+    public bool IsCompleted { get; set; } = false;
+    public DateTime? CompletedAtUtc { get; set; }
+
+    /// <summary>Ghi chú tuỳ ý của học viên cho ngày này.</summary>
+    public string? Notes { get; set; }
+}

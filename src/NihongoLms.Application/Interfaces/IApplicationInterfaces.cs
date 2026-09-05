@@ -32,6 +32,46 @@ public interface ICuratorService
     Task AssignQuizToLessonAsync(AssignQuizRequestDto dto, CancellationToken cancellationToken = default);
 }
 
+/// <summary>
+/// Pipeline bóc tách lộ trình từ PDF và lưu vào bảng RoadmapTemplates.
+/// Bước 1-3: Parse PDF + gọi LLM + Fuzzy match DriveNodes → preview JSON.
+/// Bước 4: Curator confirm → SaveRoadmapTemplateAsync lưu vào DB.
+/// </summary>
+public interface ISyllabusParserService
+{
+    /// <summary>
+    /// Đọc stream PDF, gọi LLM bóc tách cấu trúc, chạy fuzzy match Drive files.
+    /// Trả về ParsedSyllabusDto để frontend hiển thị preview — chưa lưu DB.
+    /// </summary>
+    Task<ParsedSyllabusDto> ParseFromPdfAsync(Stream pdfStream, string pdfFileName, CancellationToken ct = default);
+
+    /// <summary>
+    /// Curator đã xác nhận → lưu RoadmapTemplate + RoadmapItems + RoadmapItemDriveFiles vào DB.
+    /// </summary>
+    Task<RoadmapTemplateDto> SaveRoadmapTemplateAsync(SaveRoadmapTemplateRequestDto dto, CancellationToken ct = default);
+}
+
+/// <summary>
+/// Quản lý RoadmapTemplate (Curator) và UserRoadmapEnrollment (Learner).
+/// Tính lịch học cá nhân động dựa trên StartDate + PaceMode.
+/// </summary>
+public interface IRoadmapService
+{
+    // Curator CRUD
+    Task<List<RoadmapTemplateDto>> GetTemplatesAsync(string? jlptLevel, CancellationToken ct = default);
+    Task<RoadmapTemplateDto?> GetTemplateByIdAsync(Guid id, CancellationToken ct = default);
+    Task<RoadmapTemplateDto> PublishTemplateAsync(Guid id, bool isPublished, CancellationToken ct = default);
+    Task DeleteTemplateAsync(Guid id, CancellationToken ct = default);
+
+    // Learner enrollment
+    Task<UserRoadmapEnrollmentDto> EnrollAsync(EnrollRoadmapRequestDto dto, string userId, CancellationToken ct = default);
+    Task<List<UserRoadmapEnrollmentDto>> GetMyEnrollmentsAsync(string userId, CancellationToken ct = default);
+
+    // Lịch học cá nhân (computed)
+    Task<List<UserScheduleDayDto>> GetMyScheduleAsync(Guid enrollmentId, string userId, CancellationToken ct = default);
+    Task MarkDayCompleteAsync(Guid enrollmentId, int dayNumber, bool isCompleted, string userId, CancellationToken ct = default);
+}
+
 public interface IVocabularyService
 {
     Task<List<VocabularyEntryDto>> GetVocabularyAsync(Guid? lessonId, string? jlptLevel, string? search, CancellationToken cancellationToken = default);

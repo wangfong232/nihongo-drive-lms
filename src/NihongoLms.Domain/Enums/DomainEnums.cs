@@ -42,3 +42,14 @@ public enum QuestionType
     ListeningComprehension = 6,
     FreeResponse = 7
 }
+
+/// <summary>
+/// Tốc độ học trong lộ trình cá nhân.
+/// Normal = 1 item/ngày, Intensive = 2 items/ngày, Relaxed = 1 item/2 ngày.
+/// </summary>
+public enum PaceMode
+{
+    Normal = 0,
+    Intensive = 1,
+    Relaxed = 2
+}

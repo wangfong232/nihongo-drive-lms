@@ -55,6 +55,10 @@ builder.Services.AddScoped<IQuizLearnerService, QuizLearnerService>();
 builder.Services.AddSingleton<ISrsSchedulingEngine, SrsSchedulingEngine>();
 builder.Services.AddSingleton<IQuizGradingEngine, QuizGradingEngine>();
 
+// Roadmap Template System
+builder.Services.AddScoped<ISyllabusParserService, SyllabusParserService>();
+builder.Services.AddScoped<IRoadmapService, RoadmapService>();
+
 // Quartz.NET Background Sync Job Setup
 builder.Services.AddQuartz(q =>
 {

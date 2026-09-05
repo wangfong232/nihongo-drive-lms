@@ -21,6 +21,13 @@ public class LmsDbContext : DbContext
     public DbSet<QuizAttempt> QuizAttempts => Set<QuizAttempt>();
     public DbSet<LessonProgress> LessonProgresses => Set<LessonProgress>();
 
+    // Roadmap Template System
+    public DbSet<RoadmapTemplate> RoadmapTemplates => Set<RoadmapTemplate>();
+    public DbSet<RoadmapItem> RoadmapItems => Set<RoadmapItem>();
+    public DbSet<RoadmapItemDriveFile> RoadmapItemDriveFiles => Set<RoadmapItemDriveFile>();
+    public DbSet<UserRoadmapEnrollment> UserRoadmapEnrollments => Set<UserRoadmapEnrollment>();
+    public DbSet<UserRoadmapDayProgress> UserRoadmapDayProgresses => Set<UserRoadmapDayProgress>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -193,6 +200,79 @@ public class LmsDbContext : DbContext
             entity.HasOne(lp => lp.Lesson)
                   .WithMany(l => l.ProgressRecords)
                   .HasForeignKey(lp => lp.LessonId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ─────────────────────────────────────────
+        //  ROADMAP TEMPLATE SYSTEM
+        // ─────────────────────────────────────────
+
+        modelBuilder.Entity<RoadmapTemplate>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.JlptLevel);
+            entity.HasIndex(e => e.IsPublished);
+            entity.HasIndex(e => e.CreatedByUserId);
+        });
+
+        modelBuilder.Entity<RoadmapItem>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            // Mỗi template không có 2 item trùng DayNumber
+            entity.HasIndex(e => new { e.RoadmapTemplateId, e.DayNumber }).IsUnique();
+
+            entity.HasOne(ri => ri.RoadmapTemplate)
+                  .WithMany(rt => rt.Items)
+                  .HasForeignKey(ri => ri.RoadmapTemplateId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // LinkedLessonId nullable → nếu Lesson bị xóa thì set null
+            entity.HasOne(ri => ri.LinkedLesson)
+                  .WithMany()
+                  .HasForeignKey(ri => ri.LinkedLessonId)
+                  .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<RoadmapItemDriveFile>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.RoadmapItemId);
+            entity.HasIndex(e => e.DriveNodeId);
+
+            entity.HasOne(f => f.RoadmapItem)
+                  .WithMany(ri => ri.DriveFiles)
+                  .HasForeignKey(f => f.RoadmapItemId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // DriveNode bị xóa → restrict (không cho xóa nếu còn roadmap file reference)
+            entity.HasOne(f => f.DriveNode)
+                  .WithMany()
+                  .HasForeignKey(f => f.DriveNodeId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<UserRoadmapEnrollment>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            // 1 user chỉ enroll 1 template 1 lần
+            entity.HasIndex(e => new { e.UserId, e.RoadmapTemplateId }).IsUnique();
+            entity.HasIndex(e => e.UserId);
+
+            entity.HasOne(e => e.RoadmapTemplate)
+                  .WithMany()
+                  .HasForeignKey(e => e.RoadmapTemplateId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<UserRoadmapDayProgress>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            // Mỗi enrollment không có 2 progress trùng DayNumber
+            entity.HasIndex(e => new { e.EnrollmentId, e.DayNumber }).IsUnique();
+
+            entity.HasOne(p => p.Enrollment)
+                  .WithMany(e => e.DayProgresses)
+                  .HasForeignKey(p => p.EnrollmentId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
     }

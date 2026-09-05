@@ -17,10 +17,12 @@ import {
   Loader2,
   Sparkles,
   AlertCircle,
+  EyeOff,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { extractDriveFileId } from "@/components/common/DriveAudioPlayer";
 import { playJapaneseSpeech } from "@/lib/tts";
+import { useUserSettings } from "@/lib/userSettings";
 
 interface AudioPlayerProps {
   title: string;
@@ -35,6 +37,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
   audioUrl,
   lessonId,
 }) => {
+  const { settings, isLoaded, toggleTrackVideoWatchTime } = useUserSettings();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -81,9 +84,12 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
     }
   }, [volume, isMuted]);
 
-  // Load saved position from API
+  // Load saved position from API (only if tracking & resume prompt are enabled)
   useEffect(() => {
-    if (!lessonId) return;
+    if (!lessonId || !settings.trackVideoWatchTime || !settings.showResumePrompt) {
+      setResumeToast(null);
+      return;
+    }
     pendingResumeRef.current = 0;
     api.getLessonProgress(lessonId).then((prog) => {
       if (prog && prog.lastPlaybackPositionSeconds && prog.lastPlaybackPositionSeconds > 2) {
@@ -101,7 +107,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
         }
       }
     });
-  }, [lessonId]);
+  }, [lessonId, settings.trackVideoWatchTime, settings.showResumePrompt, isLoaded]);
 
   // Reset states on URL change
   useEffect(() => {
@@ -118,9 +124,9 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
     }
   }, [streamUrl]);
 
-  // Save playback position (debounced)
+  // Save playback position (debounced) - only if tracking is enabled
   const savePosition = (pos: number, dur: number) => {
-    if (!lessonId || pos <= 0) return;
+    if (!lessonId || pos <= 0 || !settings.trackVideoWatchTime) return;
     if (Math.abs(pos - lastSavedTimeRef.current) >= 3) {
       lastSavedTimeRef.current = pos;
       api.savePlaybackPosition({ lessonId, positionSeconds: pos, durationSeconds: dur });
@@ -294,11 +300,43 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
               <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold uppercase tracking-wide border border-emerald-500/20">
                 Luyện Nghe • Chōkai
               </span>
-              {resumeToast && (
+              {resumeToast && settings.showResumePrompt && (
                 <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/30 animate-pulse">
                   <BookmarkCheck className="w-3 h-3" /> {resumeToast}
                 </span>
               )}
+              {/* Quick Toggle Watch/Audio Time Switch */}
+              <button
+                type="button"
+                onClick={() => {
+                  const next = toggleTrackVideoWatchTime();
+                  if (!next) {
+                    setResumeToast(null);
+                  }
+                }}
+                className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all border ${
+                  settings.trackVideoWatchTime
+                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20"
+                    : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-300 dark:border-slate-700 hover:bg-slate-200"
+                }`}
+                title={
+                  settings.trackVideoWatchTime
+                    ? "Đang bật lưu tiến độ nghe. Bấm để TẮT."
+                    : "Đã tắt theo dõi tiến độ nghe. Bấm để BẬT lại."
+                }
+              >
+                {settings.trackVideoWatchTime ? (
+                  <>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                    <span>Theo dõi: BẬT</span>
+                  </>
+                ) : (
+                  <>
+                    <EyeOff className="w-3 h-3 text-slate-400 shrink-0" />
+                    <span>Theo dõi: ĐÃ TẮT</span>
+                  </>
+                )}
+              </button>
             </div>
             <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white truncate mt-1">
               {title}
