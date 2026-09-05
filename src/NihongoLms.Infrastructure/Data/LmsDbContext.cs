@@ -28,6 +28,9 @@ public class LmsDbContext : DbContext
     public DbSet<UserRoadmapEnrollment> UserRoadmapEnrollments => Set<UserRoadmapEnrollment>();
     public DbSet<UserRoadmapDayProgress> UserRoadmapDayProgresses => Set<UserRoadmapDayProgress>();
 
+    // System Settings & Encrypted Keys
+    public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -274,6 +277,13 @@ public class LmsDbContext : DbContext
                   .WithMany(e => e.DayProgresses)
                   .HasForeignKey(p => p.EnrollmentId)
                   .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // SystemSetting
+        modelBuilder.Entity<SystemSetting>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.Key).IsUnique();
         });
     }
 }

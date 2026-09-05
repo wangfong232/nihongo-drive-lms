@@ -1361,4 +1361,113 @@ export const api = {
       { isAuthenticated: false }
     );
   },
+
+  // ─── AI & System Settings APIs ─────────────────────────────────────────────
+  async getAiSettings() {
+    return safeFetch<{
+      isConfigured: boolean;
+      source: "database" | "environment" | "none";
+      provider: string;
+      maskedApiKey: string;
+      baseUrl: string;
+      model: string;
+      lastUpdatedUtc?: string;
+    }>(
+      `${API_BASE}/settings/ai`,
+      undefined,
+      {
+        isConfigured: false,
+        source: "none",
+        provider: "gemini",
+        maskedApiKey: "",
+        baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai/",
+        model: "gemini-1.5-flash",
+      }
+    );
+  },
+
+  async saveAiSettings(data: {
+    provider: string;
+    apiKey: string;
+    baseUrl?: string;
+    model?: string;
+  }) {
+    return safeFetch<{
+      isConfigured: boolean;
+      source: "database" | "environment" | "none";
+      provider: string;
+      maskedApiKey: string;
+      baseUrl: string;
+      model: string;
+      lastUpdatedUtc?: string;
+    }>(
+      `${API_BASE}/settings/ai`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      },
+      {
+        isConfigured: true,
+        source: "database",
+        provider: data.provider || "gemini",
+        maskedApiKey: data.apiKey ? `${data.apiKey.slice(0, 6)}...${data.apiKey.slice(-4)}` : "",
+        baseUrl: data.baseUrl || "https://generativelanguage.googleapis.com/v1beta/openai/",
+        model: data.model || "gemini-1.5-flash",
+      }
+    );
+  },
+
+  async deleteAiSettings() {
+    return safeFetch<{
+      isConfigured: boolean;
+      source: "database" | "environment" | "none";
+      provider: string;
+      maskedApiKey: string;
+      baseUrl: string;
+      model: string;
+      lastUpdatedUtc?: string;
+    }>(
+      `${API_BASE}/settings/ai`,
+      {
+        method: "DELETE",
+      },
+      {
+        isConfigured: false,
+        source: "none",
+        provider: "gemini",
+        maskedApiKey: "",
+        baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai/",
+        model: "gemini-1.5-flash",
+      }
+    );
+  },
+
+  async testAiConnection(data?: {
+    provider?: string;
+    apiKey?: string;
+    baseUrl?: string;
+    model?: string;
+  }) {
+    return safeFetch<{
+      success: boolean;
+      message: string;
+      modelUsed?: string;
+      latencyMs: number;
+      error?: string;
+    }>(
+      `${API_BASE}/settings/ai/test`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data || {}),
+      },
+      {
+        success: false,
+        message: "Không thể kết nối đến Backend API.",
+        latencyMs: 0,
+        error: "Backend API offline",
+      }
+    );
+  },
 };

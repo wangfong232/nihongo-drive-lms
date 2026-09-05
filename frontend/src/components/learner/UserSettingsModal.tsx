@@ -150,7 +150,14 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({ isOpen, on
         </div>
 
         {/* Footer Actions */}
-        <div className="flex justify-end">
+        <div className="flex items-center justify-between gap-3 pt-2">
+          <a
+            href="/admin/settings"
+            onClick={onClose}
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs transition-colors"
+          >
+            <span>⚙️ Cài đặt AI & API Key</span>
+          </a>
           <button
             onClick={onClose}
             className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-extrabold text-sm shadow-md shadow-orange-500/20 transition-all active:scale-95"

@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # ─── 1. PostgreSQL Database Container ─────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: nihongo-lms-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-nihongo_lms}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-nihongo_lms}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ─── 2. Backend .NET 10 Web API ───────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: src/NihongoLms.Api/Dockerfile
+    container_name: nihongo-lms-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=${POSTGRES_DB:-nihongo_lms};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - AiProvider__ApiKey=${GEMINI_API_KEY:-}
+      - AiProvider__Provider=${AI__Provider:-gemini}
+      - AiProvider__Model=${AI__Model:-gemini-1.5-flash}
+      - AiProvider__BaseUrl=${AI__BaseUrl:-https://generativelanguage.googleapis.com/v1beta/openai/}
+      - Jwt__SecretKey=${JWT_SECRET_KEY:-NihongoLms-Default-Local-Secret-Key-2026-SuperSecure}
+      - System__EncryptionKey=${SYSTEM_ENCRYPTION_KEY:-NihongoLms-Default-Local-Database-Encryption-Key-2026}
+    ports:
+      - "${BACKEND_PORT:-5222}:5222"
+
+  # ─── 3. Frontend Next.js 16 Client ───────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: nihongo-lms-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:5222/api}
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+
+volumes:
+  pgdata:
+    driver: local

@@ -404,3 +404,16 @@ public class UserRoadmapDayProgress
     /// <summary>Ghi chú tuỳ ý của học viên cho ngày này.</summary>
     public string? Notes { get; set; }
 }
+
+/// <summary>
+/// Cấu hình hệ thống (API keys, System Preferences) được lưu trữ và mã hóa trong Database cục bộ.
+/// </summary>
+public class SystemSetting
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string Key { get; set; } = string.Empty;
+    public string EncryptedValue { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
+}

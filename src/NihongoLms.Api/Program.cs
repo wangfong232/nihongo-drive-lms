@@ -55,6 +55,9 @@ builder.Services.AddScoped<IQuizLearnerService, QuizLearnerService>();
 builder.Services.AddSingleton<ISrsSchedulingEngine, SrsSchedulingEngine>();
 builder.Services.AddSingleton<IQuizGradingEngine, QuizGradingEngine>();
 
+// System Settings & Encrypted Keys
+builder.Services.AddScoped<ISystemSettingsService, SystemSettingsService>();
+
 // Roadmap Template System
 builder.Services.AddScoped<ISyllabusParserService, SyllabusParserService>();
 builder.Services.AddScoped<IRoadmapService, RoadmapService>();

@@ -73,18 +73,18 @@ public class SyllabusParserService : ISyllabusParserService
 
     private readonly LmsDbContext _db;
     private readonly IHttpClientFactory _httpFactory;
-    private readonly IConfiguration _config;
+    private readonly ISystemSettingsService _settingsService;
     private readonly ILogger<SyllabusParserService> _logger;
 
     public SyllabusParserService(
         LmsDbContext db,
         IHttpClientFactory httpFactory,
-        IConfiguration config,
+        ISystemSettingsService settingsService,
         ILogger<SyllabusParserService> logger)
     {
         _db = db;
         _httpFactory = httpFactory;
-        _config = config;
+        _settingsService = settingsService;
         _logger = logger;
     }
 
@@ -129,12 +129,16 @@ public class SyllabusParserService : ISyllabusParserService
         return sb.ToString();
     }
 
-    // ─── BƯỚC 2: LLM call (OpenAI-compatible endpoint) ───
+    // ─── BƯỚC 2: LLM call (OpenAI-compatible / Google Gemini endpoint) ───
     private async Task<ParsedSyllabusDto> CallLlmAsync(string rawText, CancellationToken ct)
     {
-        var baseUrl  = _config["AiProvider:BaseUrl"]  ?? "https://api.openai.com/v1";
-        var apiKey   = _config["AiProvider:ApiKey"]   ?? "";
-        var model    = _config["AiProvider:Model"]    ?? "gpt-4o-mini";
+        var (apiKey, baseUrl, model) = await _settingsService.GetEffectiveAiConfigAsync(ct);
+
+        if (string.IsNullOrWhiteSpace(apiKey))
+        {
+            throw new InvalidOperationException("Chưa cấu hình API Key AI (Google Gemini / OpenAI). Vui lòng cấu hình tại trang Cài Đặt Hệ Thống (/admin/settings) hoặc qua biến môi trường GEMINI_API_KEY.");
+        }
+
         int maxChars = 80_000; // giới hạn để tránh vượt context window
 
         if (rawText.Length > maxChars)
@@ -156,6 +160,7 @@ public class SyllabusParserService : ISyllabusParserService
         };
 
         var http = _httpFactory.CreateClient();
+        http.Timeout = TimeSpan.FromMinutes(2);
         http.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
 

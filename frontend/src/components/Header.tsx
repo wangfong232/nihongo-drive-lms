@@ -10,7 +10,7 @@ import { SrsFlashcardModal } from "@/components/learner/SrsFlashcardModal";
 import { UserSettingsModal } from "@/components/learner/UserSettingsModal";
 import {
   Moon, Sun, Languages, BookOpen, Layers, CheckCircle2,
-  HelpCircle, Sparkles, Server, Zap, Target, Flame, Settings
+  HelpCircle, Sparkles, Server, Zap, Target, Flame, Settings, KeyRound
 } from "lucide-react";
 
 interface HeaderProps {
@@ -63,9 +63,6 @@ export const Header: React.FC<HeaderProps> = ({ srsStats }) => {
                 <span className="font-black text-base text-slate-900 dark:text-white tracking-tight">
                   Drive<span className="text-orange-600 dark:text-orange-500">Learn</span>
                 </span>
-                {/* <span className="px-1.5 py-0.5 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400 font-extrabold text-[9px] uppercase tracking-wider shrink-0">
-                  
-                </span> */}
               </div>
               <span className="block text-[10px] text-slate-500 dark:text-slate-400 font-medium">
                 Self-Hosted Japanese Platform
@@ -135,18 +132,6 @@ export const Header: React.FC<HeaderProps> = ({ srsStats }) => {
             </Link>
 
             <Link
-              href="/kanji"
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
-                pathname?.startsWith("/kanji")
-                  ? "bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-sm"
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-              }`}
-            >
-              <Sparkles className="w-3.5 h-3.5 shrink-0" />
-              {t("navKanji")}
-            </Link>
-
-            <Link
               href="/roadmap"
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
                 pathname?.startsWith("/roadmap")
@@ -156,6 +141,18 @@ export const Header: React.FC<HeaderProps> = ({ srsStats }) => {
             >
               <Target className="w-3.5 h-3.5 shrink-0" />
               Lộ trình
+            </Link>
+
+            <Link
+              href="/admin/settings"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+                pathname === "/admin/settings"
+                  ? "bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-sm"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+              }`}
+            >
+              <KeyRound className="w-3.5 h-3.5 shrink-0 text-orange-500" />
+              Cài Đặt AI
             </Link>
           </nav>
 
