@@ -30,13 +30,14 @@ public class SettingsController : ControllerBase
     }
 
     /// <summary>
-    /// Lưu API Key và cấu hình AI vào Database cục bộ (PostgreSQL) - Key được mã hóa AES trước khi lưu.
+    /// Cập nhật cấu hình AI (cho phép đổi Model/Provider/BaseUrl độc lập mà không cần gửi lại API Key nếu không đổi).
     /// </summary>
+    [HttpPut("ai")]
     [HttpPost("ai")]
-    public async Task<ActionResult<AiSettingsDto>> SaveAiSettings([FromBody] SaveAiSettingsRequestDto request, CancellationToken ct)
+    public async Task<ActionResult<AiSettingsDto>> UpdateAiSettings([FromBody] UpdateAiSettingsRequestDto request, CancellationToken ct)
     {
         if (request == null) return BadRequest("Dữ liệu cấu hình không hợp lệ.");
-        var updated = await _settingsService.SaveAiSettingsAsync(request, ct);
+        var updated = await _settingsService.UpdateAiSettingsAsync(request, ct);
         return Ok(updated);
     }
 
@@ -57,6 +58,38 @@ public class SettingsController : ControllerBase
     public async Task<ActionResult<TestAiConnectionResultDto>> TestAiConnection([FromBody] TestAiConnectionRequestDto? request, CancellationToken ct)
     {
         var result = await _settingsService.TestAiConnectionAsync(request, ct);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Lấy thông tin cấu hình kết nối Google Drive (Masked ClientSecret, RefreshToken, RootFolderId, Source).
+    /// </summary>
+    [HttpGet("drive")]
+    public async Task<ActionResult<DriveSettingsDto>> GetDriveSettings(CancellationToken ct)
+    {
+        var settings = await _settingsService.GetDriveSettingsAsync(ct);
+        return Ok(settings);
+    }
+
+    /// <summary>
+    /// Cập nhật thông tin cấu hình Google Drive (Credentials được mã hóa an toàn bằng Data Protection).
+    /// </summary>
+    [HttpPut("drive")]
+    [HttpPost("drive")]
+    public async Task<ActionResult<DriveSettingsDto>> UpdateDriveSettings([FromBody] UpdateDriveSettingsRequestDto request, CancellationToken ct)
+    {
+        if (request == null) return BadRequest("Dữ liệu cấu hình không hợp lệ.");
+        var updated = await _settingsService.UpdateDriveSettingsAsync(request, ct);
+        return Ok(updated);
+    }
+
+    /// <summary>
+    /// Kiểm tra kết nối thực tế tới Google Drive (xác thực token và truy cập thư mục gốc).
+    /// </summary>
+    [HttpPost("drive/verify")]
+    public async Task<ActionResult<VerifyDriveConnectionResultDto>> VerifyDriveConnection([FromBody] UpdateDriveSettingsRequestDto? request, CancellationToken ct)
+    {
+        var result = await _settingsService.VerifyDriveConnectionAsync(request, ct);
         return Ok(result);
     }
 }

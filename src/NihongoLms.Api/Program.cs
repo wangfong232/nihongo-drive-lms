@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using NihongoLms.Application.Interfaces;
 using NihongoLms.Domain.Interfaces;
@@ -40,6 +41,10 @@ builder.Services.AddDbContext<LmsDbContext>(options =>
         options.UseInMemoryDatabase("NihongoLmsDev");
     }
 });
+
+// ASP.NET Core Data Protection for Secrets & Keys Encryption
+builder.Services.AddDataProtection()
+    .SetApplicationName("NihongoLms");
 
 // Domain & Application Services
 builder.Services.AddSingleton<ITokenEncryptionService, TokenEncryptionService>();

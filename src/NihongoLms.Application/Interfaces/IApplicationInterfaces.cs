@@ -172,17 +172,19 @@ public class AiSettingsDto
     public string Source { get; set; } = "none"; // "database", "environment", "none"
     public string Provider { get; set; } = "gemini"; // "gemini", "openai", "custom"
     public string MaskedApiKey { get; set; } = string.Empty;
+    public bool HasApiKey { get; set; }
     public string BaseUrl { get; set; } = "https://generativelanguage.googleapis.com/v1beta/openai/";
-    public string Model { get; set; } = "gemini-1.5-flash";
+    public string SelectedModel { get; set; } = "gemini-3.1-flash-lite";
+    public List<string> AvailableModels { get; set; } = new();
     public DateTime? LastUpdatedUtc { get; set; }
 }
 
-public class SaveAiSettingsRequestDto
+public class UpdateAiSettingsRequestDto
 {
-    public string Provider { get; set; } = "gemini";
-    public string ApiKey { get; set; } = string.Empty;
+    public string? Provider { get; set; }
+    public string? ApiKey { get; set; } // Optional: nếu trống/null thì giữ nguyên key đã lưu
     public string? BaseUrl { get; set; }
-    public string? Model { get; set; }
+    public string? SelectedModel { get; set; }
 }
 
 public class TestAiConnectionRequestDto
@@ -202,15 +204,53 @@ public class TestAiConnectionResultDto
     public string? Error { get; set; }
 }
 
+public class DriveSettingsDto
+{
+    public bool IsConfigured { get; set; }
+    public string Source { get; set; } = "none"; // "database", "environment", "oauth_token", "none"
+    public string? ClientId { get; set; }
+    public string? MaskedClientSecret { get; set; }
+    public bool HasClientSecret { get; set; }
+    public string? MaskedRefreshToken { get; set; }
+    public bool HasRefreshToken { get; set; }
+    public string? RootFolderId { get; set; }
+    public DateTime? LastUpdatedUtc { get; set; }
+}
+
+public class UpdateDriveSettingsRequestDto
+{
+    public string? ClientId { get; set; }
+    public string? ClientSecret { get; set; } // Optional
+    public string? RefreshToken { get; set; }  // Optional
+    public string? RootFolderId { get; set; }
+}
+
+public class VerifyDriveConnectionResultDto
+{
+    public bool Success { get; set; }
+    public string Message { get; set; } = string.Empty;
+    public string? RootFolderName { get; set; }
+    public int? TopLevelItemsCount { get; set; }
+    public long LatencyMs { get; set; }
+    public string? Error { get; set; }
+}
+
 public interface ISystemSettingsService
 {
     Task<string?> GetSettingAsync(string key, CancellationToken ct = default);
     Task SaveSettingAsync(string key, string plainValue, string? description = null, CancellationToken ct = default);
     Task DeleteSettingAsync(string key, CancellationToken ct = default);
 
+    // AI Provider Management
     Task<AiSettingsDto> GetAiSettingsAsync(CancellationToken ct = default);
-    Task<AiSettingsDto> SaveAiSettingsAsync(SaveAiSettingsRequestDto request, CancellationToken ct = default);
+    Task<AiSettingsDto> UpdateAiSettingsAsync(UpdateAiSettingsRequestDto request, CancellationToken ct = default);
     Task<AiSettingsDto> DeleteAiSettingsAsync(CancellationToken ct = default);
     Task<TestAiConnectionResultDto> TestAiConnectionAsync(TestAiConnectionRequestDto? request = null, CancellationToken ct = default);
     Task<(string ApiKey, string BaseUrl, string Model)> GetEffectiveAiConfigAsync(CancellationToken ct = default);
+
+    // Google Drive Sync Credentials Management
+    Task<DriveSettingsDto> GetDriveSettingsAsync(CancellationToken ct = default);
+    Task<DriveSettingsDto> UpdateDriveSettingsAsync(UpdateDriveSettingsRequestDto request, CancellationToken ct = default);
+    Task<VerifyDriveConnectionResultDto> VerifyDriveConnectionAsync(UpdateDriveSettingsRequestDto? request = null, CancellationToken ct = default);
+    Task<(string ClientId, string ClientSecret, string RefreshToken, string RootFolderId)> GetEffectiveDriveCredentialsAsync(CancellationToken ct = default);
 }

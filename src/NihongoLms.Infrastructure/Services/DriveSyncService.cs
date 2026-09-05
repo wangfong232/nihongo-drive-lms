@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using NihongoLms.Application.Interfaces;
 using NihongoLms.Domain.Entities;
 using NihongoLms.Domain.Enums;
 using NihongoLms.Domain.Interfaces;
@@ -13,6 +14,7 @@ public class DriveSyncService : IDriveSyncService
     private readonly LmsDbContext _dbContext;
     private readonly IGoogleDriveService _driveService;
     private readonly ITokenEncryptionService _encryptionService;
+    private readonly ISystemSettingsService _settingsService;
     private readonly IConfiguration _configuration;
     private readonly ILogger<DriveSyncService> _logger;
 
@@ -20,12 +22,14 @@ public class DriveSyncService : IDriveSyncService
         LmsDbContext dbContext,
         IGoogleDriveService driveService,
         ITokenEncryptionService encryptionService,
+        ISystemSettingsService settingsService,
         IConfiguration configuration,
         ILogger<DriveSyncService> logger)
     {
         _dbContext = dbContext;
         _driveService = driveService;
         _encryptionService = encryptionService;
+        _settingsService = settingsService;
         _configuration = configuration;
         _logger = logger;
     }
@@ -33,36 +37,47 @@ public class DriveSyncService : IDriveSyncService
     public async Task<SyncResult> SyncRawDriveTreeAsync(string? overrideRootFolderId = null, CancellationToken cancellationToken = default)
     {
         var result = new SyncResult();
+        
+        // 1. Get effective credentials and root folder ID from SystemSettings (or fallback to Env / Config)
+        var (effClientId, effClientSecret, effRefreshToken, effRootFolderId) = await _settingsService.GetEffectiveDriveCredentialsAsync(cancellationToken);
+
         string rootFolderId = !string.IsNullOrWhiteSpace(overrideRootFolderId)
             ? overrideRootFolderId.Trim()
-            : (_configuration["GoogleDrive:RootFolderId"] ?? string.Empty);
+            : (!string.IsNullOrWhiteSpace(effRootFolderId) ? effRootFolderId : (_configuration["GoogleDrive:RootFolderId"] ?? string.Empty));
 
         if (string.IsNullOrWhiteSpace(rootFolderId) || rootFolderId == "YOUR_GOOGLE_DRIVE_ROOT_FOLDER_ID")
         {
             rootFolderId = "14MD4svpbhKvo6odQoGxvAgQTRSachRiz";
         }
 
-        var tokenRecord = await _dbContext.UserOAuthTokens.FirstOrDefaultAsync(t => t.UserId == "default-user", cancellationToken);
-        if (tokenRecord == null || string.IsNullOrEmpty(tokenRecord.EncryptedRefreshToken))
-        {
-            result.Errors.Add("OAuth token missing. User must authenticate via Google OAuth first.");
-            return result;
-        }
-
         string accessToken;
         try
         {
-            string refreshToken = _encryptionService.Decrypt(tokenRecord.EncryptedRefreshToken);
-            string clientId = _configuration["Authentication:Google:ClientId"] ?? string.Empty;
-            string clientSecret = _configuration["Authentication:Google:ClientSecret"] ?? string.Empty;
+            if (!string.IsNullOrEmpty(effRefreshToken) && !string.IsNullOrEmpty(effClientId) && !string.IsNullOrEmpty(effClientSecret))
+            {
+                accessToken = await _driveService.RefreshAccessTokenAsync(effClientId, effClientSecret, effRefreshToken, cancellationToken);
+            }
+            else
+            {
+                var tokenRecord = await _dbContext.UserOAuthTokens.FirstOrDefaultAsync(t => t.UserId == "default-user", cancellationToken);
+                if (tokenRecord == null || string.IsNullOrEmpty(tokenRecord.EncryptedRefreshToken))
+                {
+                    result.Errors.Add("Google Drive credentials missing. Please configure Drive credentials in Settings or authenticate via Google OAuth.");
+                    return result;
+                }
 
-            accessToken = await _driveService.RefreshAccessTokenAsync(clientId, clientSecret, refreshToken, cancellationToken);
+                string refreshToken = _encryptionService.Decrypt(tokenRecord.EncryptedRefreshToken);
+                string clientId = _configuration["Authentication:Google:ClientId"] ?? string.Empty;
+                string clientSecret = _configuration["Authentication:Google:ClientSecret"] ?? string.Empty;
 
-            // Update stored access token
-            tokenRecord.EncryptedAccessToken = _encryptionService.Encrypt(accessToken);
-            tokenRecord.ExpiresAtUtc = DateTime.UtcNow.AddHours(1);
-            tokenRecord.UpdatedAtUtc = DateTime.UtcNow;
-            await _dbContext.SaveChangesAsync(cancellationToken);
+                accessToken = await _driveService.RefreshAccessTokenAsync(clientId, clientSecret, refreshToken, cancellationToken);
+
+                // Update stored access token
+                tokenRecord.EncryptedAccessToken = _encryptionService.Encrypt(accessToken);
+                tokenRecord.ExpiresAtUtc = DateTime.UtcNow.AddHours(1);
+                tokenRecord.UpdatedAtUtc = DateTime.UtcNow;
+                await _dbContext.SaveChangesAsync(cancellationToken);
+            }
         }
         catch (Exception ex)
         {

@@ -1412,115 +1412,6 @@ export const api = {
     );
   },
 
-  // ─── AI & System Settings APIs ─────────────────────────────────────────────
-  async getAiSettings() {
-    return safeFetch<{
-      isConfigured: boolean;
-      source: "database" | "environment" | "none";
-      provider: string;
-      maskedApiKey: string;
-      baseUrl: string;
-      model: string;
-      lastUpdatedUtc?: string;
-    }>(
-      `${API_BASE}/settings/ai`,
-      undefined,
-      {
-        isConfigured: false,
-        source: "none",
-        provider: "gemini",
-        maskedApiKey: "",
-        baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai/",
-        model: "gemini-1.5-flash",
-      }
-    );
-  },
-
-  async saveAiSettings(data: {
-    provider: string;
-    apiKey: string;
-    baseUrl?: string;
-    model?: string;
-  }) {
-    return safeFetch<{
-      isConfigured: boolean;
-      source: "database" | "environment" | "none";
-      provider: string;
-      maskedApiKey: string;
-      baseUrl: string;
-      model: string;
-      lastUpdatedUtc?: string;
-    }>(
-      `${API_BASE}/settings/ai`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      },
-      {
-        isConfigured: true,
-        source: "database",
-        provider: data.provider || "gemini",
-        maskedApiKey: data.apiKey ? `${data.apiKey.slice(0, 6)}...${data.apiKey.slice(-4)}` : "",
-        baseUrl: data.baseUrl || "https://generativelanguage.googleapis.com/v1beta/openai/",
-        model: data.model || "gemini-1.5-flash",
-      }
-    );
-  },
-
-  async deleteAiSettings() {
-    return safeFetch<{
-      isConfigured: boolean;
-      source: "database" | "environment" | "none";
-      provider: string;
-      maskedApiKey: string;
-      baseUrl: string;
-      model: string;
-      lastUpdatedUtc?: string;
-    }>(
-      `${API_BASE}/settings/ai`,
-      {
-        method: "DELETE",
-      },
-      {
-        isConfigured: false,
-        source: "none",
-        provider: "gemini",
-        maskedApiKey: "",
-        baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai/",
-        model: "gemini-1.5-flash",
-      }
-    );
-  },
-
-  async testAiConnection(data?: {
-    provider?: string;
-    apiKey?: string;
-    baseUrl?: string;
-    model?: string;
-  }) {
-    return safeFetch<{
-      success: boolean;
-      message: string;
-      modelUsed?: string;
-      latencyMs: number;
-      error?: string;
-    }>(
-      `${API_BASE}/settings/ai/test`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data || {}),
-      },
-      {
-        success: false,
-        message: "Không thể kết nối đến Backend API.",
-        latencyMs: 0,
-        error: "Backend API offline",
-      }
-    );
-  },
-
   // ─── AI Auto-Course Builder & Weekly Pacing ─────────────────────
   async scanAutoBuildCourse(data: {
     courseTitle: string;
@@ -1725,7 +1616,200 @@ export const api = {
       }
     );
   },
+
+  // === System Settings & AI / Drive Secrets ===
+  async getAiSettings() {
+    return safeFetch<AiSettings>(
+      `${API_BASE}/settings/ai`,
+      { method: "GET" },
+      {
+        isConfigured: false,
+        source: "none",
+        provider: "gemini",
+        maskedApiKey: "",
+        hasApiKey: false,
+        baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai/",
+        selectedModel: "gemini-3.1-flash-lite",
+        availableModels: [
+          "gemini-3.1-flash-lite",
+          "gemini-3.5-flash-lite",
+          "gemini-3.6-flash",
+          "gemini-2.5-flash",
+          "gemini-1.5-flash",
+          "gemini-1.5-pro"
+        ],
+      }
+    );
+  },
+
+  async updateAiSettings(data: UpdateAiSettingsRequest) {
+    return safeFetch<AiSettings>(
+      `${API_BASE}/settings/ai`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      },
+      {
+        isConfigured: true,
+        source: "database",
+        provider: data.provider || "gemini",
+        maskedApiKey: data.apiKey ? "AIza••••••••" : "",
+        hasApiKey: Boolean(data.apiKey),
+        baseUrl: data.baseUrl || "https://generativelanguage.googleapis.com/v1beta/openai/",
+        selectedModel: data.selectedModel || "gemini-3.1-flash-lite",
+        availableModels: [
+          "gemini-3.1-flash-lite",
+          "gemini-3.5-flash-lite",
+          "gemini-3.6-flash",
+          "gemini-2.5-flash",
+          "gemini-1.5-flash",
+          "gemini-1.5-pro"
+        ],
+      }
+    );
+  },
+
+  async deleteAiSettings() {
+    return safeFetch<AiSettings>(
+      `${API_BASE}/settings/ai`,
+      { method: "DELETE" },
+      {
+        isConfigured: false,
+        source: "none",
+        provider: "gemini",
+        maskedApiKey: "",
+        hasApiKey: false,
+        baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai/",
+        selectedModel: "gemini-3.1-flash-lite",
+        availableModels: [],
+      }
+    );
+  },
+
+  async testAiConnection(data?: { provider?: string; apiKey?: string; baseUrl?: string; model?: string }) {
+    return safeFetch<TestAiConnectionResult>(
+      `${API_BASE}/settings/ai/test`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data || {}),
+      },
+      {
+        success: false,
+        message: "Không thể gửi yêu cầu kiểm tra tới máy chủ",
+      }
+    );
+  },
+
+  async getDriveSettings() {
+    return safeFetch<DriveSettings>(
+      `${API_BASE}/settings/drive`,
+      { method: "GET" },
+      {
+        isConfigured: false,
+        source: "none",
+        clientId: "",
+        maskedClientSecret: "",
+        hasClientSecret: false,
+        maskedRefreshToken: "",
+        hasRefreshToken: false,
+        rootFolderId: "",
+      }
+    );
+  },
+
+  async updateDriveSettings(data: UpdateDriveSettingsRequest) {
+    return safeFetch<DriveSettings>(
+      `${API_BASE}/settings/drive`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      },
+      {
+        isConfigured: true,
+        source: "database",
+        clientId: data.clientId,
+        maskedClientSecret: data.clientSecret ? "••••••••" : undefined,
+        hasClientSecret: Boolean(data.clientSecret),
+        maskedRefreshToken: data.refreshToken ? "1//••••••••" : undefined,
+        hasRefreshToken: Boolean(data.refreshToken),
+        rootFolderId: data.rootFolderId,
+      }
+    );
+  },
+
+  async verifyDriveConnection(data?: UpdateDriveSettingsRequest) {
+    return safeFetch<VerifyDriveConnectionResult>(
+      `${API_BASE}/settings/drive/verify`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data || {}),
+      },
+      {
+        success: false,
+        message: "Không thể kết nối tới Google Drive API",
+      }
+    );
+  },
 };
+
+export interface AiSettings {
+  isConfigured: boolean;
+  source: "database" | "environment" | "none";
+  provider: string;
+  maskedApiKey: string;
+  hasApiKey: boolean;
+  baseUrl: string;
+  selectedModel: string;
+  availableModels: string[];
+  lastUpdatedUtc?: string;
+}
+
+export interface UpdateAiSettingsRequest {
+  provider?: string;
+  apiKey?: string;
+  baseUrl?: string;
+  selectedModel?: string;
+}
+
+export interface TestAiConnectionResult {
+  success: boolean;
+  message: string;
+  modelUsed?: string;
+  latencyMs?: number;
+  error?: string;
+}
+
+export interface DriveSettings {
+  isConfigured: boolean;
+  source: "database" | "environment" | "oauth_token" | "none";
+  clientId?: string;
+  maskedClientSecret?: string;
+  hasClientSecret: boolean;
+  maskedRefreshToken?: string;
+  hasRefreshToken: boolean;
+  rootFolderId?: string;
+  lastUpdatedUtc?: string;
+}
+
+export interface UpdateDriveSettingsRequest {
+  clientId?: string;
+  clientSecret?: string;
+  refreshToken?: string;
+  rootFolderId?: string;
+}
+
+export interface VerifyDriveConnectionResult {
+  success: boolean;
+  message: string;
+  rootFolderName?: string;
+  topLevelItemsCount?: number;
+  latencyMs?: number;
+  error?: string;
+}
 
 export interface AutoBuildResourcePreview {
   driveNodeId: string;
