@@ -1391,6 +1391,18 @@ export const api = {
     );
   },
 
+  async reorderResources(lessonId: string, resourceIds: string[]) {
+    return safeFetch(
+      `${API_BASE}/course/reorder-resources`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lessonId, resourceIds }),
+      },
+      { success: true }
+    );
+  },
+
   async assignQuizToLesson(quizId: string, lessonId?: string | null) {
     return safeFetch(
       `${API_BASE}/course/assign-quiz`,

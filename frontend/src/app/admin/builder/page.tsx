@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { Header } from "@/components/Header";
 import { RawDriveTree } from "@/components/builder/RawDriveTree";
 import { CuratedCourseTree } from "@/components/builder/CuratedCourseTree";
@@ -8,7 +8,7 @@ import { AutoSuggestModal } from "@/components/builder/AutoSuggestModal";
 import { ConfirmDeleteModal } from "@/components/builder/ConfirmDeleteModal";
 import { AssignQuizModal } from "@/components/builder/AssignQuizModal";
 import AutoCourseBuilderModal from "@/components/builder/AutoCourseBuilderModal";
-import { DriveNode, Course, Section, Lesson, api, DriveSyncResult } from "@/lib/api";
+import { DriveNode, Course, Section, Lesson, Resource, api, DriveSyncResult } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
 import {
   Layers,
@@ -19,6 +19,7 @@ import {
   CheckCircle2,
   Sparkles,
   Zap,
+  GripVertical,
 } from "lucide-react";
 
 // ─── Drag payload (mirrors RawDriveTree's dataTransfer) ─────────────────────
@@ -43,6 +44,49 @@ export default function CourseBuilderPage() {
   const [driveNodes, setDriveNodes] = useState<DriveNode[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // ─── Splitter Resizer State ────────────────────────────────────────────────
+  const [leftWidthPercent, setLeftWidthPercent] = useState<number>(30);
+  const [isDraggingSplitter, setIsDraggingSplitter] = useState<boolean>(false);
+  const workspaceRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const savedRatio = localStorage.getItem("nihongo_builder_split_ratio");
+    if (savedRatio) {
+      const parsed = parseFloat(savedRatio);
+      if (!isNaN(parsed) && parsed >= 18 && parsed <= 60) {
+        setLeftWidthPercent(parsed);
+      }
+    }
+  }, []);
+
+  const handleMouseDownSplitter = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDraggingSplitter(true);
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      if (!workspaceRef.current) return;
+      const rect = workspaceRef.current.getBoundingClientRect();
+      const newLeft = ((moveEvent.clientX - rect.left) / rect.width) * 100;
+      const clamped = Math.min(Math.max(newLeft, 18), 60);
+      setLeftWidthPercent(clamped);
+    };
+
+    const onMouseUp = (upEvent: MouseEvent) => {
+      setIsDraggingSplitter(false);
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+      if (workspaceRef.current) {
+        const rect = workspaceRef.current.getBoundingClientRect();
+        const finalLeft = ((upEvent.clientX - rect.left) / rect.width) * 100;
+        const clamped = Math.min(Math.max(finalLeft, 18), 60);
+        localStorage.setItem("nihongo_builder_split_ratio", clamped.toFixed(1));
+      }
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  }, []);
 
   // ─── Create Modals ─────────────────────────────────────────────────────────
   const [showAutoCourseBuilder, setShowAutoCourseBuilder] = useState(false);
@@ -367,6 +411,41 @@ export default function CourseBuilderPage() {
     }
   };
 
+  // ─── Reorder Resources inside Lesson ─────────────────────────────────────
+  const handleReorderResources = async (lessonId: string, resourceIds: string[]) => {
+    // Optimistic UI update
+    setCourses((prevCourses) =>
+      prevCourses.map((c) => ({
+        ...c,
+        sections: c.sections.map((s) => ({
+          ...s,
+          lessons: s.lessons.map((l) => {
+            if (l.id !== lessonId) return l;
+            const resourceMap = new Map(l.resources.map((r) => [r.id, r]));
+            const sortedResources: Resource[] = [];
+            for (const rId of resourceIds) {
+              const res = resourceMap.get(rId);
+              if (res) sortedResources.push(res);
+            }
+            for (const res of l.resources) {
+              if (!sortedResources.some((r) => r.id === res.id)) {
+                sortedResources.push(res);
+              }
+            }
+            return { ...l, resources: sortedResources };
+          }),
+        })),
+      }))
+    );
+
+    try {
+      await api.reorderResources(lessonId, resourceIds);
+    } catch (err: any) {
+      console.error("Failed to reorder resources", err);
+      await loadData();
+    }
+  };
+
   // ─── Delete handlers ──────────────────────────────────────────────────────
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
@@ -405,7 +484,7 @@ export default function CourseBuilderPage() {
       <Header />
 
       {/* Main workspace */}
-      <main className="flex-1 flex flex-col gap-0 p-4 pt-20 max-w-screen-2xl mx-auto w-full">
+      <main className="flex-1 flex flex-col gap-0 px-4 pb-3 pt-2 max-w-screen-2xl mx-auto w-full">
         {/* ── Title + Sync Toolbar (shrink-0) ─────────────────────────────── */}
         <div className="shrink-0 flex flex-col gap-3 mb-3">
           {/* Title row */}
@@ -475,10 +554,16 @@ export default function CourseBuilderPage() {
           </div>
         </div>
 
-        {/* ── 2-Column Workspace ──────────────────── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-[calc(100vh-210px)] min-h-[650px] pb-2 min-h-0">
-          {/* Left Column: Raw Drive Tree — 5/12 */}
-          <div className="lg:col-span-5 h-full flex flex-col min-h-0">
+        {/* ── 2-Column Resizable Workspace ──────────────────── */}
+        <div
+          ref={workspaceRef}
+          className="flex flex-col lg:flex-row gap-0 h-[calc(100vh-145px)] min-h-[600px] pb-1 min-h-0 relative select-none"
+        >
+          {/* Left Column: Raw Drive Tree */}
+          <div
+            style={{ width: `${leftWidthPercent}%` }}
+            className="hidden lg:flex flex-col h-full min-h-0 pr-2 transition-none overflow-hidden"
+          >
             {loading ? (
               <div className="h-full flex items-center justify-center rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60">
                 <div className="flex items-center gap-2 text-xs text-slate-400">
@@ -495,8 +580,34 @@ export default function CourseBuilderPage() {
             )}
           </div>
 
-          {/* Right Column: Curated Course Structure — 7/12 */}
-          <div className="lg:col-span-7 h-full flex flex-col min-h-0">
+          {/* Draggable Divider Bar */}
+          <div
+            onMouseDown={handleMouseDownSplitter}
+            className={`hidden lg:flex items-center justify-center w-3 cursor-col-resize select-none shrink-0 group relative z-10 transition-colors ${
+              isDraggingSplitter ? "bg-orange-500/20" : "hover:bg-slate-200 dark:hover:bg-slate-800"
+            }`}
+          >
+            <div
+              className={`w-1 h-12 rounded-full transition-all flex items-center justify-center ${
+                isDraggingSplitter
+                  ? "bg-orange-500 h-20 shadow-md shadow-orange-500/50"
+                  : "bg-slate-300 dark:bg-slate-700 group-hover:bg-orange-400 group-hover:h-16"
+              }`}
+            >
+              <GripVertical className="w-2.5 h-2.5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+            {isDraggingSplitter && (
+              <div className="absolute top-2 px-2 py-0.5 rounded bg-orange-600 text-white text-[10px] font-bold shadow-lg pointer-events-none whitespace-nowrap">
+                {Math.round(leftWidthPercent)}% / {Math.round(100 - leftWidthPercent)}%
+              </div>
+            )}
+          </div>
+
+          {/* Right Column: Curated Course Structure */}
+          <div
+            style={{ width: `${100 - leftWidthPercent}%` }}
+            className="flex-1 lg:flex-none h-full flex flex-col min-h-0 pl-0 lg:pl-2 transition-none overflow-hidden"
+          >
             <CuratedCourseTree
               courses={courses}
               onAddCourse={() => setShowAddCourse(true)}
@@ -527,6 +638,7 @@ export default function CourseBuilderPage() {
                 setManualResourceType(0);
               }}
               onRemoveResource={handleRemoveResource}
+              onReorderResources={handleReorderResources}
               onDeleteCourse={(course) => setDeleteTarget({ type: "course", entity: course })}
               onDeleteSection={(section) => setDeleteTarget({ type: "section", entity: section })}
               onDeleteLesson={(lesson) => setDeleteTarget({ type: "lesson", entity: lesson })}

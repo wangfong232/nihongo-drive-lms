@@ -24,7 +24,10 @@ import {
   PlusCircle,
   ArrowUp,
   ArrowDown,
+  ArrowLeft,
+  ArrowRight,
   HelpCircle,
+  GripVertical,
 } from "lucide-react";
 
 // ─── Drag payload type (matches RawDriveTree's dataTransfer structure) ───────
@@ -52,6 +55,7 @@ interface CuratedCourseTreeProps {
   onAssignQuiz?: (lesson: Lesson) => void;
   onAddManualResource?: (lesson: Lesson) => void;
   onRemoveResource: (resourceId: string) => void;
+  onReorderResources?: (lessonId: string, resourceIds: string[]) => void;
   onDeleteCourse: (course: Course) => void;
   onDeleteSection: (section: Section) => void;
   onDeleteLesson: (lesson: Lesson) => void;
@@ -73,6 +77,7 @@ export const CuratedCourseTree: React.FC<CuratedCourseTreeProps> = ({
   onAssignQuiz,
   onAddManualResource,
   onRemoveResource,
+  onReorderResources,
   onDeleteCourse,
   onDeleteSection,
   onDeleteLesson,
@@ -82,6 +87,7 @@ export const CuratedCourseTree: React.FC<CuratedCourseTreeProps> = ({
   const [collapsedCourses, setCollapsedCourses] = useState<Record<string, boolean>>({});
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
   const [dropTargetLessonId, setDropTargetLessonId] = useState<string | null>(null);
+  const [dropTargetResource, setDropTargetResource] = useState<{ lessonId: string; index: number } | null>(null);
   const [searchFilter, setSearchFilter] = useState("");
   // Maps lessonId → ephemeral success message shown for 2.5s after a drop
   const [dropSuccess, setDropSuccess] = useState<Record<string, string>>({});
@@ -107,6 +113,100 @@ export const CuratedCourseTree: React.FC<CuratedCourseTreeProps> = ({
     });
     setCollapsedCourses(allC);
     setCollapsedSections(allS);
+  };
+
+  // ─── DnD Handlers for Lessons & Resources ───────────────────────────────────
+  const handleDragOver = (e: React.DragEvent, lessonId: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+    setDropTargetLessonId(lessonId);
+  };
+
+  const handleDragLeave = () => {
+    setDropTargetLessonId(null);
+    setDropTargetResource(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, lessonId: string) => {
+    e.preventDefault();
+    setDropTargetLessonId(null);
+    setDropTargetResource(null);
+    try {
+      const raw = e.dataTransfer.getData("application/json");
+      if (!raw) return;
+      const payload = JSON.parse(raw);
+      if (payload.type === "resource-reorder") {
+        // Handled in handleResourceDrop
+        return;
+      }
+      onDropFile(lessonId, payload as DragPayload);
+      // Show success toast inside the lesson row for 2.5s
+      setDropSuccess((prev) => ({ ...prev, [lessonId]: `✓ Đã gán: ${payload.name}` }));
+      setTimeout(() => {
+        setDropSuccess((prev) => {
+          const next = { ...prev };
+          delete next[lessonId];
+          return next;
+        });
+      }, 2500);
+    } catch {
+      // Invalid drag payload — ignore
+    }
+  };
+
+  const handleResourceDragStart = (e: React.DragEvent, lessonId: string, resourceId: string, index: number) => {
+    e.stopPropagation();
+    e.dataTransfer.setData("application/json", JSON.stringify({
+      type: "resource-reorder",
+      lessonId,
+      resourceId,
+      sourceIndex: index
+    }));
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleResourceDragOver = (e: React.DragEvent, lessonId: string, targetIndex: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = "move";
+    setDropTargetResource({ lessonId, index: targetIndex });
+  };
+
+  const handleResourceDrop = (e: React.DragEvent, lessonId: string, targetIndex: number, currentResources: Resource[]) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDropTargetResource(null);
+    setDropTargetLessonId(null);
+    try {
+      const raw = e.dataTransfer.getData("application/json");
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      if (data.type === "resource-reorder" && data.lessonId === lessonId) {
+        const sourceIndex = data.sourceIndex;
+        if (sourceIndex === targetIndex || sourceIndex < 0 || sourceIndex >= currentResources.length) return;
+        const reordered = [...currentResources];
+        const [moved] = reordered.splice(sourceIndex, 1);
+        reordered.splice(targetIndex, 0, moved);
+        if (onReorderResources) {
+          onReorderResources(lessonId, reordered.map((r) => r.id));
+        }
+      } else if (data.driveNodeId) {
+        onDropFile(lessonId, data as DragPayload);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleMoveResource = (lesson: Lesson, rIdx: number, direction: "left" | "right") => {
+    const targetIdx = direction === "left" ? rIdx - 1 : rIdx + 1;
+    if (targetIdx < 0 || targetIdx >= lesson.resources.length) return;
+    const reordered = [...lesson.resources];
+    const [moved] = reordered.splice(rIdx, 1);
+    reordered.splice(targetIdx, 0, moved);
+    if (onReorderResources) {
+      onReorderResources(lesson.id, reordered.map((r) => r.id));
+    }
   };
 
   // ─── Resource badge ────────────────────────────────────────────────────────
@@ -148,39 +248,6 @@ export const CuratedCourseTree: React.FC<CuratedCourseTreeProps> = ({
             <File className="w-2.5 h-2.5" /> File
           </span>
         );
-    }
-  };
-
-  // ─── DnD Handlers ──────────────────────────────────────────────────────────
-  const handleDragOver = (e: React.DragEvent, lessonId: string) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "copy";
-    setDropTargetLessonId(lessonId);
-  };
-
-  const handleDragLeave = () => {
-    setDropTargetLessonId(null);
-  };
-
-  const handleDrop = (e: React.DragEvent, lessonId: string) => {
-    e.preventDefault();
-    setDropTargetLessonId(null);
-    try {
-      const raw = e.dataTransfer.getData("application/json");
-      if (!raw) return;
-      const payload = JSON.parse(raw) as DragPayload;
-      onDropFile(lessonId, payload);
-      // Show success toast inside the lesson row for 2.5s
-      setDropSuccess((prev) => ({ ...prev, [lessonId]: `✓ Đã gán: ${payload.name}` }));
-      setTimeout(() => {
-        setDropSuccess((prev) => {
-          const next = { ...prev };
-          delete next[lessonId];
-          return next;
-        });
-      }, 2500);
-    } catch {
-      // Invalid drag payload — ignore
     }
   };
 
@@ -588,41 +655,98 @@ export const CuratedCourseTree: React.FC<CuratedCourseTreeProps> = ({
                                           </div>
                                         )}
 
-                                        {/* Resources */}
-                                        <div className="flex flex-wrap gap-1.5 pl-5">
+                                        {/* Resources with Drag & Drop Reordering */}
+                                        <div className="flex flex-wrap gap-1.5 pl-5 items-center">
                                           {lesson.resources.length === 0 && !isDropTarget ? (
                                             <span className="text-[10px] text-slate-400 italic">
                                               {t("dragToAssign")}
                                             </span>
                                           ) : (
-                                            lesson.resources.map((res) => (
-                                              <div
-                                                key={res.id}
-                                                className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs shadow-2xs group hover:border-indigo-400 transition-colors"
-                                              >
-                                                {getResourceTypeBadge(res.resourceType)}
-                                                <span className="truncate max-w-[150px] text-[11px] font-medium text-slate-700 dark:text-slate-300">
-                                                  {res.title}
-                                                </span>
-                                                {res.webViewLink && (
-                                                  <a
-                                                    href={res.webViewLink}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-slate-400 hover:text-indigo-500 transition-colors"
-                                                  >
-                                                    <ExternalLink className="w-2.5 h-2.5" />
-                                                  </a>
-                                                )}
-                                                <button
-                                                  onClick={() => onRemoveResource(res.id)}
-                                                  className="text-slate-400 hover:text-rose-500 p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                  title="Remove resource"
+                                            lesson.resources.map((res, rIdx) => {
+                                              const isTargetRes = dropTargetResource?.lessonId === lesson.id && dropTargetResource?.index === rIdx;
+                                              return (
+                                                <div
+                                                  key={res.id}
+                                                  draggable={true}
+                                                  onDragStart={(e) => handleResourceDragStart(e, lesson.id, res.id, rIdx)}
+                                                  onDragOver={(e) => handleResourceDragOver(e, lesson.id, rIdx)}
+                                                  onDragLeave={handleDragLeave}
+                                                  onDrop={(e) => handleResourceDrop(e, lesson.id, rIdx, lesson.resources)}
+                                                  className={`flex items-center gap-1 px-2 py-1 rounded-md bg-white dark:bg-slate-800 border text-xs shadow-2xs group transition-all cursor-grab active:cursor-grabbing select-none ${
+                                                    isTargetRes
+                                                      ? "border-orange-500 bg-orange-50 dark:bg-orange-950/40 ring-2 ring-orange-400/50 scale-105"
+                                                      : "border-slate-200 dark:border-slate-700 hover:border-indigo-400"
+                                                  }`}
+                                                  title="Kéo thả để sắp xếp thứ tự tài liệu trong bài học"
                                                 >
-                                                  <Trash2 className="w-2.5 h-2.5" />
-                                                </button>
-                                              </div>
-                                            ))
+                                                  {/* Grip handle */}
+                                                  <GripVertical className="w-3 h-3 text-slate-300 dark:text-slate-600 group-hover:text-slate-500 shrink-0" />
+
+                                                  {/* Order index badge */}
+                                                  <span className="text-[9px] font-mono font-bold text-slate-400 dark:text-slate-500 shrink-0">
+                                                    {rIdx + 1}.
+                                                  </span>
+
+                                                  {getResourceTypeBadge(res.resourceType)}
+
+                                                  <span className="truncate max-w-[150px] text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                                                    {res.title}
+                                                  </span>
+
+                                                  {/* Quick Move Left / Right Buttons */}
+                                                  <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-100 dark:bg-slate-700 px-1 py-0.5 rounded">
+                                                    <button
+                                                      type="button"
+                                                      onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleMoveResource(lesson, rIdx, "left");
+                                                      }}
+                                                      disabled={rIdx === 0}
+                                                      className="p-0.5 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
+                                                      title="Chuyển sang trái"
+                                                    >
+                                                      <ArrowLeft className="w-2.5 h-2.5" />
+                                                    </button>
+                                                    <button
+                                                      type="button"
+                                                      onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleMoveResource(lesson, rIdx, "right");
+                                                      }}
+                                                      disabled={rIdx === lesson.resources.length - 1}
+                                                      className="p-0.5 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
+                                                      title="Chuyển sang phải"
+                                                    >
+                                                      <ArrowRight className="w-2.5 h-2.5" />
+                                                    </button>
+                                                  </div>
+
+                                                  {res.webViewLink && (
+                                                    <a
+                                                      href={res.webViewLink}
+                                                      target="_blank"
+                                                      rel="noopener noreferrer"
+                                                      onClick={(e) => e.stopPropagation()}
+                                                      className="text-slate-400 hover:text-indigo-500 transition-colors shrink-0"
+                                                    >
+                                                      <ExternalLink className="w-2.5 h-2.5" />
+                                                    </a>
+                                                  )}
+
+                                                  <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      onRemoveResource(res.id);
+                                                    }}
+                                                    className="text-slate-400 hover:text-rose-500 p-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                                                    title="Xóa tài nguyên khỏi bài học"
+                                                  >
+                                                    <Trash2 className="w-2.5 h-2.5" />
+                                                  </button>
+                                                </div>
+                                              );
+                                            })
                                           )}
                                         </div>
                                       </div>

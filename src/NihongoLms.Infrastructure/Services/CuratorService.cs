@@ -340,6 +340,21 @@ public class CuratorService : ICuratorService
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task ReorderResourcesAsync(ReorderResourcesDto dto, CancellationToken cancellationToken = default)
+    {
+        var resources = await _dbContext.Resources.Where(r => r.LessonId == dto.LessonId).ToListAsync(cancellationToken);
+        for (int i = 0; i < dto.ResourceIds.Count; i++)
+        {
+            var id = dto.ResourceIds[i];
+            var res = resources.FirstOrDefault(r => r.Id == id);
+            if (res != null)
+            {
+                res.DisplayOrder = i + 1;
+            }
+        }
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task AssignQuizToLessonAsync(AssignQuizRequestDto dto, CancellationToken cancellationToken = default)
     {
         var quiz = await _dbContext.Quizzes.FirstOrDefaultAsync(q => q.Id == dto.QuizId, cancellationToken);

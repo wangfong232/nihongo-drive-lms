@@ -29,6 +29,7 @@ public interface ICuratorService
     Task<int> ApplyAutoSuggestAsync(ApplyAutoSuggestRequestDto dto, CancellationToken cancellationToken = default);
     Task ReorderLessonsAsync(ReorderLessonsDto dto, CancellationToken cancellationToken = default);
     Task ReorderSectionsAsync(ReorderSectionsDto dto, CancellationToken cancellationToken = default);
+    Task ReorderResourcesAsync(ReorderResourcesDto dto, CancellationToken cancellationToken = default);
     Task AssignQuizToLessonAsync(AssignQuizRequestDto dto, CancellationToken cancellationToken = default);
 
     // AI Auto-Course Builder (Drive Folder -> Standard Course with 5 Pedagogical Lessons)
