@@ -7,7 +7,6 @@ import { CuratedCourseTree } from "@/components/builder/CuratedCourseTree";
 import { AutoSuggestModal } from "@/components/builder/AutoSuggestModal";
 import { ConfirmDeleteModal } from "@/components/builder/ConfirmDeleteModal";
 import { AssignQuizModal } from "@/components/builder/AssignQuizModal";
-import SyllabusImportModal from "@/components/builder/SyllabusImportModal";
 import AutoCourseBuilderModal from "@/components/builder/AutoCourseBuilderModal";
 import { DriveNode, Course, Section, Lesson, api, DriveSyncResult } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
@@ -47,7 +46,6 @@ export default function CourseBuilderPage() {
 
   // ─── Create Modals ─────────────────────────────────────────────────────────
   const [showAutoCourseBuilder, setShowAutoCourseBuilder] = useState(false);
-  const [showSyllabusImport, setShowSyllabusImport] = useState(false);
   const [autoSuggestNode, setAutoSuggestNode] = useState<DriveNode | null>(null);
   const [showAddCourse, setShowAddCourse] = useState(false);
   const [newCourseTitle, setNewCourseTitle] = useState("");
@@ -464,13 +462,6 @@ export default function CourseBuilderPage() {
               >
                 <Zap className="w-3.5 h-3.5 text-amber-300" />
                 AI Auto-Build Khóa Học (Drive)
-              </button>
-              <button
-                onClick={() => setShowSyllabusImport(true)}
-                className="flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all active:scale-95 shrink-0"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
-                Import PDF Lộ trình
               </button>
               <button
                 onClick={handleTriggerSync}
@@ -1013,14 +1004,7 @@ export default function CourseBuilderPage() {
         </div>
       )}
 
-      {/* ── Syllabus Import Modal (AI PDF Extractor) ─────────── */}
-      <SyllabusImportModal
-        isOpen={showSyllabusImport}
-        onClose={() => setShowSyllabusImport(false)}
-        onTemplateCreated={() => {
-          loadData();
-        }}
-      />
+
 
       {/* ── AI Auto-Course Builder Modal (Drive -> 5 Standard Lessons) ── */}
       <AutoCourseBuilderModal

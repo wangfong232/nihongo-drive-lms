@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using NihongoLms.Application.Interfaces;
 using NihongoLms.Domain.Entities;
 using NihongoLms.Domain.Enums;
 using NihongoLms.Domain.Interfaces;
@@ -98,10 +99,15 @@ public class DriveSyncServiceTests
             })
             .Build();
 
+        var mockSettingsService = new Mock<ISystemSettingsService>();
+        mockSettingsService.Setup(s => s.GetEffectiveDriveCredentialsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(("mock_client_id", "mock_client_secret", "mock_refresh_token", "root_folder_id"));
+
         var syncService = new DriveSyncService(
             dbContext,
             mockDriveService.Object,
             mockEncryptionService.Object,
+            mockSettingsService.Object,
             config,
             NullLogger<DriveSyncService>.Instance);
 

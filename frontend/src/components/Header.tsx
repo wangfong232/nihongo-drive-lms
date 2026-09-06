@@ -154,17 +154,7 @@ export const Header: React.FC<HeaderProps> = ({ srsStats }) => {
               {t("navQuizzes")}
             </Link>
 
-            <Link
-              href="/roadmap"
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
-                pathname?.startsWith("/roadmap")
-                  ? "bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-sm"
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-              }`}
-            >
-              <Target className="w-3.5 h-3.5 shrink-0" />
-              Lộ trình
-            </Link>
+
 
             <Link
               href="/admin/settings"
