@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Header } from "@/components/Header";
 import { LearnerSidebar } from "@/components/learner/LearnerSidebar";
 import { LessonContentView } from "@/components/learner/LessonContentView";
 import { SrsFlashcardModal } from "@/components/learner/SrsFlashcardModal";
 import { QuizModal } from "@/components/learner/QuizModal";
 import { Course, Section, Lesson, api } from "@/lib/api";
+import { useCourseLevel } from "@/lib/courseLevel";
 import Link from "next/link";
 import {
   BookOpen, Flame, Sparkles, Target, TrendingUp, ChevronRight,
@@ -14,6 +15,7 @@ import {
 } from "lucide-react";
 
 export default function LearnerPortalPage() {
+  const { selectedLevel } = useCourseLevel();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -54,12 +56,6 @@ export default function LearnerPortalPage() {
         ]);
         setCourses(data);
         setSrsStats(stats as any);
-
-        if (data.length > 0 && data[0].sections.length > 0 && data[0].sections[0].lessons.length > 0) {
-          setActiveCourse(data[0]);
-          setActiveSection(data[0].sections[0]);
-          setActiveLesson(data[0].sections[0].lessons[0]);
-        }
       } catch (err) {
         console.error("Failed to load learner data", err);
       } finally {
@@ -70,6 +66,27 @@ export default function LearnerPortalPage() {
 
     return () => window.removeEventListener("open-srs-modal", handleOpenSrs);
   }, []);
+
+  // When courses or selectedLevel changes, update active course/lesson
+  useEffect(() => {
+    if (courses.length === 0) return;
+    const filtered = (!selectedLevel || selectedLevel === "ALL")
+      ? courses
+      : courses.filter((c) => c.jlptLevel?.trim().toUpperCase() === selectedLevel.trim().toUpperCase());
+
+    const targetCourse = filtered.length > 0 ? filtered[0] : courses[0];
+    if (targetCourse && targetCourse.sections.length > 0 && targetCourse.sections[0].lessons.length > 0) {
+      // If current active lesson is not in filtered courses, switch to targetCourse
+      const isCurrentInFiltered = filtered.some((c) =>
+        c.sections.some((s) => s.lessons.some((l) => l.id === activeLesson?.id))
+      );
+      if (!isCurrentInFiltered) {
+        setActiveCourse(targetCourse);
+        setActiveSection(targetCourse.sections[0]);
+        setActiveLesson(targetCourse.sections[0].lessons[0]);
+      }
+    }
+  }, [courses, selectedLevel]);
 
   const totalLessons = courses.reduce((s, c) => s + c.sections.reduce((ss, sec) => ss + sec.lessons.length, 0), 0);
   const completedCount = Object.values(completedLessonIds).filter(Boolean).length;

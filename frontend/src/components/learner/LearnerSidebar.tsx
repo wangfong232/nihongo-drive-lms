@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Course, Section, Lesson } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
+import { useCourseLevel } from "@/lib/courseLevel";
 import {
   BookOpen, FolderKanban, CheckCircle2, Circle, Search, ChevronDown,
   ChevronRight, PanelLeftClose, PanelLeftOpen, Sparkles, PlayCircle,
-  FileText, Headphones, HelpCircle
+  FileText, Headphones, HelpCircle, GraduationCap
 } from "lucide-react";
 
 interface LearnerSidebarProps {
@@ -23,9 +24,17 @@ export const LearnerSidebar: React.FC<LearnerSidebarProps> = ({
   completedLessonIds = {},
 }) => {
   const { t } = useI18n();
+  const { selectedLevel, setSelectedLevel } = useCourseLevel();
   const [search, setSearch] = useState("");
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  const filteredCourses = useMemo(() => {
+    if (!selectedLevel || selectedLevel === "ALL") return courses;
+    return courses.filter(
+      (c) => c.jlptLevel?.trim().toUpperCase() === selectedLevel.trim().toUpperCase()
+    );
+  }, [courses, selectedLevel]);
 
   const toggleSection = (sectionId: string) => {
     setCollapsedSections((prev) => ({ ...prev, [sectionId]: !prev[sectionId] }));
@@ -69,9 +78,9 @@ export const LearnerSidebar: React.FC<LearnerSidebarProps> = ({
       <div className="p-3.5 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
         {isSidebarOpen && (
           <div className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse" />
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
             <span className="font-extrabold text-xs uppercase tracking-wider text-slate-800 dark:text-slate-200">
-              Lộ Trình Học Tập
+              {selectedLevel === "ALL" ? "Tất Cả Khóa Học" : `Lộ Trình ${selectedLevel}`}
             </span>
           </div>
         )}
@@ -102,10 +111,33 @@ export const LearnerSidebar: React.FC<LearnerSidebarProps> = ({
 
           {/* Navigation Tree */}
           <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-4">
-            {courses.length === 0 ? (
-              <div className="p-6 text-center text-xs text-slate-400">Chưa có khóa học nào.</div>
+            {filteredCourses.length === 0 ? (
+              <div className="p-6 text-center flex flex-col items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-600 flex items-center justify-center">
+                  <GraduationCap className="w-6 h-6" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                    {selectedLevel === "ALL" ? "Chưa có khóa học nào." : `Chưa có khóa JLPT ${selectedLevel}`}
+                  </p>
+                  {courses.length > 0 && selectedLevel !== "ALL" && (
+                    <p className="text-[11px] text-slate-500 mt-1">
+                      Hệ thống đang có các khóa: {Array.from(new Set(courses.map(c => c.jlptLevel))).join(", ")}
+                    </p>
+                  )}
+                </div>
+                {selectedLevel !== "ALL" && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedLevel("ALL")}
+                    className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 text-white text-xs font-bold shadow-xs hover:from-orange-700 hover:to-amber-700 transition-all"
+                  >
+                    Xem Tất Cả Khóa Học
+                  </button>
+                )}
+              </div>
             ) : (
-              courses.map((course) => {
+              filteredCourses.map((course) => {
                 const progress = getCourseProgress(course);
                 return (
                   <div key={course.id} className="flex flex-col gap-2">

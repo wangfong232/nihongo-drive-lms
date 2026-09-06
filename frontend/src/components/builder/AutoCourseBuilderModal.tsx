@@ -131,11 +131,13 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
     rootFolderNodeId: "",
     courseTitle: "Khóa học Tiếng Nhật",
     jlptLevel: "N4",
-    presetName: "minna-lesson",
-    sectionFolderDepth: 1,
-    lessonFolderDepth: 2,
+    presetName: "stage-skill-chapter",
+    sectionGroupingMode: "combine-stage-skill",
+    combineParentStages: true,
+    sectionFolderDepth: 2,
+    lessonFolderDepth: 3,
     includeLeafFilesAsLessons: true,
-    excludeFolderPatterns: ["*lộ trình*", "*lo trinh*", "*file sách*", "*file sach*", "*hướng dẫn*"],
+    excludeFolderPatterns: ["*lộ trình*", "*lo trinh*", "*file sách*", "*file sach*", "*hướng dẫn*", "*huong dan*"],
     excludeFileExtensions: [".exe", ".zip", ".rar", ".txt", ".ini"],
     skillKeywordRules: {
       "chu han": "Kanji",
@@ -171,6 +173,7 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
   // AI Prompt Helper State
   const [aiPromptInstruction, setAiPromptInstruction] = useState("");
   const [isAiAnalyzing, setIsAiAnalyzing] = useState(false);
+  const [aiFeedbackRationale, setAiFeedbackRationale] = useState<string | null>(null);
 
   // Step 3 State: Course Preview & Confirm
   const [loading, setLoading] = useState(false);
@@ -196,6 +199,7 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
 
     setIsDetecting(true);
     setError(null);
+    setAiFeedbackRationale(null);
     try {
       const res = await api.detectFolderStructure(folderId);
       setDetectResult(res);
@@ -215,9 +219,12 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
   // ── Preset Selection Handler ──
   const handleSelectPreset = (preset: FolderPresetInfo) => {
     setSelectedPreset(preset.presetId);
+    const isCompound = preset.presetId === "stage-skill-chapter";
     setConfig((prev) => ({
       ...prev,
       presetName: preset.presetId,
+      combineParentStages: isCompound,
+      sectionGroupingMode: isCompound ? "combine-stage-skill" : preset.presetId,
       sectionFolderDepth: preset.sectionDepth,
       lessonFolderDepth: preset.lessonDepth,
       includeLeafFilesAsLessons: preset.includeLeafFilesAsLessons,
@@ -244,9 +251,15 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
         sectionFolderDepth: res.sectionFolderDepth,
         lessonFolderDepth: res.lessonFolderDepth,
         includeLeafFilesAsLessons: res.includeLeafFilesAsLessons,
+        combineParentStages: res.combineParentStages ?? prev.combineParentStages,
+        sectionGroupingMode: res.sectionGroupingMode ?? prev.sectionGroupingMode,
+        aiAnalysisRationale: res.aiAnalysisRationale,
         presetName: "custom",
       }));
       setSelectedPreset("custom");
+      if (res.aiAnalysisRationale) {
+        setAiFeedbackRationale(res.aiAnalysisRationale);
+      }
     } catch (err: any) {
       setError(err.message || "Lỗi khi gọi AI phân tích cây thư mục.");
     } finally {
@@ -783,27 +796,27 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
             <div className="space-y-5 max-w-2xl mx-auto py-2">
               {/* ✨ AI Prompt Helper Card */}
               {scanMode === "folder" && (
-                <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 border border-indigo-500/20">
-                  <div className="flex items-center gap-2 mb-2 text-indigo-950 dark:text-indigo-200">
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 border border-indigo-500/20 space-y-2.5">
+                  <div className="flex items-center gap-2 text-indigo-950 dark:text-indigo-200">
                     <Wand2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400 animate-pulse" />
-                    <span className="text-xs font-extrabold">AI Prompt Helper (Xử lý Cấu Trúc Khó / Độc Lạ)</span>
+                    <span className="text-xs font-extrabold">AI Prompt Helper (Trợ lý Phân tích Cấu Trúc Khóa Học)</span>
                   </div>
-                  <p className="text-[11px] text-slate-600 dark:text-slate-400 mb-2.5">
-                    Nếu cây thư mục của bạn có cách tổ chức đặc thù, hãy nhập ghi chú để AI Gemini tự động đọc JSON cây thư mục và thiết lập cấu hình chuẩn xác nhất.
+                  <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                    Nhập câu lệnh hướng dẫn bằng tiếng Việt (ví dụ: <i>"Gộp Chặng và Kỹ năng làm Section, mỗi Chương hoặc Dạng bài làm 1 Lesson riêng..."</i>), AI sẽ đọc cây thư mục và tự động cấu hình chuẩn nhất.
                   </p>
                   <div className="flex gap-2">
                     <input
                       type="text"
                       value={aiPromptInstruction}
                       onChange={(e) => setAiPromptInstruction(e.target.value)}
-                      placeholder="Ví dụ: Lấy folder Chặng làm Section, folder Chữ hán/Ngữ pháp làm Lesson..."
+                      placeholder="Ví dụ: Gộp Chặng 1 + Chữ Hán làm Section, Chương 1..8 làm Lesson..."
                       className="flex-1 px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                     />
                     <button
                       type="button"
                       onClick={handleAiAnalyze}
                       disabled={isAiAnalyzing}
-                      className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold text-xs shrink-0 shadow-sm"
+                      className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold text-xs shrink-0 shadow-sm transition-all"
                     >
                       {isAiAnalyzing ? (
                         <>
@@ -818,6 +831,16 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                       )}
                     </button>
                   </div>
+
+                  {aiFeedbackRationale && (
+                    <div className="p-3 rounded-xl bg-indigo-100/60 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800/70 text-xs text-indigo-900 dark:text-indigo-200 flex items-start gap-2.5 animate-in fade-in">
+                      <Sparkles className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-bold text-indigo-700 dark:text-indigo-300">Phản hồi từ AI:</p>
+                        <p className="mt-0.5 text-[11px] text-indigo-800/90 dark:text-indigo-300/90 leading-relaxed">{aiFeedbackRationale}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -831,7 +854,7 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                     type="text"
                     value={config.courseTitle}
                     onChange={(e) => setConfig({ ...config, courseTitle: e.target.value })}
-                    placeholder="Ví dụ: Khóa học Tiếng Nhật N4 Minna no Nihongo"
+                    placeholder="Ví dụ: Khóa học Tiếng Nhật N3 Dũng Mori"
                     className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 font-medium"
                   />
                 </div>
@@ -855,39 +878,72 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
 
               {/* Depth Controls */}
               {scanMode === "folder" && (
-                <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 space-y-3">
+                <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 space-y-3.5">
                   <h4 className="text-xs font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
                     <Sliders className="w-4 h-4 text-indigo-600" />
-                    <span>Cấu hình Cấp Độ Thư Mục (Folder Depth Mapping)</span>
+                    <span>Cấu hình Phân Cấp Khóa Học (Section & Lesson Mapping)</span>
                   </h4>
+
+                  {/* Primary Compound Mode Toggle */}
+                  <label className="flex items-center gap-2.5 text-xs font-bold text-indigo-900 dark:text-indigo-300 cursor-pointer bg-indigo-50 dark:bg-indigo-950/40 p-3 rounded-xl border border-indigo-200 dark:border-indigo-800">
+                    <input
+                      type="checkbox"
+                      checked={config.combineParentStages ?? true}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setConfig({
+                          ...config,
+                          combineParentStages: checked,
+                          sectionGroupingMode: checked ? "combine-stage-skill" : "single-folder",
+                          sectionFolderDepth: checked ? 2 : 1,
+                          lessonFolderDepth: checked ? 3 : 2,
+                        });
+                      }}
+                      className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4 shrink-0"
+                    />
+                    <div>
+                      <span className="text-xs font-extrabold">⭐ Gộp [Chặng + Kỹ năng] làm Section (Khuyên dùng cho khóa 4 tầng N3/N2)</span>
+                      <p className="text-[10px] font-normal text-indigo-700/80 dark:text-indigo-400 mt-0.5">
+                        Tự động ghép tên Cấp 1 & Cấp 2 thành <i>"Chặng 1 - Chữ Hán"</i>, <i>"Chặng 1 - Ngữ Pháp"</i>; các folder con bên trong (Chương 1..8, Dạng bài) thành từng Lesson riêng biệt.
+                      </p>
+                    </div>
+                  </label>
 
                   <div className="grid grid-cols-2 gap-3 pt-1">
                     <div>
                       <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                        Cấp độ Thư mục làm Section (Chương / Chặng / Bài)
+                        Cấp độ Thư mục làm Section
                       </label>
                       <select
                         value={config.sectionFolderDepth}
-                        onChange={(e) => setConfig({ ...config, sectionFolderDepth: parseInt(e.target.value) || 1 })}
+                        onChange={(e) => {
+                          const depth = parseInt(e.target.value) || 1;
+                          setConfig({
+                            ...config,
+                            sectionFolderDepth: depth,
+                            combineParentStages: depth >= 2,
+                            sectionGroupingMode: depth >= 2 ? "combine-stage-skill" : "single-folder"
+                          });
+                        }}
                         className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-semibold"
                       >
-                        <option value={1}>Cấp 1 (Thư mục con trực tiếp của Root)</option>
-                        <option value={2}>Cấp 2 (Ví dụ: 01. Bài giảng / Bài 26)</option>
-                        <option value={3}>Cấp 3 (Thư mục con cấp sâu)</option>
+                        <option value={2}>Cấp 2 (Gộp Chặng + Kỹ năng)</option>
+                        <option value={1}>Cấp 1 (Chặng đơn hoặc Bài học lớn)</option>
+                        <option value={3}>Cấp 3 (Cấp sâu hơn)</option>
                       </select>
                     </div>
 
                     <div>
                       <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                        Cấp độ Thư mục làm Lesson (Bài học / Kỹ năng)
+                        Cấp độ Thư mục làm Lesson
                       </label>
                       <select
                         value={config.lessonFolderDepth}
                         onChange={(e) => setConfig({ ...config, lessonFolderDepth: parseInt(e.target.value) || 2 })}
                         className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-semibold"
                       >
-                        <option value={2}>Cấp 2 (Ví dụ: 1. Chữ hán, 2. Ngữ pháp)</option>
-                        <option value={3}>Cấp 3 (Ví dụ: Chặng 1 / Chữ hán / Chương 1)</option>
+                        <option value={3}>Cấp 3 (Chương / Dạng bài: Tanbun, Mondai...)</option>
+                        <option value={2}>Cấp 2 (Kỹ năng con hoặc Bài)</option>
                         <option value={4}>Cấp 4 (Cấp sâu hơn)</option>
                       </select>
                     </div>
@@ -902,7 +958,7 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                         onChange={(e) => setConfig({ ...config, includeLeafFilesAsLessons: e.target.checked })}
                         className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4"
                       />
-                      <span>Tự động biến các file media lẻ không có subfolder thành từng Bài học độc lập</span>
+                      <span>Tự động tạo bài học cho các file media lẻ không có thư mục con</span>
                     </label>
 
                     <label className="flex items-center gap-2 text-xs font-medium text-slate-800 dark:text-slate-200 cursor-pointer">
@@ -912,7 +968,7 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                         onChange={(e) => setConfig({ ...config, enableCrossFolderMatching: e.target.checked })}
                         className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4"
                       />
-                      <span>Tự động gộp tài liệu tổng hợp ngoài folder bài giảng (vd: <i>Tổng hợp ngữ pháp bài 25-50 minna</i>) vào đúng Bài học</span>
+                      <span>Tự động gom tài liệu tổng hợp ngoài folder bài giảng vào đúng bài học</span>
                     </label>
                   </div>
                 </div>

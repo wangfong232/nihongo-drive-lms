@@ -25,17 +25,20 @@ public class FolderCourseBuilderService : IFolderCourseBuilderService
     private readonly LmsDbContext _dbContext;
     private readonly IHttpClientFactory _httpFactory;
     private readonly IConfiguration _config;
+    private readonly ISystemSettingsService _systemSettingsService;
     private readonly ILogger<FolderCourseBuilderService> _logger;
 
     public FolderCourseBuilderService(
         LmsDbContext dbContext,
         IHttpClientFactory httpFactory,
         IConfiguration config,
+        ISystemSettingsService systemSettingsService,
         ILogger<FolderCourseBuilderService> logger)
     {
         _dbContext = dbContext;
         _httpFactory = httpFactory;
         _config = config;
+        _systemSettingsService = systemSettingsService;
         _logger = logger;
     }
 
@@ -107,26 +110,28 @@ public class FolderCourseBuilderService : IFolderCourseBuilderService
         bool hasBaiPattern = subFolders.Any(f => Regex.IsMatch(f.Name, @"(?:bai|b)[\s_-]*\d+", RegexOptions.IgnoreCase));
         bool hasChangPattern = subFolders.Any(f => Regex.IsMatch(f.Name, @"(?:chang|chặng|giai đoạn)[\s_-]*\d+", RegexOptions.IgnoreCase));
         bool hasChuongPattern = subFolders.Any(f => Regex.IsMatch(f.Name, @"(?:chuong|chương)[\s_-]*\d+", RegexOptions.IgnoreCase));
-        bool hasMondaiPattern = subFolders.Any(f => Regex.IsMatch(f.Name, @"(?:mondai|đề|de thi)[\s_-]*\d+", RegexOptions.IgnoreCase));
 
         string detectedPreset = "minna-lesson";
         string rationale;
         int suggestedSecDepth = 1;
         int suggestedLesDepth = 2;
+        bool combineParentStages = false;
+        string groupingMode = "single-folder";
         bool includeLeaf = true;
 
-        if (hasChangPattern)
+        if (hasChangPattern || (maxDepth >= 3 && !hasBaiPattern))
         {
             detectedPreset = "stage-skill-chapter";
-            suggestedSecDepth = 1; // Chặng 1, Chặng 2 làm Section
-            suggestedLesDepth = Math.Min(3, maxDepth); // Kỹ năng hoặc Chương làm Lesson
+            suggestedSecDepth = 2; // Cấp Kỹ Năng
+            suggestedLesDepth = 3; // Cấp Chương / Dạng bài
+            combineParentStages = true;
+            groupingMode = "combine-stage-skill";
             includeLeaf = true;
-            rationale = "Phát hiện cấu trúc Chặng (Chặng 1, Chặng 2) kết hợp Kỹ năng & Chương học.";
+            rationale = "Phát hiện cấu trúc Chặng (Chặng 1, Chặng 2) kết hợp Kỹ năng & Chương. Tự động áp dụng Gộp [Chặng + Kỹ năng] làm Section.";
         }
         else if (hasBaiPattern)
         {
             detectedPreset = "minna-lesson";
-            // Check if Bài folders are at depth 1 or depth 2 (e.g. 01. Bài giảng / Bài 26)
             var baiFolder = subFolders.FirstOrDefault(f => Regex.IsMatch(f.Name, @"(?:bai|b)[\s_-]*\d+", RegexOptions.IgnoreCase));
             if (baiFolder != null && folderDepths.TryGetValue(baiFolder.Id, out int bDepth))
             {
@@ -138,6 +143,8 @@ public class FolderCourseBuilderService : IFolderCourseBuilderService
                 suggestedSecDepth = 1;
                 suggestedLesDepth = 2;
             }
+            combineParentStages = false;
+            groupingMode = "single-folder";
             includeLeaf = true;
             rationale = "Phát hiện cấu trúc theo Bài học Minna (Bài 1..50) và các thư mục kỹ năng con.";
         }
@@ -146,6 +153,8 @@ public class FolderCourseBuilderService : IFolderCourseBuilderService
             detectedPreset = "flat-chapters";
             suggestedSecDepth = 1;
             suggestedLesDepth = 2;
+            combineParentStages = false;
+            groupingMode = "flat-chapters";
             includeLeaf = true;
             rationale = "Phát hiện cấu trúc phân chia theo Chương hoặc Chuyên đề.";
         }
@@ -154,6 +163,8 @@ public class FolderCourseBuilderService : IFolderCourseBuilderService
             detectedPreset = "minna-lesson";
             suggestedSecDepth = 1;
             suggestedLesDepth = Math.Min(2, maxDepth);
+            combineParentStages = false;
+            groupingMode = "single-folder";
             includeLeaf = true;
             rationale = $"Phân tích độ sâu thư mục (Độ sâu tối đa {maxDepth} cấp).";
         }
@@ -181,14 +192,26 @@ public class FolderCourseBuilderService : IFolderCourseBuilderService
             CourseTitle = rootNode.Name,
             JlptLevel = InferJlptLevelFromPath(rootCleanFullPath),
             PresetName = detectedPreset,
+            SectionGroupingMode = groupingMode,
+            CombineParentStages = combineParentStages,
             SectionFolderDepth = suggestedSecDepth,
             LessonFolderDepth = suggestedLesDepth,
             IncludeLeafFilesAsLessons = includeLeaf,
-            ExcludeFolderPatterns = new List<string> { "*lộ trình*", "*lo trinh*", "*file sách*", "*file sach*", "*hướng dẫn*" }
+            ExcludeFolderPatterns = new List<string> { "*lộ trình*", "*lo trinh*", "*file sách*", "*file sach*", "*hướng dẫn*", "*huong dan*" }
         };
 
         var availablePresets = new List<FolderPresetInfoDto>
         {
+            new()
+            {
+                PresetId = "stage-skill-chapter",
+                Name = "Gộp [Chặng + Kỹ năng] làm Section (Khuyên dùng)",
+                Description = "Ghép Cấp 1 (Chặng) và Cấp 2 (Kỹ năng) thành Tên Section (VD: Chặng 1 - Chữ Hán); Cấp 3 (Chương, Dạng bài) làm Lesson chứa toàn bộ Video & Docs.",
+                SectionDepth = 2,
+                LessonDepth = 3,
+                IncludeLeafFilesAsLessons = true,
+                SamplePathPattern = "Chặng 1 / 1. Chữ hán / Chương 1 / Video + Tài liệu"
+            },
             new()
             {
                 PresetId = "minna-lesson",
@@ -198,16 +221,6 @@ public class FolderCourseBuilderService : IFolderCourseBuilderService
                 LessonDepth = 2,
                 IncludeLeafFilesAsLessons = true,
                 SamplePathPattern = "01. Bài giảng / Bài 26 / 1. Chữ hán, 2. Ngữ pháp, Video lẻ"
-            },
-            new()
-            {
-                PresetId = "stage-skill-chapter",
-                Name = "Mô hình Chặng - Kỹ năng - Chương (N3/N2)",
-                Description = "Chặng 1, Chặng 2 làm Section; Kỹ năng hoặc Chương con làm Lesson.",
-                SectionDepth = 1,
-                LessonDepth = 3,
-                IncludeLeafFilesAsLessons = true,
-                SamplePathPattern = "Chặng 1 / 1. Chữ hán / Chương 1 / Video bài giảng"
             },
             new()
             {
@@ -223,7 +236,7 @@ public class FolderCourseBuilderService : IFolderCourseBuilderService
             {
                 PresetId = "custom",
                 Name = "Tùy biến Nâng cao (Custom Depth & Rules)",
-                Description = "Tự do điều chỉnh độ sâu Section/Lesson và các bộ lọc loại trừ.",
+                Description = "Tự do điều chỉnh độ sâu Section/Lesson, tùy chọn gộp tên cha con và các bộ lọc loại trừ.",
                 SectionDepth = suggestedSecDepth,
                 LessonDepth = suggestedLesDepth,
                 IncludeLeafFilesAsLessons = includeLeaf,
@@ -259,38 +272,55 @@ public class FolderCourseBuilderService : IFolderCourseBuilderService
         var compactTree = autoDetect.FolderTreePreview.Select(SimplifyNodeForLlm).ToList();
         var compactTreeJson = JsonSerializer.Serialize(compactTree, new JsonSerializerOptions { WriteIndented = true });
 
-        var apiKey = _config["Google:ApiKey"]
-                  ?? _config["GeminiApiKey"]
-                  ?? _config["OpenAI:ApiKey"]
-                  ?? Environment.GetEnvironmentVariable("GEMINI_API_KEY");
+        // Retrieve AI config dynamically from SystemSettingsService (Database first, then env)
+        var (effectiveApiKey, effectiveBaseUrl, effectiveModel) = await _systemSettingsService.GetEffectiveAiConfigAsync(ct);
+
+        var apiKey = !string.IsNullOrWhiteSpace(effectiveApiKey)
+            ? effectiveApiKey
+            : (_config["Google:ApiKey"] ?? _config["GeminiApiKey"] ?? _config["OpenAI:ApiKey"] ?? Environment.GetEnvironmentVariable("GEMINI_API_KEY"));
 
         if (string.IsNullOrWhiteSpace(apiKey))
         {
-            _logger.LogWarning("[FolderBuilder] Chưa cấu hình Gemini API Key. Trả về cấu hình Heuristic Auto-Detect.");
-            return autoDetect.SuggestedConfig;
+            _logger.LogWarning("[FolderBuilder] Chưa cấu hình AI API Key. Trả về cấu hình Heuristic Auto-Detect.");
+            var fallback = autoDetect.SuggestedConfig;
+            fallback.AiAnalysisRationale = "Chưa tìm thấy Gemini API Key trong hệ thống. Vui lòng vào Cài đặt Hệ thống để nhập API Key hoặc tiếp tục với cấu hình Tự Động Nhận Diện.";
+            return fallback;
         }
 
-        var baseUrl = _config["OpenAI:BaseUrl"] ?? "https://generativelanguage.googleapis.com/v1beta/openai";
-        var model = _config["OpenAI:Model"] ?? "gemini-2.5-flash";
+        var baseUrl = !string.IsNullOrWhiteSpace(effectiveBaseUrl)
+            ? effectiveBaseUrl
+            : (_config["OpenAI:BaseUrl"] ?? "https://generativelanguage.googleapis.com/v1beta/openai");
+        var model = !string.IsNullOrWhiteSpace(effectiveModel)
+            ? effectiveModel
+            : (_config["OpenAI:Model"] ?? "gemini-2.5-flash");
 
         var systemPrompt = """
             You are an expert Educational Curriculum and LMS Architect.
-            Analyze the following Google Drive folder tree JSON and determine the optimal mapping configuration to convert it into a well-structured course (Sections and Lessons).
+            Analyze the provided Google Drive folder tree JSON and the user's natural language instructions to determine the optimal mapping configuration to convert it into a well-structured course (Sections and Lessons).
 
             RULES:
-            1. Determine sectionFolderDepth (1, 2, or 3): Which folder level represents major units/chapters/stages (e.g. "Chặng 1", "Bài 26", "Chương 1").
-            2. Determine lessonFolderDepth: Which folder level represents individual lessons/skills/topics.
-            3. Set includeLeafFilesAsLessons: true if files should each be a lesson or grouped if inside a skill folder.
+            1. For multi-tier structures (e.g. Stage / Chặng -> Skill / Kỹ năng -> Chapter / Chương -> Media files):
+               - Set combineParentStages: true
+               - Set sectionGroupingMode: "combine-stage-skill"
+               - Set sectionFolderDepth: 2 (Skill level)
+               - Set lessonFolderDepth: 3 (Chapter / Topic level)
+            2. For standard single-tier courses (e.g. Minna: Bài 1..50 -> Skills):
+               - Set combineParentStages: false
+               - Set sectionGroupingMode: "single-folder"
+               - Set sectionFolderDepth: 1
+               - Set lessonFolderDepth: 2
+            3. Set includeLeafFilesAsLessons: true if media files without subfolders should become individual lessons.
             4. Provide excludeFolderPatterns (e.g., ["*lộ trình*", "*file sách*"]).
-            5. Return ONLY a valid JSON object matching FolderMappingConfigDto with no markdown or explanations.
+            5. Provide aiAnalysisRationale: A concise, polite explanation in Vietnamese explaining how you structured the course according to the user's instructions.
+            6. Return ONLY a valid JSON object matching FolderMappingConfigDto with no extra formatting or markdown code blocks.
             """;
 
         var userContent = $"""
             Folder Tree JSON:
             {compactTreeJson}
 
-            User Note / Instructions:
-            {customPrompt ?? "Tự động phân tích và chọn độ sâu Section/Lesson chuẩn xác nhất."}
+            User Instructions:
+            {customPrompt ?? "Tự động phân tích và chọn mô hình Section/Lesson chuẩn xác nhất. Ưu tiên gộp [Chặng + Kỹ năng] làm Section nếu có cấu trúc Chặng."}
             """;
 
         try
@@ -325,19 +355,30 @@ public class FolderCourseBuilderService : IFolderCourseBuilderService
                     using var parsedDoc = JsonDocument.Parse(content);
                     var root = parsedDoc.RootElement;
 
+                    bool combineParent = root.TryGetProperty("combineParentStages", out var cps)
+                        ? cps.GetBoolean()
+                        : (root.TryGetProperty("sectionGroupingMode", out var sgm) && sgm.GetString() == "combine-stage-skill");
+
                     var config = new FolderMappingConfigDto
                     {
                         RootFolderNodeId = rootFolderId,
                         CourseTitle = autoDetect.RootFolderName,
                         JlptLevel = autoDetect.SuggestedConfig.JlptLevel,
                         PresetName = "custom",
-                        SectionFolderDepth = root.TryGetProperty("sectionFolderDepth", out var sdp) ? sdp.GetInt32() : autoDetect.SuggestedConfig.SectionFolderDepth,
-                        LessonFolderDepth = root.TryGetProperty("lessonFolderDepth", out var ldp) ? ldp.GetInt32() : autoDetect.SuggestedConfig.LessonFolderDepth,
+                        SectionGroupingMode = root.TryGetProperty("sectionGroupingMode", out var sgmProp) ? (sgmProp.GetString() ?? "combine-stage-skill") : "combine-stage-skill",
+                        CombineParentStages = combineParent,
+                        SectionFolderDepth = root.TryGetProperty("sectionFolderDepth", out var sdp) ? sdp.GetInt32() : (combineParent ? 2 : autoDetect.SuggestedConfig.SectionFolderDepth),
+                        LessonFolderDepth = root.TryGetProperty("lessonFolderDepth", out var ldp) ? ldp.GetInt32() : (combineParent ? 3 : autoDetect.SuggestedConfig.LessonFolderDepth),
                         IncludeLeafFilesAsLessons = root.TryGetProperty("includeLeafFilesAsLessons", out var ilf) && ilf.GetBoolean(),
+                        AiAnalysisRationale = root.TryGetProperty("aiAnalysisRationale", out var air) ? air.GetString() : "AI đã phân tích và thiết lập cấu hình tối ưu theo yêu cầu của bạn.",
                         DefaultLessonDurationMinutes = 45
                     };
                     return config;
                 }
+            }
+            else
+            {
+                _logger.LogWarning("[FolderBuilder] AI API Error: Status {StatusCode}", response.StatusCode);
             }
         }
         catch (Exception ex)
@@ -345,11 +386,13 @@ public class FolderCourseBuilderService : IFolderCourseBuilderService
             _logger.LogError(ex, "[FolderBuilder] Lỗi khi gọi AI phân tích cây thư mục: {Message}", ex.Message);
         }
 
-        return autoDetect.SuggestedConfig;
+        var res = autoDetect.SuggestedConfig;
+        res.AiAnalysisRationale = "Đã áp dụng cấu hình phân tích tự động dựa trên độ sâu cây thư mục.";
+        return res;
     }
 
     // ═════════════════════════════════════════════════════════════════════════
-    //  3. GENERATE PREVIEW (RawPath Skills, Cross-Folder Docs, Natural Sort)
+    //  3. GENERATE PREVIEW (Compound Section Grouping, RawPath, Natural Sort)
     // ═════════════════════════════════════════════════════════════════════════
 
     public async Task<AutoBuildScanResultDto> GeneratePreviewAsync(FolderMappingConfigDto config, CancellationToken ct = default)
@@ -387,7 +430,7 @@ public class FolderCourseBuilderService : IFolderCourseBuilderService
             .Where(n => IsNodeInSubtree(n.RawPath, n.Name, n.ParentNodeId, n.Id, rootCleanFullPath, config.RootFolderNodeId))
             .ToList();
 
-        // 1. Exclude paths matching ExcludeFolderPatterns
+        // 1. Exclude paths matching ExcludeFolderPatterns & ExcludeFileExtensions
         var excludedPatterns = config.ExcludeFolderPatterns ?? new List<string>();
         var validNodes = subtreeNodes.Where(n =>
         {
@@ -407,7 +450,7 @@ public class FolderCourseBuilderService : IFolderCourseBuilderService
         var subFolders = validNodes.Where(n => n.NodeType == NodeType.Folder && n.Id != config.RootFolderNodeId).ToList();
         var files = validNodes.Where(n => n.NodeType == NodeType.File).ToList();
 
-        // Compute relative depth for each folder
+        // Compute relative depth and path for each folder
         var folderMap = new Dictionary<Guid, (SubtreeNodeItem Node, int RelDepth, string RelPath)>();
         foreach (var folder in subFolders)
         {
@@ -422,19 +465,15 @@ public class FolderCourseBuilderService : IFolderCourseBuilderService
                 var idx = p.IndexOf("/" + rootCleanFullPath + "/", StringComparison.OrdinalIgnoreCase);
                 relPath = p.Substring(idx + rootCleanFullPath.Length + 2);
             }
+            else
+            {
+                relPath = p;
+            }
+
             var segs = relPath.Split('/', StringSplitOptions.RemoveEmptyEntries);
             int depth = segs.Length > 0 ? segs.Length : Math.Max(1, p.Split('/', StringSplitOptions.RemoveEmptyEntries).Length - rootSegmentsCount);
             folderMap[folder.Id] = (folder, depth, relPath);
         }
-
-        // 2. Identify Section Folders based on SectionFolderDepth
-        var targetSecDepth = Math.Max(1, config.SectionFolderDepth);
-        var targetLesDepth = Math.Max(targetSecDepth + 1, config.LessonFolderDepth);
-
-        var sectionFolderEntries = folderMap.Values
-            .Where(f => f.RelDepth == targetSecDepth)
-            .OrderBy(f => ExtractNaturalSortKey(f.Node.Name), StringComparer.OrdinalIgnoreCase)
-            .ToList();
 
         var result = new AutoBuildScanResultDto
         {
@@ -443,8 +482,8 @@ public class FolderCourseBuilderService : IFolderCourseBuilderService
             Sections = new List<AutoBuildSectionPreviewDto>()
         };
 
-        // Fallback: If no folders at target depth, create 1 section for root
-        if (sectionFolderEntries.Count == 0)
+        // Fallback: If no subfolders at all, create 1 section for root
+        if (subFolders.Count == 0)
         {
             var defaultSec = new AutoBuildSectionPreviewDto
             {
@@ -454,8 +493,9 @@ public class FolderCourseBuilderService : IFolderCourseBuilderService
                 Lessons = new List<AutoBuildLessonPreviewDto>()
             };
 
-            // Group files in root
-            var rootFiles = files.Select(f => MapNodeToResourcePreview(f, config.SkillKeywordRules, "LessonFolder")).ToList();
+            var rootFiles = files.OrderBy(f => ExtractNaturalSortKey(f.Name), StringComparer.OrdinalIgnoreCase)
+                                 .Select(f => MapNodeToResourcePreview(f, config.SkillKeywordRules, "LessonFolder"))
+                                 .ToList();
             if (rootFiles.Count > 0)
             {
                 defaultSec.Lessons.Add(new AutoBuildLessonPreviewDto
@@ -474,192 +514,470 @@ public class FolderCourseBuilderService : IFolderCourseBuilderService
             return result;
         }
 
+        bool isCompoundMode = config.CombineParentStages
+            || string.Equals(config.SectionGroupingMode, "combine-stage-skill", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(config.PresetName, "stage-skill-chapter", StringComparison.OrdinalIgnoreCase);
+
         int secOrder = 0;
         int totalLessonsCount = 0;
         int totalFilesCount = 0;
 
-        foreach (var secEntry in sectionFolderEntries)
+        // ═════════════════════════════════════════════════════════════════════
+        //  MODE A: GỘP [CHẶNG + KỸ NĂNG] LÀM SECTION (Phương án 1 - Chuẩn 4 tầng)
+        // ═════════════════════════════════════════════════════════════════════
+        if (isCompoundMode)
         {
-            secOrder++;
-            var secNode = secEntry.Node;
-            var secPathPrefix = GetEffectiveNodePath(secNode.RawPath, secNode.Name);
-            int lessonNum = ExtractLessonNumber(secNode.Name, secOrder);
-
-            var sectionDto = new AutoBuildSectionPreviewDto
-            {
-                Title = secNode.Name,
-                DisplayOrder = secOrder,
-                LessonNumber = lessonNum,
-                Lessons = new List<AutoBuildLessonPreviewDto>()
-            };
-
-            // Subfolders belonging to this Section
-            var secSubFolders = folderMap.Values
-                .Where(f => f.RelDepth > targetSecDepth && (
-                    f.RelPath.StartsWith(secEntry.RelPath + "/", StringComparison.OrdinalIgnoreCase) ||
-                    GetEffectiveNodePath(f.Node.RawPath, f.Node.Name).StartsWith(secPathPrefix + "/", StringComparison.OrdinalIgnoreCase)
-                ))
-                .ToList();
-
-            // Direct lesson folders (at targetLesDepth or immediate children)
-            var lessonFolderCandidates = secSubFolders
-                .Where(f => f.RelDepth == targetLesDepth || (f.RelDepth > targetSecDepth && f.RelDepth < targetLesDepth))
+            var stageFolders = folderMap.Values
+                .Where(f => f.RelDepth == 1)
                 .OrderBy(f => ExtractNaturalSortKey(f.Node.Name), StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
-            // Direct files under this Section folder
-            var directSecFiles = files.Where(f =>
+            foreach (var stageEntry in stageFolders)
             {
-                var fp = GetEffectiveNodePath(f.RawPath, f.Name);
-                return fp.Equals(secPathPrefix, StringComparison.OrdinalIgnoreCase) || 
-                       fp.Equals($"{secPathPrefix}/{CleanPath(f.Name)}", StringComparison.OrdinalIgnoreCase) ||
-                       f.ParentNodeId == secNode.Id;
-            })
-            .OrderBy(f => ExtractNaturalSortKey(f.Name), StringComparer.OrdinalIgnoreCase)
-            .ToList();
+                var stageNode = stageEntry.Node;
+                var stageRelPath = stageEntry.RelPath;
+                var stagePathPrefix = GetEffectiveNodePath(stageNode.RawPath, stageNode.Name);
+                int stageNum = ExtractLessonNumber(stageNode.Name, secOrder + 1);
 
-            int lesOrder = 0;
-
-            if (lessonFolderCandidates.Count > 0)
-            {
-                foreach (var lesEntry in lessonFolderCandidates)
-                {
-                    lesOrder++;
-                    var lesNode = lesEntry.Node;
-                    var lesPathPrefix = GetEffectiveNodePath(lesNode.RawPath, lesNode.Name);
-
-                    // Files under this lesson folder sorted naturally by full path and file name
-                    var lesFiles = files.Where(f =>
-                    {
-                        var fp = GetEffectiveNodePath(f.RawPath, f.Name);
-                        return fp.StartsWith(lesPathPrefix + "/", StringComparison.OrdinalIgnoreCase) ||
-                               fp.Equals(lesPathPrefix, StringComparison.OrdinalIgnoreCase) ||
-                               f.ParentNodeId == lesNode.Id;
-                    })
-                    .OrderBy(f => ExtractNaturalSortKey(GetEffectiveNodePath(f.RawPath, f.Name)), StringComparer.OrdinalIgnoreCase)
-                    .ThenBy(f => ExtractNaturalSortKey(f.Name), StringComparer.OrdinalIgnoreCase)
+                // Find Level 2 Skill folders directly under this Stage folder
+                var skillFolders = folderMap.Values
+                    .Where(f => f.RelDepth == 2 && (
+                        f.RelPath.StartsWith(stageRelPath + "/", StringComparison.OrdinalIgnoreCase) ||
+                        GetEffectiveNodePath(f.Node.RawPath, f.Node.Name).StartsWith(stagePathPrefix + "/", StringComparison.OrdinalIgnoreCase) ||
+                        f.Node.ParentNodeId == stageNode.Id
+                    ))
+                    .OrderBy(f => ExtractNaturalSortKey(f.Node.Name), StringComparer.OrdinalIgnoreCase)
                     .ToList();
 
-                    // Detect skill from folder name + full rawpath
-                    string skillTag = DetectSkillFromPath(lesPathPrefix, config.SkillKeywordRules);
-
-                    var lessonDto = new AutoBuildLessonPreviewDto
+                if (skillFolders.Count > 0)
+                {
+                    foreach (var skillEntry in skillFolders)
                     {
-                        Title = lesNode.Name,
-                        FlowOrder = lesOrder,
-                        Skill = skillTag,
-                        EstimatedDurationMinutes = config.DefaultLessonDurationMinutes,
-                        Resources = lesFiles.Select(f => MapNodeToResourcePreview(f, config.SkillKeywordRules, "LessonFolder")).ToList()
+                        secOrder++;
+                        var skillNode = skillEntry.Node;
+                        var skillRelPath = skillEntry.RelPath;
+                        var skillPathPrefix = GetEffectiveNodePath(skillNode.RawPath, skillNode.Name);
+
+                        // Format compound section title: "Chặng 1 - Chữ Hán", "Chặng 1 - Ngữ Pháp"
+                        var cleanSkillTitle = CleanLeadingOrder(skillNode.Name);
+                        var compoundSecTitle = $"{stageNode.Name} - {cleanSkillTitle}";
+
+                        var sectionDto = new AutoBuildSectionPreviewDto
+                        {
+                            Title = compoundSecTitle,
+                            DisplayOrder = secOrder,
+                            LessonNumber = stageNum,
+                            Lessons = new List<AutoBuildLessonPreviewDto>()
+                        };
+
+                        // Separate Level 3 folders into Chapter/Topic folders vs Documentation/Material folders
+                        var allLevel3Folders = folderMap.Values
+                            .Where(f => f.RelDepth == 3 && (
+                                f.RelPath.StartsWith(skillRelPath + "/", StringComparison.OrdinalIgnoreCase) ||
+                                GetEffectiveNodePath(f.Node.RawPath, f.Node.Name).StartsWith(skillPathPrefix + "/", StringComparison.OrdinalIgnoreCase) ||
+                                f.Node.ParentNodeId == skillNode.Id
+                            ))
+                            .OrderBy(f => ExtractNaturalSortKey(f.Node.Name), StringComparer.OrdinalIgnoreCase)
+                            .ToList();
+
+                        bool IsDocFolder(SubtreeNodeItem n) => Regex.IsMatch(n.Name, @"^(?:0\.\s*)?(?:tài liệu|tai lieu|document|docs|sách|sach|giao trinh|giáo trình)", RegexOptions.IgnoreCase);
+
+                        var docFolders = allLevel3Folders.Where(f => IsDocFolder(f.Node)).ToList();
+                        var chapterFolders = allLevel3Folders.Where(f => !IsDocFolder(f.Node)).ToList();
+
+                        // Files inside docFolders (e.g., 0. Tài liệu / Chương 1.pdf ... Chương 8.pdf)
+                        var docFiles = files.Where(f =>
+                        {
+                            var fp = GetEffectiveNodePath(f.RawPath, f.Name);
+                            return docFolders.Any(df => f.ParentNodeId == df.Node.Id || fp.StartsWith(GetEffectiveNodePath(df.Node.RawPath, df.Node.Name) + "/", StringComparison.OrdinalIgnoreCase));
+                        }).ToList();
+
+                        var handledDocFileIds = new HashSet<Guid>();
+
+                        // Direct files under this Skill folder (not inside any chapter or doc folder)
+                        var directSkillFiles = files.Where(f =>
+                        {
+                            var fp = GetEffectiveNodePath(f.RawPath, f.Name);
+                            return (f.ParentNodeId == skillNode.Id || fp.StartsWith(skillPathPrefix + "/", StringComparison.OrdinalIgnoreCase)) &&
+                                   !chapterFolders.Any(cf => fp.StartsWith(GetEffectiveNodePath(cf.Node.RawPath, cf.Node.Name) + "/", StringComparison.OrdinalIgnoreCase)) &&
+                                   !docFolders.Any(df => fp.StartsWith(GetEffectiveNodePath(df.Node.RawPath, df.Node.Name) + "/", StringComparison.OrdinalIgnoreCase));
+                        })
+                        .OrderBy(f => ExtractNaturalSortKey(f.Name), StringComparer.OrdinalIgnoreCase)
+                        .ToList();
+
+                        int lesOrder = 0;
+
+                        if (chapterFolders.Count > 0)
+                        {
+                            foreach (var chEntry in chapterFolders)
+                            {
+                                lesOrder++;
+                                var chNode = chEntry.Node;
+                                var chPathPrefix = GetEffectiveNodePath(chNode.RawPath, chNode.Name);
+
+                                // All files under this chapter folder
+                                var chFiles = files.Where(f =>
+                                {
+                                    var fp = GetEffectiveNodePath(f.RawPath, f.Name);
+                                    return f.ParentNodeId == chNode.Id ||
+                                           fp.StartsWith(chPathPrefix + "/", StringComparison.OrdinalIgnoreCase) ||
+                                           fp.Equals(chPathPrefix, StringComparison.OrdinalIgnoreCase);
+                                })
+                                .OrderBy(f => ExtractNaturalSortKey(f.Name), StringComparer.OrdinalIgnoreCase)
+                                .ToList();
+
+                                // Match corresponding PDF/Docs from 0. Tài liệu folder (e.g., Chương 1.pdf into Lesson Chương 1)
+                                int chNum = ExtractLessonNumber(chNode.Name, -1);
+                                var matchedDocs = docFiles.Where(df =>
+                                {
+                                    if (df.Name.Contains(chNode.Name, StringComparison.OrdinalIgnoreCase)) return true;
+                                    if (chNum > 0 && Regex.IsMatch(df.Name, $@"(?:chuong|c|chương|bai|b)[\s_\-\.]*0*{chNum}(?!\d)", RegexOptions.IgnoreCase)) return true;
+                                    return false;
+                                }).ToList();
+
+                                foreach (var mDoc in matchedDocs)
+                                {
+                                    handledDocFileIds.Add(mDoc.Id);
+                                }
+
+                                var combinedFiles = chFiles
+                                    .Concat(matchedDocs.Where(d => !chFiles.Any(cf => cf.Id == d.Id)))
+                                    .OrderBy(f => ExtractNaturalSortKey(f.Name), StringComparer.OrdinalIgnoreCase)
+                                    .ToList();
+
+                                string skillTag = DetectSkillFromPath(chPathPrefix, config.SkillKeywordRules);
+                                if (skillTag == "Tổng hợp") skillTag = DetectSkillFromPath(skillNode.Name, config.SkillKeywordRules);
+
+                                var lessonDto = new AutoBuildLessonPreviewDto
+                                {
+                                    Title = chNode.Name, // Clean chapter/topic title (Chương 1, Tanbun, Mondai 1...)
+                                    FlowOrder = lesOrder,
+                                    Skill = skillTag,
+                                    EstimatedDurationMinutes = config.DefaultLessonDurationMinutes,
+                                    Resources = combinedFiles.Select(f => MapNodeToResourcePreview(f, config.SkillKeywordRules, "LessonFolder")).ToList()
+                                };
+
+                                sectionDto.Lessons.Add(lessonDto);
+                                totalFilesCount += lessonDto.Resources.Count;
+                            }
+
+                            // Leftover unmapped doc files and direct skill files
+                            var unmappedDocFiles = docFiles.Where(df => !handledDocFileIds.Contains(df.Id)).ToList();
+                            var remainingFiles = directSkillFiles.Concat(unmappedDocFiles).OrderBy(f => ExtractNaturalSortKey(f.Name), StringComparer.OrdinalIgnoreCase).ToList();
+
+                            if (remainingFiles.Count > 0)
+                            {
+                                lesOrder++;
+                                var looseLesson = new AutoBuildLessonPreviewDto
+                                {
+                                    Title = "Tài liệu & Video bổ trợ",
+                                    FlowOrder = lesOrder,
+                                    Skill = DetectSkillFromPath(skillNode.Name, config.SkillKeywordRules),
+                                    EstimatedDurationMinutes = config.DefaultLessonDurationMinutes,
+                                    Resources = remainingFiles.Select(f => MapNodeToResourcePreview(f, config.SkillKeywordRules, "LessonFolder")).ToList()
+                                };
+                                sectionDto.Lessons.Add(looseLesson);
+                                totalFilesCount += looseLesson.Resources.Count;
+                            }
+                        }
+                        else
+                        {
+                            // Skill folder has NO chapter subfolders (e.g. only 0. Tài liệu / file1.pdf, file2.pdf and/or loose files)
+                            var allAvailableFiles = directSkillFiles.Concat(docFiles).OrderBy(f => ExtractNaturalSortKey(f.Name), StringComparer.OrdinalIgnoreCase).ToList();
+
+                            if (config.IncludeLeafFilesAsLessons && allAvailableFiles.Count > 1)
+                            {
+                                foreach (var f in allAvailableFiles)
+                                {
+                                    lesOrder++;
+                                    var lessonDto = new AutoBuildLessonPreviewDto
+                                    {
+                                        Title = Path.GetFileNameWithoutExtension(f.Name),
+                                        FlowOrder = lesOrder,
+                                        Skill = DetectSkillFromPath(f.Name, config.SkillKeywordRules),
+                                        EstimatedDurationMinutes = config.DefaultLessonDurationMinutes,
+                                        Resources = new List<AutoBuildResourcePreviewDto> { MapNodeToResourcePreview(f, config.SkillKeywordRules, "LessonFolder") }
+                                    };
+                                    sectionDto.Lessons.Add(lessonDto);
+                                    totalFilesCount++;
+                                }
+                            }
+                            else if (allAvailableFiles.Count > 0)
+                            {
+                                lesOrder++;
+                                var lessonDto = new AutoBuildLessonPreviewDto
+                                {
+                                    Title = cleanSkillTitle,
+                                    FlowOrder = lesOrder,
+                                    Skill = DetectSkillFromPath(skillNode.Name, config.SkillKeywordRules),
+                                    EstimatedDurationMinutes = config.DefaultLessonDurationMinutes,
+                                    Resources = allAvailableFiles.Select(f => MapNodeToResourcePreview(f, config.SkillKeywordRules, "LessonFolder")).ToList()
+                                };
+                                sectionDto.Lessons.Add(lessonDto);
+                                totalFilesCount += lessonDto.Resources.Count;
+                            }
+                        }
+
+                        totalLessonsCount += sectionDto.Lessons.Count;
+                        result.Sections.Add(sectionDto);
+                    }
+                }
+                else
+                {
+                    // Stage folder without level 2 subfolders (only direct files or flat)
+                    secOrder++;
+                    var sectionDto = new AutoBuildSectionPreviewDto
+                    {
+                        Title = stageNode.Name,
+                        DisplayOrder = secOrder,
+                        LessonNumber = stageNum,
+                        Lessons = new List<AutoBuildLessonPreviewDto>()
                     };
 
-                    sectionDto.Lessons.Add(lessonDto);
-                    totalFilesCount += lessonDto.Resources.Count;
-                }
-
-                // If there are also loose leaf files directly under the Section folder
-                if (directSecFiles.Count > 0)
-                {
-                    lesOrder++;
-                    var looseSkill = DetectSkillFromPath(directSecFiles[0].Name, config.SkillKeywordRules);
-                    var looseLesson = new AutoBuildLessonPreviewDto
+                    var directStageFiles = files.Where(f =>
                     {
-                        Title = "Tài liệu & Video bổ trợ",
-                        FlowOrder = lesOrder,
-                        Skill = looseSkill,
-                        EstimatedDurationMinutes = config.DefaultLessonDurationMinutes,
-                        Resources = directSecFiles.Select(f => MapNodeToResourcePreview(f, config.SkillKeywordRules, "LessonFolder")).ToList()
-                    };
-                    sectionDto.Lessons.Add(looseLesson);
-                    totalFilesCount += looseLesson.Resources.Count;
-                }
-            }
-            else
-            {
-                // No subfolders: Each file becomes a lesson OR all files grouped into 1-2 lessons
-                if (config.IncludeLeafFilesAsLessons && directSecFiles.Count > 1)
-                {
-                    // Natural sort the files
-                    var sortedFiles = directSecFiles.OrderBy(f => ExtractNaturalSortKey(f.Name), StringComparer.OrdinalIgnoreCase).ToList();
-                    foreach (var f in sortedFiles)
+                        var fp = GetEffectiveNodePath(f.RawPath, f.Name);
+                        return f.ParentNodeId == stageNode.Id || fp.StartsWith(stagePathPrefix + "/", StringComparison.OrdinalIgnoreCase);
+                    })
+                    .OrderBy(f => ExtractNaturalSortKey(f.Name), StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                    int lesOrder = 0;
+                    if (config.IncludeLeafFilesAsLessons && directStageFiles.Count > 1)
+                    {
+                        foreach (var f in directStageFiles)
+                        {
+                            lesOrder++;
+                            var lessonDto = new AutoBuildLessonPreviewDto
+                            {
+                                Title = Path.GetFileNameWithoutExtension(f.Name),
+                                FlowOrder = lesOrder,
+                                Skill = DetectSkillFromPath(f.Name, config.SkillKeywordRules),
+                                EstimatedDurationMinutes = config.DefaultLessonDurationMinutes,
+                                Resources = new List<AutoBuildResourcePreviewDto> { MapNodeToResourcePreview(f, config.SkillKeywordRules, "LessonFolder") }
+                            };
+                            sectionDto.Lessons.Add(lessonDto);
+                            totalFilesCount++;
+                        }
+                    }
+                    else if (directStageFiles.Count > 0)
                     {
                         lesOrder++;
-                        string skill = DetectSkillFromPath($"{secPathPrefix}/{f.Name}", config.SkillKeywordRules);
                         var lessonDto = new AutoBuildLessonPreviewDto
                         {
-                            Title = Path.GetFileNameWithoutExtension(f.Name),
+                            Title = stageNode.Name,
+                            FlowOrder = lesOrder,
+                            Skill = DetectSkillFromPath(stageNode.Name, config.SkillKeywordRules),
+                            EstimatedDurationMinutes = config.DefaultLessonDurationMinutes,
+                            Resources = directStageFiles.Select(f => MapNodeToResourcePreview(f, config.SkillKeywordRules, "LessonFolder")).ToList()
+                        };
+                        sectionDto.Lessons.Add(lessonDto);
+                        totalFilesCount += lessonDto.Resources.Count;
+                    }
+
+                    totalLessonsCount += sectionDto.Lessons.Count;
+                    result.Sections.Add(sectionDto);
+                }
+            }
+        }
+        // ═════════════════════════════════════════════════════════════════════
+        //  MODE B: SINGLE-DEPTH / CUSTOM MAPPING (Minna, Flat Chapters, Custom)
+        // ═════════════════════════════════════════════════════════════════════
+        else
+        {
+            var targetSecDepth = Math.Max(1, config.SectionFolderDepth);
+            var targetLesDepth = Math.Max(targetSecDepth + 1, config.LessonFolderDepth);
+
+            var sectionFolderEntries = folderMap.Values
+                .Where(f => f.RelDepth == targetSecDepth)
+                .OrderBy(f => ExtractNaturalSortKey(f.Node.Name), StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (sectionFolderEntries.Count == 0)
+            {
+                sectionFolderEntries = folderMap.Values
+                    .Where(f => f.RelDepth == 1)
+                    .OrderBy(f => ExtractNaturalSortKey(f.Node.Name), StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+            }
+
+            foreach (var secEntry in sectionFolderEntries)
+            {
+                secOrder++;
+                var secNode = secEntry.Node;
+                var secPathPrefix = GetEffectiveNodePath(secNode.RawPath, secNode.Name);
+                int lessonNum = ExtractLessonNumber(secNode.Name, secOrder);
+
+                var sectionDto = new AutoBuildSectionPreviewDto
+                {
+                    Title = secNode.Name,
+                    DisplayOrder = secOrder,
+                    LessonNumber = lessonNum,
+                    Lessons = new List<AutoBuildLessonPreviewDto>()
+                };
+
+                // STRICT FILTERING: Only lesson folders at targetLesDepth or immediate children without mixing ancestors
+                var lessonFolderCandidates = folderMap.Values
+                    .Where(f => f.RelDepth == targetLesDepth && (
+                        f.RelPath.StartsWith(secEntry.RelPath + "/", StringComparison.OrdinalIgnoreCase) ||
+                        GetEffectiveNodePath(f.Node.RawPath, f.Node.Name).StartsWith(secPathPrefix + "/", StringComparison.OrdinalIgnoreCase) ||
+                        f.Node.ParentNodeId == secNode.Id
+                    ))
+                    .OrderBy(f => ExtractNaturalSortKey(f.Node.Name), StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                // If no folders at targetLesDepth, check immediate child folders
+                if (lessonFolderCandidates.Count == 0)
+                {
+                    lessonFolderCandidates = folderMap.Values
+                        .Where(f => f.RelDepth == secEntry.RelDepth + 1 && (
+                            f.RelPath.StartsWith(secEntry.RelPath + "/", StringComparison.OrdinalIgnoreCase) ||
+                            GetEffectiveNodePath(f.Node.RawPath, f.Node.Name).StartsWith(secPathPrefix + "/", StringComparison.OrdinalIgnoreCase) ||
+                            f.Node.ParentNodeId == secNode.Id
+                        ))
+                        .OrderBy(f => ExtractNaturalSortKey(f.Node.Name), StringComparer.OrdinalIgnoreCase)
+                        .ToList();
+                }
+
+                // Direct files under this section
+                var directSecFiles = files.Where(f =>
+                {
+                    var fp = GetEffectiveNodePath(f.RawPath, f.Name);
+                    return (f.ParentNodeId == secNode.Id || fp.StartsWith(secPathPrefix + "/", StringComparison.OrdinalIgnoreCase)) &&
+                           !lessonFolderCandidates.Any(lf => fp.StartsWith(GetEffectiveNodePath(lf.Node.RawPath, lf.Node.Name) + "/", StringComparison.OrdinalIgnoreCase));
+                })
+                .OrderBy(f => ExtractNaturalSortKey(f.Name), StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+                int lesOrder = 0;
+
+                if (lessonFolderCandidates.Count > 0)
+                {
+                    foreach (var lesEntry in lessonFolderCandidates)
+                    {
+                        lesOrder++;
+                        var lesNode = lesEntry.Node;
+                        var lesPathPrefix = GetEffectiveNodePath(lesNode.RawPath, lesNode.Name);
+
+                        var lesFiles = files.Where(f =>
+                        {
+                            var fp = GetEffectiveNodePath(f.RawPath, f.Name);
+                            return f.ParentNodeId == lesNode.Id ||
+                                   fp.StartsWith(lesPathPrefix + "/", StringComparison.OrdinalIgnoreCase) ||
+                                   fp.Equals(lesPathPrefix, StringComparison.OrdinalIgnoreCase);
+                        })
+                        .OrderBy(f => ExtractNaturalSortKey(f.Name), StringComparer.OrdinalIgnoreCase)
+                        .ToList();
+
+                        string skillTag = DetectSkillFromPath(lesPathPrefix, config.SkillKeywordRules);
+
+                        var lessonDto = new AutoBuildLessonPreviewDto
+                        {
+                            Title = lesNode.Name,
+                            FlowOrder = lesOrder,
+                            Skill = skillTag,
+                            EstimatedDurationMinutes = config.DefaultLessonDurationMinutes,
+                            Resources = lesFiles.Select(f => MapNodeToResourcePreview(f, config.SkillKeywordRules, "LessonFolder")).ToList()
+                        };
+
+                        sectionDto.Lessons.Add(lessonDto);
+                        totalFilesCount += lessonDto.Resources.Count;
+                    }
+
+                    if (directSecFiles.Count > 0)
+                    {
+                        lesOrder++;
+                        var looseLesson = new AutoBuildLessonPreviewDto
+                        {
+                            Title = "Tài liệu & Video bổ trợ",
+                            FlowOrder = lesOrder,
+                            Skill = DetectSkillFromPath(directSecFiles[0].Name, config.SkillKeywordRules),
+                            EstimatedDurationMinutes = config.DefaultLessonDurationMinutes,
+                            Resources = directSecFiles.Select(f => MapNodeToResourcePreview(f, config.SkillKeywordRules, "LessonFolder")).ToList()
+                        };
+                        sectionDto.Lessons.Add(looseLesson);
+                        totalFilesCount += looseLesson.Resources.Count;
+                    }
+                }
+                else
+                {
+                    if (config.IncludeLeafFilesAsLessons && directSecFiles.Count > 1)
+                    {
+                        foreach (var f in directSecFiles)
+                        {
+                            lesOrder++;
+                            string skill = DetectSkillFromPath($"{secPathPrefix}/{f.Name}", config.SkillKeywordRules);
+                            var lessonDto = new AutoBuildLessonPreviewDto
+                            {
+                                Title = Path.GetFileNameWithoutExtension(f.Name),
+                                FlowOrder = lesOrder,
+                                Skill = skill,
+                                EstimatedDurationMinutes = config.DefaultLessonDurationMinutes,
+                                Resources = new List<AutoBuildResourcePreviewDto> { MapNodeToResourcePreview(f, config.SkillKeywordRules, "LessonFolder") }
+                            };
+                            sectionDto.Lessons.Add(lessonDto);
+                            totalFilesCount++;
+                        }
+                    }
+                    else if (directSecFiles.Count > 0)
+                    {
+                        lesOrder++;
+                        string skill = DetectSkillFromPath(secPathPrefix, config.SkillKeywordRules);
+                        var lessonDto = new AutoBuildLessonPreviewDto
+                        {
+                            Title = secNode.Name,
                             FlowOrder = lesOrder,
                             Skill = skill,
                             EstimatedDurationMinutes = config.DefaultLessonDurationMinutes,
-                            Resources = new List<AutoBuildResourcePreviewDto> { MapNodeToResourcePreview(f, config.SkillKeywordRules, "LessonFolder") }
+                            Resources = directSecFiles.Select(f => MapNodeToResourcePreview(f, config.SkillKeywordRules, "LessonFolder")).ToList()
                         };
                         sectionDto.Lessons.Add(lessonDto);
-                        totalFilesCount++;
+                        totalFilesCount += lessonDto.Resources.Count;
                     }
                 }
-                else if (directSecFiles.Count > 0)
+
+                // Cross-folder matching for standard Minna sections
+                bool isMatchableSection = Regex.IsMatch(secNode.Name, @"(?:bai|b|lesson|chuong|chương)[\s_-]*\d+", RegexOptions.IgnoreCase);
+                if (config.EnableCrossFolderMatching && isMatchableSection && lessonNum > 0)
                 {
-                    lesOrder++;
-                    string skill = DetectSkillFromPath(secPathPrefix, config.SkillKeywordRules);
-                    var lessonDto = new AutoBuildLessonPreviewDto
-                    {
-                        Title = secNode.Name,
-                        FlowOrder = lesOrder,
-                        Skill = skill,
-                        EstimatedDurationMinutes = config.DefaultLessonDurationMinutes,
-                        Resources = directSecFiles.Select(f => MapNodeToResourcePreview(f, config.SkillKeywordRules, "LessonFolder")).ToList()
-                    };
-                    sectionDto.Lessons.Add(lessonDto);
-                    totalFilesCount += lessonDto.Resources.Count;
-                }
-            }
-
-            // ═════════════════════════════════════════════════════════════════
-            //  CROSS-FOLDER MATCHING (e.g. Tổng hợp ngữ pháp bài 25-50 minna, tài liệu chương 1)
-            // ═════════════════════════════════════════════════════════════════
-            bool isMatchableSection = Regex.IsMatch(secNode.Name, @"(?:bai|b|lesson|chuong|chương)[\s_-]*\d+", RegexOptions.IgnoreCase);
-            if (config.EnableCrossFolderMatching && isMatchableSection && lessonNum > 0)
-            {
-                var crossFiles = subtreeNodes
-                    .Where(n => n.NodeType == NodeType.File)
-                    .Where(n =>
-                    {
-                        var ext = (n.FileExtension ?? Path.GetExtension(n.Name) ?? "").ToLowerInvariant();
-                        // Only documents/exercise files are eligible for cross-folder matching, NOT videos
-                        if (ext != ".pdf" && ext != ".docx" && ext != ".doc" && ext != ".xlsx") return false;
-
-                        var fp = GetEffectiveNodePath(n.RawPath, n.Name);
-                        // Must not be already inside this section's path
-                        if (fp.StartsWith(secPathPrefix + "/", StringComparison.OrdinalIgnoreCase) || fp.Equals(secPathPrefix, StringComparison.OrdinalIgnoreCase)) return false;
-
-                        // Must match the lesson number strictly e.g. "bai 26", "b26", "chuong 1"
-                        var numStr = lessonNum.ToString();
-                        return Regex.IsMatch(fp, $@"(?:bai|b|lesson|chuong)[\s_-]*0*{numStr}(?!\d)", RegexOptions.IgnoreCase);
-                    })
-                    .ToList();
-
-                if (crossFiles.Count > 0)
-                {
-                    // Append these resources to the first grammar/vocabulary lesson or create a dedicated resource entry
-                    var targetLesson = sectionDto.Lessons.FirstOrDefault(l => l.Skill.Contains("Grammar") || l.Skill.Contains("Vocabulary"))
-                                    ?? sectionDto.Lessons.FirstOrDefault();
-
-                    if (targetLesson != null)
-                    {
-                        foreach (var cf in crossFiles)
+                    var crossFiles = subtreeNodes
+                        .Where(n => n.NodeType == NodeType.File)
+                        .Where(n =>
                         {
-                            if (!targetLesson.Resources.Any(r => r.DriveNodeId == cf.Id))
+                            var ext = (n.FileExtension ?? Path.GetExtension(n.Name) ?? "").ToLowerInvariant();
+                            if (ext != ".pdf" && ext != ".docx" && ext != ".doc" && ext != ".xlsx") return false;
+
+                            var fp = GetEffectiveNodePath(n.RawPath, n.Name);
+                            if (fp.StartsWith(secPathPrefix + "/", StringComparison.OrdinalIgnoreCase) || fp.Equals(secPathPrefix, StringComparison.OrdinalIgnoreCase)) return false;
+
+                            var numStr = lessonNum.ToString();
+                            return Regex.IsMatch(fp, $@"(?:bai|b|lesson|chuong)[\s_-]*0*{numStr}(?!\d)", RegexOptions.IgnoreCase);
+                        })
+                        .ToList();
+
+                    if (crossFiles.Count > 0)
+                    {
+                        var targetLesson = sectionDto.Lessons.FirstOrDefault(l => l.Skill.Contains("Grammar") || l.Skill.Contains("Vocabulary"))
+                                        ?? sectionDto.Lessons.FirstOrDefault();
+
+                        if (targetLesson != null)
+                        {
+                            foreach (var cf in crossFiles)
                             {
-                                var resPreview = MapNodeToResourcePreview(cf, config.SkillKeywordRules, "CrossFolder");
-                                targetLesson.Resources.Add(resPreview);
-                                totalFilesCount++;
+                                if (!targetLesson.Resources.Any(r => r.DriveNodeId == cf.Id))
+                                {
+                                    var resPreview = MapNodeToResourcePreview(cf, config.SkillKeywordRules, "CrossFolder");
+                                    targetLesson.Resources.Add(resPreview);
+                                    totalFilesCount++;
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            totalLessonsCount += sectionDto.Lessons.Count;
-            result.Sections.Add(sectionDto);
+                totalLessonsCount += sectionDto.Lessons.Count;
+                result.Sections.Add(sectionDto);
+            }
         }
 
         result.TotalSections = result.Sections.Count;
@@ -756,6 +1074,27 @@ public class FolderCourseBuilderService : IFolderCourseBuilderService
     //  HELPER METHODS
     // ═════════════════════════════════════════════════════════════════════════
 
+    /// <summary>
+    /// Cắt bỏ số thứ tự thừa ở đầu tên folder con khi nối chuỗi (VD: "1. Chữ hán" -> "Chữ Hán", "02_Ngữ pháp" -> "Ngữ Pháp")
+    /// </summary>
+    private static string CleanLeadingOrder(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return string.Empty;
+        var trimmed = name.Trim();
+        // Regex strips "1. ", "01. ", "1 - ", "01_ ", "1) ", "1.Chữ Hán"
+        var cleaned = Regex.Replace(trimmed, @"^\s*(?:\d+[\s\.\-_:\)]+|\d+\s+)", "").Trim();
+        if (string.IsNullOrWhiteSpace(cleaned)) return trimmed;
+
+        try
+        {
+            return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(cleaned);
+        }
+        catch
+        {
+            return char.ToUpper(cleaned[0]) + cleaned.Substring(1);
+        }
+    }
+
     private static string CleanPath(string? path)
     {
         if (string.IsNullOrWhiteSpace(path)) return string.Empty;
@@ -790,13 +1129,6 @@ public class FolderCourseBuilderService : IFolderCourseBuilderService
             return true;
 
         return false;
-    }
-
-    private static string NormalizePath(string? path)
-    {
-        if (string.IsNullOrWhiteSpace(path)) return string.Empty;
-        var p = path.Replace('\\', '/').Trim();
-        return RemoveDiacritics(p);
     }
 
     private static string RemoveDiacritics(string text)
@@ -854,7 +1186,7 @@ public class FolderCourseBuilderService : IFolderCourseBuilderService
         if (norm.Contains("tu vung") || norm.Contains("kotoba")) return "Vocabulary";
         if (norm.Contains("ngu phap") || norm.Contains("bunpou")) return "Grammar";
         if (norm.Contains("nghe") || norm.Contains("choukai") || norm.Contains("mondai")) return "Choukai";
-        if (norm.Contains("doc") || norm.Contains("dokkai") || norm.Contains("tanbun") || norm.Contains("choubun")) return "Dokkai";
+        if (norm.Contains("doc") || norm.Contains("dokkai") || norm.Contains("tanbun") || norm.Contains("chuubun") || norm.Contains("choubun")) return "Dokkai";
         if (norm.Contains("hoi thoai") || norm.Contains("kaiwa")) return "Kaiwa";
         if (norm.Contains("de thi") || norm.Contains("thi thu") || norm.Contains("test")) return "Quiz";
 
@@ -919,7 +1251,7 @@ public class FolderCourseBuilderService : IFolderCourseBuilderService
 
     private static string ExtractNaturalSortKey(string input)
     {
-        // Padds numbers with leading zeros for natural string sorting (e.g. "Chương 2" -> "Chương 0000000002")
+        // Pads numbers with leading zeros for natural string sorting (e.g. "Chương 2" -> "Chương 0000000002")
         return Regex.Replace(input, @"\d+", m => m.Value.PadLeft(10, '0'));
     }
 
@@ -1017,13 +1349,5 @@ public class FolderCourseBuilderService : IFolderCourseBuilderService
         public string MimeType { get; set; } = string.Empty;
         public long? Size { get; set; }
         public string? WebViewLink { get; set; }
-    }
-
-    private class NaturalStringComparer : IComparer<string>
-    {
-        public int Compare(string? x, string? y)
-        {
-            return string.Compare(x, y, StringComparison.OrdinalIgnoreCase);
-        }
     }
 }

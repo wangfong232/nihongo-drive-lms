@@ -273,6 +273,9 @@ export interface FolderMappingConfig {
   courseTitle: string;
   jlptLevel: string;
   presetName: string;
+  sectionGroupingMode?: string;
+  combineParentStages?: boolean;
+  aiAnalysisRationale?: string;
   sectionFolderDepth: number;
   lessonFolderDepth: number;
   includeLeafFilesAsLessons: boolean;

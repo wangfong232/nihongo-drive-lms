@@ -14,6 +14,15 @@ public class FolderMappingConfigDto
     public string JlptLevel { get; set; } = "N4";
     public string PresetName { get; set; } = "auto"; // "minna-lesson", "stage-skill-chapter", "flat-chapters", "custom"
 
+    /// <summary>Chế độ gom nhóm Section: "combine-stage-skill" (Gộp Chặng + Kỹ năng), "single-folder", "flat-chapters", "custom"</summary>
+    public string SectionGroupingMode { get; set; } = "combine-stage-skill";
+
+    /// <summary>Gộp tên thư mục cha cấp trên vào tên Section (Ví dụ: "Chặng 1 - Chữ Hán", "Chặng 1 - Ngữ Pháp")</summary>
+    public bool CombineParentStages { get; set; } = true;
+
+    /// <summary>Giải thích hoặc phản hồi từ AI khi phân tích cây</summary>
+    public string? AiAnalysisRationale { get; set; }
+
     /// <summary>Độ sâu tương đối của thư mục làm Section (1-based relative to root)</summary>
     public int SectionFolderDepth { get; set; } = 1;
 
