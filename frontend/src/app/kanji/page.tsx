@@ -444,65 +444,57 @@ export default function KanjiHubPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-900/5 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+    <div className="min-h-screen flex flex-col bg-[#f8f9ff] dark:bg-[#090d16] text-[#0b1c30] dark:text-slate-100 font-sans">
       <Header />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col gap-6 pt-20">
-        {/* Header Title Banner */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="px-2.5 py-0.5 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400 text-[10px] font-extrabold uppercase tracking-wider">
-                Kanji Master Hub
-              </span>
-              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-                <span className="text-orange-500 font-black text-2xl">漢</span>
-                Kho Tra Cứu & Luyện Viết Chữ Hán
-              </h1>
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 md:p-8 flex flex-col gap-5 pt-20">
+        {/* ── 1. Top Bento Hub Header ── */}
+        <div className="bento-card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div className="w-11 h-11 rounded-2xl bg-orange-500/10 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 flex items-center justify-center font-black text-2xl shrink-0 border border-orange-200/60 dark:border-orange-800/40 shadow-xs">
+              漢
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Tổng hợp Chữ Hán JLPT N5 — N1, phân loại theo 214 Bộ thủ, tra cứu Âm Hán Việt, On/Kun, tự thêm & import CSV hàng loạt và luyện viết từng nét với hoạt ảnh tương tác.
-            </p>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-lg sm:text-xl font-black text-[#0b1c30] dark:text-white tracking-tight">
+                  Kho Tra Cứu & Luyện Viết Chữ Hán
+                </h1>
+                <span className="px-2.5 py-0.5 rounded-full bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 font-extrabold text-[11px] border border-orange-200 dark:border-orange-800">
+                  {filteredKanjiList.length} chữ Hán
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                Tổng hợp Chữ Hán JLPT N5 — N1, phân loại 214 Bộ thủ, tra cứu Âm Hán Việt, On/Kun & luyện viết từng nét tương tác.
+              </p>
+            </div>
           </div>
 
-          {/* Quick Actions & Stats */}
-          <div className="flex items-center gap-2.5 flex-wrap">
+          {/* Action Pills */}
+          <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
             <button
               onClick={() => {
                 setImportText("");
                 setParsedImportList([]);
                 setShowImportModal(true);
               }}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-500/20 transition-all active:scale-95 cursor-pointer"
+              className="btn-tactile-emerald px-4 py-2 text-xs font-black flex items-center gap-1.5 cursor-pointer"
             >
-              <FileSpreadsheet className="w-4 h-4" />
+              <FileSpreadsheet className="w-3.5 h-3.5" />
               <span>Import CSV / Excel</span>
             </button>
 
             <button
               onClick={() => handleOpenAddModal()}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-bold text-xs shadow-md shadow-orange-500/20 transition-all active:scale-95 cursor-pointer"
+              className="btn-tactile-amber px-4 py-2 text-xs font-black flex items-center gap-1.5 cursor-pointer"
             >
-              <Plus className="w-4 h-4" />
-              <span>Thêm Chữ Hán Mới</span>
+              <Plus className="w-3.5 h-3.5" />
+              <span>Thêm Chữ Hán</span>
             </button>
-
-            <div className="px-3.5 py-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center font-black text-sm">
-                {filteredKanjiList.length}
-              </div>
-              <div className="text-left">
-                <span className="block text-[10px] text-slate-400 font-bold uppercase">Chữ Hán Hiển Thị</span>
-                <span className="text-xs font-black text-slate-900 dark:text-white">
-                  {selectedJlpt === "all" ? "Tất cả cấp độ" : `Cấp độ ${selectedJlpt}`}
-                </span>
-              </div>
-            </div>
           </div>
         </div>
 
-        {/* ─── Search & Filters Control Center ─────────────────────────────── */}
-        <div className="p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-md flex flex-col gap-4">
+        {/* ── 2. Search & Filters Bento Control Center ── */}
+        <div className="bento-card p-4 sm:p-5 flex flex-col gap-3.5 shadow-sm">
           {/* Top Row: Search input & JLPT level tabs */}
           <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
             {/* JLPT Level Tabs + Favorite Filter */}
@@ -514,37 +506,40 @@ export default function KanjiHubPage() {
                 { id: "N3", label: "JLPT N3" },
                 { id: "N2", label: "JLPT N2" },
                 { id: "N1", label: "JLPT N1" },
-              ].map((lvl) => (
-                <button
-                  key={lvl.id}
-                  onClick={() => {
-                    setShowFavoritesOnly(false);
-                    setShowCustomOnly(false);
-                    setSelectedJlpt(lvl.id);
-                  }}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                    !showFavoritesOnly && !showCustomOnly && selectedJlpt === lvl.id
-                      ? "bg-orange-600 text-white shadow-md shadow-orange-500/20"
-                      : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                  }`}
-                >
-                  {lvl.label}
-                </button>
-              ))}
+              ].map((lvl) => {
+                const isSelected = !showFavoritesOnly && !showCustomOnly && selectedJlpt === lvl.id;
+                return (
+                  <button
+                    key={lvl.id}
+                    onClick={() => {
+                      setShowFavoritesOnly(false);
+                      setShowCustomOnly(false);
+                      setSelectedJlpt(lvl.id);
+                    }}
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                      isSelected
+                        ? "bg-[#fd761a] text-white shadow-[0_3px_0_#9d4300]"
+                        : "bg-[#eff4ff] hover:bg-[#dce9ff] dark:bg-slate-800 text-[#0b1c30] dark:text-slate-200 border border-[#d3e4fe] dark:border-slate-700 shadow-[0_2px_0_#d3e4fe] dark:shadow-[0_2px_0_#1e293b]"
+                    }`}
+                  >
+                    {lvl.label}
+                  </button>
+                );
+              })}
 
               <button
                 onClick={() => {
                   setShowCustomOnly(!showCustomOnly);
                   setShowFavoritesOnly(false);
                 }}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
                   showCustomOnly
-                    ? "bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/20"
-                    : "bg-indigo-500/10 border-indigo-500/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/20"
+                    ? "bg-purple-600 text-white shadow-[0_3px_0_#6d28d9]"
+                    : "bg-[#eff4ff] hover:bg-[#dce9ff] dark:bg-slate-800 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 shadow-[0_2px_0_#ddd6fe] dark:shadow-[0_2px_0_#581c87]"
                 }`}
               >
                 <Tag className="w-3.5 h-3.5" />
-                <span>Tự Thêm / Từ Vựng ({customKanjis.length})</span>
+                <span>Tự Thêm ({customKanjis.length})</span>
               </button>
 
               <button
@@ -552,10 +547,10 @@ export default function KanjiHubPage() {
                   setShowFavoritesOnly(!showFavoritesOnly);
                   setShowCustomOnly(false);
                 }}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
                   showFavoritesOnly
-                    ? "bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/20"
-                    : "bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20"
+                    ? "bg-amber-500 text-white shadow-[0_3px_0_#c2410c]"
+                    : "bg-[#eff4ff] hover:bg-[#dce9ff] dark:bg-slate-800 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 shadow-[0_2px_0_#fde68a] dark:shadow-[0_2px_0_#78350f]"
                 }`}
               >
                 <Star className="w-3.5 h-3.5 fill-current" />
@@ -566,20 +561,20 @@ export default function KanjiHubPage() {
             {/* Search Input & Stroke filter */}
             <div className="flex items-center gap-2 flex-1 max-w-md">
               <div className="relative flex-1">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-2.5 pointer-events-none" />
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3.5 top-2.5 pointer-events-none" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Tìm theo chữ Hán, Hán Việt, Romaji, nghĩa (VD: Nhật, nichi, người)..."
-                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                  placeholder="Tìm chữ Hán, Hán Việt, Romaji, nghĩa..."
+                  className="w-full pl-9 pr-3 py-2 rounded-full bg-[#eff4ff] dark:bg-slate-800 text-xs font-bold text-[#0b1c30] dark:text-white placeholder:text-slate-400 border border-[#d3e4fe] dark:border-slate-700 focus:border-orange-400 dark:focus:border-orange-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20 shadow-inner transition-all"
                 />
               </div>
 
               <select
                 value={strokeFilter}
                 onChange={(e) => setStrokeFilter(e.target.value)}
-                className="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white font-semibold focus:outline-none"
+                className="px-3 py-2 rounded-full bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white font-bold focus:outline-none shadow-2xs cursor-pointer"
               >
                 <option value="all">Số Nét: Tất Cả</option>
                 <option value="1-4">1 — 4 nét</option>
@@ -593,27 +588,27 @@ export default function KanjiHubPage() {
           {/* Bottom Row: 214 Radicals (Bộ Thủ) Horizontal Carousel */}
           <div className="flex flex-col gap-1.5 pt-3 border-t border-slate-100 dark:border-slate-800/80">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+              <span className="font-extrabold text-[#0b1c30] dark:text-slate-200 flex items-center gap-1.5">
                 <Layers className="w-3.5 h-3.5 text-orange-500" />
                 Lọc Theo Bộ Thủ Gốc:
               </span>
               {selectedRadical !== "all" && (
                 <button
                   onClick={() => setSelectedRadical("all")}
-                  className="text-orange-600 dark:text-orange-400 font-bold hover:underline"
+                  className="text-orange-600 dark:text-orange-400 font-black hover:underline cursor-pointer"
                 >
                   Xóa lọc bộ thủ (Hiện tất cả)
                 </button>
               )}
             </div>
 
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 custom-scrollbar">
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
               <button
                 onClick={() => setSelectedRadical("all")}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
+                className={`px-3 py-1.5 rounded-full text-xs font-bold shrink-0 transition-all cursor-pointer ${
                   selectedRadical === "all"
-                    ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900"
-                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
+                    ? "bg-[#0b1c30] dark:bg-white text-white dark:text-[#0b1c30] shadow-sm"
+                    : "bg-[#eff4ff] hover:bg-[#dce9ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-[#d3e4fe] dark:border-slate-700"
                 }`}
               >
                 Tất Cả Bộ Thủ
@@ -623,10 +618,10 @@ export default function KanjiHubPage() {
                 <button
                   key={rad.radical}
                   onClick={() => setSelectedRadical(rad.radical)}
-                  className={`px-2.5 py-1 rounded-xl text-xs font-bold shrink-0 flex items-center gap-1.5 transition-all border ${
+                  className={`px-2.5 py-1 rounded-full text-xs font-bold shrink-0 flex items-center gap-1.5 transition-all border cursor-pointer ${
                     selectedRadical === rad.radical
-                      ? "bg-orange-500/10 border-orange-500 text-orange-600 dark:text-orange-400 ring-1 ring-orange-500/40"
-                      : "bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-orange-400"
+                      ? "bg-orange-50 dark:bg-orange-950/40 border-orange-400 text-orange-700 dark:text-orange-300 shadow-2xs"
+                      : "bg-[#eff4ff]/60 hover:bg-[#dce9ff] dark:bg-slate-800/80 border-[#d3e4fe] dark:border-slate-700 text-slate-700 dark:text-slate-300"
                   }`}
                 >
                   <span className="text-sm font-black">{rad.radical}</span>
@@ -637,20 +632,20 @@ export default function KanjiHubPage() {
           </div>
         </div>
 
-        {/* ─── Kanji Cards Grid ────────────────────────────────────────────── */}
+        {/* ── 3. Kanji Cards Grid (Playful Bento Tiles) ── */}
         {filteredKanjiList.length === 0 ? (
-          <div className="p-12 text-center text-xs text-slate-400 border border-slate-200 dark:border-slate-800 rounded-3xl bg-white dark:bg-slate-900/60 flex flex-col items-center gap-3">
-            <p>Không tìm thấy chữ Hán nào phù hợp với bộ lọc hoặc từ khóa tìm kiếm.</p>
+          <div className="bento-card p-12 text-center text-xs text-slate-400 flex flex-col items-center gap-3">
+            <p className="font-semibold">Không tìm thấy chữ Hán nào phù hợp với bộ lọc hoặc từ khóa tìm kiếm.</p>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handleOpenAddModal()}
-                className="px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs"
+                className="btn-tactile-amber px-4 py-2 text-xs font-black cursor-pointer"
               >
                 + Thêm Chữ Hán Này Vào Kho
               </button>
               <button
                 onClick={() => setShowImportModal(true)}
-                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs"
+                className="btn-tactile-emerald px-4 py-2 text-xs font-black cursor-pointer"
               >
                 Import CSV / Excel
               </button>
@@ -664,20 +659,17 @@ export default function KanjiHubPage() {
                 <div
                   key={item.id}
                   onClick={() => setActiveKanji(item)}
-                  className="group p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-orange-500/50 dark:hover:border-orange-500/50 transition-all duration-200 cursor-pointer flex flex-col justify-between gap-3 relative overflow-hidden"
+                  className="bento-card p-4 hover:border-orange-300 dark:hover:border-orange-600 transition-all cursor-pointer flex flex-col justify-between gap-3 relative overflow-hidden group shadow-2xs active:scale-[0.99]"
                 >
-                  {/* Accent Hover Stripe */}
-                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 to-amber-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-
                   {/* Card Top: Kanji & Header */}
                   <div>
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="px-2 py-0.5 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 font-extrabold text-[10px]">
+                        <span className="px-2 py-0.5 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 font-black text-[10px]">
                           {item.jlpt}
                         </span>
                         {isCustom && (
-                          <span className="px-1.5 py-0.5 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold text-[9px] border border-indigo-500/20">
+                          <span className="px-1.5 py-0.5 rounded-md bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 font-bold text-[9px] border border-purple-200 dark:border-purple-800">
                             {item.id.startsWith("synced-vocab-") ? "Từ vựng" : "Tự thêm"}
                           </span>
                         )}
@@ -687,10 +679,10 @@ export default function KanjiHubPage() {
                             toggleKanjiFavorite(item.character);
                           }}
                           title={isKanjiFavorite(item.character) ? "Bỏ yêu thích" : "Lưu vào chữ Hán yêu thích"}
-                          className={`p-1 rounded-lg border transition-all ${
+                          className={`p-1 rounded-lg border transition-all cursor-pointer ${
                             isKanjiFavorite(item.character)
-                              ? "bg-amber-500/20 border-amber-500/40 text-amber-500"
-                              : "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 hover:text-amber-500"
+                              ? "bg-amber-50 border-amber-300 text-amber-500"
+                              : "bg-[#eff4ff] dark:bg-slate-800 border-[#d3e4fe] dark:border-slate-700 text-slate-400 hover:text-amber-500"
                           }`}
                         >
                           <Star className={`w-3 h-3 ${isKanjiFavorite(item.character) ? "fill-amber-500 text-amber-500" : ""}`} />
@@ -708,7 +700,7 @@ export default function KanjiHubPage() {
                                 e.stopPropagation();
                                 handleOpenAddModal(item);
                               }}
-                              className="p-1 rounded-md text-slate-400 hover:text-indigo-500"
+                              className="p-1 rounded-md text-slate-400 hover:text-purple-600 cursor-pointer"
                               title="Chỉnh sửa chữ Hán"
                             >
                               <Edit2 className="w-3 h-3" />
@@ -718,7 +710,7 @@ export default function KanjiHubPage() {
                                 e.stopPropagation();
                                 handleDeleteCustomKanji(item.id, item.character);
                               }}
-                              className="p-1 rounded-md text-slate-400 hover:text-rose-500"
+                              className="p-1 rounded-md text-slate-400 hover:text-rose-500 cursor-pointer"
                               title="Xóa khỏi kho"
                             >
                               <Trash2 className="w-3 h-3" />
@@ -729,14 +721,14 @@ export default function KanjiHubPage() {
                     </div>
 
                     <div className="flex items-center gap-3 my-2">
-                      <div className="w-16 h-16 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-3xl font-black text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 group-hover:scale-110 transition-all shadow-inner">
+                      <div className="w-16 h-16 rounded-2xl bg-[#eff4ff] dark:bg-slate-800/80 border border-[#d3e4fe] dark:border-slate-700 flex items-center justify-center text-3xl font-black text-[#0b1c30] dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 group-hover:scale-110 transition-all shadow-inner">
                         {item.character}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h3 className="text-base font-black text-slate-900 dark:text-white tracking-wide uppercase truncate">
+                        <h3 className="text-base font-black text-[#0b1c30] dark:text-white tracking-wide uppercase truncate">
                           {item.hanViet}
                         </h3>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-0.5">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-0.5 font-medium">
                           {item.meaning}
                         </p>
                       </div>
@@ -746,13 +738,13 @@ export default function KanjiHubPage() {
                     <div className="flex flex-col gap-1 text-[11px] mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                       <div className="flex items-center gap-1.5">
                         <span className="text-slate-400 font-bold w-9 shrink-0">On:</span>
-                        <span className="font-semibold text-slate-700 dark:text-slate-300 truncate">
+                        <span className="font-bold text-slate-700 dark:text-slate-300 truncate">
                           {item.onyomi.length > 0 ? item.onyomi.join(", ") : "-"}
                         </span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <span className="text-slate-400 font-bold w-9 shrink-0">Kun:</span>
-                        <span className="font-semibold text-slate-700 dark:text-slate-300 truncate">
+                        <span className="font-bold text-slate-700 dark:text-slate-300 truncate">
                           {item.kunyomi.length > 0 ? item.kunyomi.join(", ") : "-"}
                         </span>
                       </div>
@@ -765,7 +757,7 @@ export default function KanjiHubPage() {
                       e.stopPropagation();
                       setActiveKanji(item);
                     }}
-                    className="w-full flex items-center justify-center gap-1.5 py-2 rounded-2xl bg-slate-100 dark:bg-slate-800 group-hover:bg-orange-600 text-slate-700 dark:text-slate-300 group-hover:text-white font-bold text-xs transition-all shadow-2xs"
+                    className="w-full flex items-center justify-center gap-1.5 py-2 rounded-full bg-[#eff4ff] hover:bg-[#fd761a] dark:bg-slate-800 text-[#0b1c30] dark:text-slate-300 hover:text-white dark:hover:text-white font-extrabold text-xs transition-all shadow-2xs border border-[#d3e4fe] dark:border-slate-700 cursor-pointer"
                   >
                     <Pencil className="w-3.5 h-3.5" />
                     <span>Tập Viết & Xem Nét</span>
@@ -779,18 +771,18 @@ export default function KanjiHubPage() {
 
       {/* ════════════════════════════ ADD / EDIT KANJI MODAL ════════════════════════════ */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/75 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 max-w-xl w-full flex flex-col gap-4 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
-            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-              <h3 className="font-black text-base text-slate-900 dark:text-white flex items-center gap-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bento-card p-6 max-w-xl w-full flex flex-col gap-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <h3 className="font-black text-base text-[#0b1c30] dark:text-white flex items-center gap-2">
                 <span className="text-orange-500 font-black text-xl">漢</span>
                 {editingKanjiId ? "Chỉnh Sửa Chữ Hán" : "Thêm Chữ Hán Mới Vào Kho"}
               </h3>
               <button
                 onClick={() => setShowAddModal(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
@@ -805,7 +797,7 @@ export default function KanjiHubPage() {
                   onChange={(e) => setFormCharacter(e.target.value)}
                   placeholder="e.g. 学 hoặc 語"
                   autoFocus
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/50 focus:outline-none"
+                  className="w-full px-4 py-2.5 rounded-full bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs font-bold text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 focus:outline-none"
                 />
               </div>
 
@@ -818,7 +810,7 @@ export default function KanjiHubPage() {
                   value={formHanViet}
                   onChange={(e) => setFormHanViet(e.target.value)}
                   placeholder="e.g. HỌC, NGỮ"
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/50 focus:outline-none uppercase"
+                  className="w-full px-4 py-2.5 rounded-full bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs font-black text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 focus:outline-none uppercase"
                 />
               </div>
 
@@ -831,7 +823,7 @@ export default function KanjiHubPage() {
                   value={formMeaning}
                   onChange={(e) => setFormMeaning(e.target.value)}
                   placeholder="e.g. Học tập, trường học, ngôn ngữ"
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/50 focus:outline-none"
+                  className="w-full px-4 py-2.5 rounded-full bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs font-bold text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 focus:outline-none"
                 />
               </div>
 
@@ -844,7 +836,7 @@ export default function KanjiHubPage() {
                   value={formOnyomi}
                   onChange={(e) => setFormOnyomi(e.target.value)}
                   placeholder="e.g. ガク, ゴ"
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/50 focus:outline-none"
+                  className="w-full px-4 py-2.5 rounded-full bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs font-bold text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 focus:outline-none"
                 />
               </div>
 
@@ -857,7 +849,7 @@ export default function KanjiHubPage() {
                   value={formKunyomi}
                   onChange={(e) => setFormKunyomi(e.target.value)}
                   placeholder="e.g. まな.ぶ, かた.る"
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/50 focus:outline-none"
+                  className="w-full px-4 py-2.5 rounded-full bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs font-bold text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 focus:outline-none"
                 />
               </div>
 
@@ -868,7 +860,7 @@ export default function KanjiHubPage() {
                 <select
                   value={formJlpt}
                   onChange={(e) => setFormJlpt(e.target.value as any)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white font-semibold focus:outline-none"
+                  className="w-full px-4 py-2.5 rounded-full bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs font-bold text-[#0b1c30] dark:text-white focus:outline-none cursor-pointer"
                 >
                   <option value="N5">JLPT N5</option>
                   <option value="N4">JLPT N4</option>
@@ -888,7 +880,7 @@ export default function KanjiHubPage() {
                   max={40}
                   value={formStrokeCount}
                   onChange={(e) => setFormStrokeCount(parseInt(e.target.value) || 1)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none"
+                  className="w-full px-4 py-2.5 rounded-full bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs font-bold text-[#0b1c30] dark:text-white focus:outline-none"
                 />
               </div>
 
@@ -903,7 +895,7 @@ export default function KanjiHubPage() {
                     setFormRadical(e.target.value);
                     if (rad) setFormRadicalName(`Bộ ${rad.name}`);
                   }}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white font-semibold focus:outline-none"
+                  className="w-full px-4 py-2.5 rounded-full bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs font-bold text-[#0b1c30] dark:text-white focus:outline-none cursor-pointer"
                 >
                   {RADICALS_LIST.map((r) => (
                     <option key={r.radical} value={r.radical}>
@@ -922,7 +914,7 @@ export default function KanjiHubPage() {
                   value={formRadicalName}
                   onChange={(e) => setFormRadicalName(e.target.value)}
                   placeholder="e.g. Bộ Nhật, Bộ Mộc"
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none"
+                  className="w-full px-4 py-2.5 rounded-full bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs font-bold text-[#0b1c30] dark:text-white focus:outline-none"
                 />
               </div>
 
@@ -935,21 +927,21 @@ export default function KanjiHubPage() {
                   value={formExamplesText}
                   onChange={(e) => setFormExamplesText(e.target.value)}
                   placeholder="e.g.&#10;学生|がくせい|Học sinh, sinh viên&#10;学校|がっこう|Trường học"
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/50 focus:outline-none font-mono"
+                  className="w-full p-3 rounded-2xl bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs font-mono text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 focus:outline-none"
                 />
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
               <button
                 onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-200"
+                className="btn-tactile-secondary px-4 py-2 rounded-full text-xs font-bold cursor-pointer"
               >
                 Hủy
               </button>
               <button
                 onClick={handleSaveKanji}
-                className="px-5 py-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-bold text-xs shadow-md shadow-orange-500/20 active:scale-95 transition-all"
+                className="btn-tactile-amber px-5 py-2 rounded-full text-xs font-black cursor-pointer"
               >
                 {editingKanjiId ? "Cập Nhật" : "Lưu Chữ Hán"}
               </button>
@@ -960,41 +952,41 @@ export default function KanjiHubPage() {
 
       {/* ════════════════════════════ BATCH IMPORT KANJI MODAL ════════════════════════════ */}
       {showImportModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/75 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 max-w-3xl w-full flex flex-col gap-4 shadow-2xl max-h-[92vh] overflow-y-auto custom-scrollbar">
-            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bento-card p-6 max-w-3xl w-full flex flex-col gap-4 shadow-2xl max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2">
                 <FileSpreadsheet className="w-5 h-5 text-emerald-500" />
-                <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
+                <h3 className="font-black text-base text-[#0b1c30] dark:text-white">
                   Import Chữ Hán Hàng Loạt (CSV / Excel / TXT)
                 </h3>
               </div>
               <button
                 onClick={() => setShowImportModal(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Template Download Guide Banner */}
-            <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
               <div>
-                <p className="font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+                <p className="font-black text-emerald-900 dark:text-emerald-200 flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                   Mẫu file chuẩn: Chữ Hán; Hán Việt; Ý nghĩa; On; Kun; Số nét; JLPT; Bộ thủ; Tên bộ thủ; Ví dụ
                 </p>
                 <p className="text-[11px] text-emerald-700/80 dark:text-emerald-400/80 mt-0.5">
-                  Bạn có thể tải file CSV mẫu có sẵn dữ liệu chuẩn để mở bằng Excel hoặc Google Sheets.
+                  Tải file CSV mẫu có sẵn dữ liệu chuẩn để mở bằng Excel hoặc Google Sheets.
                 </p>
               </div>
 
               <button
                 onClick={handleDownloadTemplate}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shrink-0 shadow-sm transition-all active:scale-95"
+                className="btn-tactile-emerald px-3.5 py-1.5 rounded-full text-xs font-bold shrink-0 cursor-pointer flex items-center gap-1.5"
               >
                 <Download className="w-3.5 h-3.5" />
-                Tải File Mẫu (.CSV)
+                <span>Tải File Mẫu (.CSV)</span>
               </button>
             </div>
 
@@ -1015,7 +1007,7 @@ export default function KanjiHubPage() {
                       setImportDelimiter(d);
                       if (importText) parseKanjiImportData(importText, d);
                     }}
-                    className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-semibold border border-slate-200 dark:border-slate-700 focus:outline-none"
+                    className="px-2.5 py-1 rounded-full bg-[#eff4ff] dark:bg-slate-800 text-xs font-bold border border-[#d3e4fe] dark:border-slate-700 focus:outline-none cursor-pointer"
                   >
                     <option value=";">Chấm phẩy (;)</option>
                     <option value=",">Dấu phẩy (,)</option>
@@ -1028,7 +1020,7 @@ export default function KanjiHubPage() {
                 type="file"
                 accept=".csv, .txt, .tsv"
                 onChange={handleFileUpload}
-                className="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-slate-100 dark:file:bg-slate-800 file:text-slate-700 dark:file:text-slate-300 hover:file:bg-slate-200 cursor-pointer"
+                className="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-[#eff4ff] dark:file:bg-slate-800 file:text-slate-700 dark:file:text-slate-300 hover:file:bg-[#dce9ff] cursor-pointer"
               />
 
               <textarea
@@ -1039,7 +1031,7 @@ export default function KanjiHubPage() {
                   parseKanjiImportData(e.target.value, importDelimiter);
                 }}
                 placeholder="Dán dữ liệu chữ Hán vào đây (Ví dụ: 学;HỌC;Học tập;ガク;まな.ぶ;8;N5;子;Bộ Tử;学生|がくせい|Học sinh)..."
-                className="w-full p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-mono text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                className="w-full p-3 rounded-2xl bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs font-mono text-[#0b1c30] dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 shadow-inner"
               />
             </div>
 
@@ -1047,14 +1039,14 @@ export default function KanjiHubPage() {
             {parsedImportList.length > 0 && (
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between text-xs font-bold">
-                  <span className="text-slate-700 dark:text-slate-300">
+                  <span className="text-[#0b1c30] dark:text-slate-200">
                     2. Xem trước kết quả nạp ({parsedImportList.filter((k) => k.isValid).length} hợp lệ / {parsedImportList.length} dòng):
                   </span>
                 </div>
 
-                <div className="max-h-56 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/40">
+                <div className="max-h-56 overflow-y-auto rounded-2xl border border-[#d3e4fe] dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xs">
                   <table className="w-full text-left text-xs">
-                    <thead className="bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase sticky top-0">
+                    <thead className="bg-[#eff4ff] dark:bg-slate-800 border-b border-[#d3e4fe] dark:border-slate-700 text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase sticky top-0">
                       <tr>
                         <th className="p-2.5">Trạng thái</th>
                         <th className="p-2.5">Chữ Hán</th>
@@ -1081,13 +1073,13 @@ export default function KanjiHubPage() {
                               </span>
                             )}
                           </td>
-                          <td className="p-2.5 font-black text-sm text-slate-900 dark:text-white">{item.character}</td>
-                          <td className="p-2.5 font-bold uppercase text-orange-600 dark:text-orange-400">{item.hanViet}</td>
+                          <td className="p-2.5 font-black text-sm text-[#0b1c30] dark:text-white">{item.character}</td>
+                          <td className="p-2.5 font-black uppercase text-orange-600 dark:text-orange-400">{item.hanViet}</td>
                           <td className="p-2.5 max-w-[140px] truncate">{item.meaning}</td>
                           <td className="p-2.5 text-[11px] text-slate-500">
                             {item.onyomi.join(", ") || "-"} / {item.kunyomi.join(", ") || "-"}
                           </td>
-                          <td className="p-2.5 font-mono">{item.strokeCount}</td>
+                          <td className="p-2.5 font-mono font-bold">{item.strokeCount}</td>
                           <td className="p-2.5 font-bold">{item.jlpt}</td>
                           <td className="p-2.5 text-slate-500">{item.radicalName} ({item.radical})</td>
                           <td className="p-2.5 text-[11px] text-slate-500 max-w-[120px] truncate">
@@ -1103,7 +1095,7 @@ export default function KanjiHubPage() {
 
             {/* Progress Bar during import */}
             {isImporting && (
-              <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/30">
+              <div className="flex flex-col gap-1.5 p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/30">
                 <div className="flex items-center justify-between text-xs font-bold text-emerald-700 dark:text-emerald-300">
                   <span>Đang nạp chữ Hán vào hệ thống...</span>
                   <span>{importProgress.current} / {importProgress.total}</span>
@@ -1119,18 +1111,18 @@ export default function KanjiHubPage() {
               </div>
             )}
 
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
               <button
                 onClick={() => setShowImportModal(false)}
                 disabled={isImporting}
-                className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-200"
+                className="btn-tactile-secondary px-4 py-2 rounded-full text-xs font-bold cursor-pointer"
               >
                 Hủy
               </button>
               <button
                 onClick={handleExecuteBatchImport}
                 disabled={isImporting || parsedImportList.filter((k) => k.isValid).length === 0}
-                className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-xs shadow-md shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+                className="btn-tactile-emerald px-5 py-2 rounded-full text-xs font-black flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 <FileSpreadsheet className="w-4 h-4" />
                 <span>Nạp {parsedImportList.filter((k) => k.isValid).length} Chữ Hán Vào Kho</span>
@@ -1142,24 +1134,24 @@ export default function KanjiHubPage() {
 
       {/* ════════════════════════════ KANJI PRACTICE MODAL ════════════════════════════ */}
       {activeKanji && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/75 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 max-w-4xl w-full flex flex-col gap-6 shadow-2xl max-h-[92vh] overflow-y-auto custom-scrollbar">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bento-card p-6 max-w-4xl w-full flex flex-col gap-5 shadow-2xl max-h-[92vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3.5">
               <div className="flex items-center gap-3">
-                <span className="w-12 h-12 rounded-2xl bg-orange-600 text-white font-black text-2xl flex items-center justify-center shadow-md shadow-orange-500/30">
+                <span className="w-12 h-12 rounded-2xl bg-orange-500 text-white font-black text-2xl flex items-center justify-center shadow-xs">
                   {activeKanji.character}
                 </span>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded-md bg-orange-500/10 text-orange-600 dark:text-orange-400 font-extrabold text-[10px]">
+                    <span className="px-2 py-0.5 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 font-black text-[10px]">
                       {activeKanji.jlpt}
                     </span>
-                    <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-wide">
+                    <h2 className="text-lg font-black text-[#0b1c30] dark:text-white tracking-tight">
                       Chữ Hán: <span className="text-orange-600 dark:text-orange-400">{activeKanji.hanViet}</span>
                     </h2>
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
                     {activeKanji.meaning} • {activeKanji.strokeCount} nét • {activeKanji.radicalName} ({activeKanji.radical})
                   </p>
                 </div>
@@ -1168,44 +1160,44 @@ export default function KanjiHubPage() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => toggleKanjiFavorite(activeKanji.character)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all border cursor-pointer ${
                     isKanjiFavorite(activeKanji.character)
-                      ? "bg-amber-500/10 border-amber-500/40 text-amber-500"
-                      : "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 hover:text-amber-500"
+                      ? "bg-amber-50 border-amber-300 text-amber-600"
+                      : "bg-[#eff4ff] hover:bg-[#dce9ff] dark:bg-slate-800 border-[#d3e4fe] dark:border-slate-700 text-slate-500 hover:text-amber-500"
                   }`}
                   title={isKanjiFavorite(activeKanji.character) ? "Bỏ yêu thích" : "Lưu vào chữ Hán yêu thích"}
                 >
                   <Star className={`w-3.5 h-3.5 ${isKanjiFavorite(activeKanji.character) ? "fill-amber-500 text-amber-500" : ""}`} />
-                  <span className="hidden sm:inline">{isKanjiFavorite(activeKanji.character) ? "Đã Lưu Yêu Thích" : "Lưu Yêu Thích"}</span>
+                  <span className="hidden sm:inline font-black">{isKanjiFavorite(activeKanji.character) ? "Đã Lưu" : "Lưu Yêu Thích"}</span>
                 </button>
 
                 <button
                   onClick={handlePrevKanji}
-                  className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 font-bold text-xs"
-                  title="Chữ Hán trước"
+                  className="p-2 rounded-full bg-[#eff4ff] hover:bg-[#dce9ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-[#d3e4fe] dark:border-slate-700 shadow-2xs transition-all active:scale-90 cursor-pointer"
+                  title="Chữ Hán trước (‹)"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 <button
                   onClick={handleNextKanji}
-                  className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 font-bold text-xs"
-                  title="Chữ Hán tiếp theo"
+                  className="p-2 rounded-full bg-[#eff4ff] hover:bg-[#dce9ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-[#d3e4fe] dark:border-slate-700 shadow-2xs transition-all active:scale-90 cursor-pointer"
+                  title="Chữ Hán tiếp theo (›)"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setActiveKanji(null)}
-                  className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
             </div>
 
             {/* Modal Body: 2 Columns (Canvas vs Details) */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
               {/* Left Column: HanziWriter Canvas (7 cols) */}
-              <div className="md:col-span-7 flex flex-col items-center justify-center p-4 rounded-3xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/80">
+              <div className="md:col-span-7 flex flex-col items-center justify-center p-5 rounded-3xl bg-[#eff4ff]/60 dark:bg-slate-800/40 border border-[#d3e4fe] dark:border-slate-700 shadow-inner">
                 <KanjiCanvas
                   kanji={activeKanji.character}
                   size={290}
@@ -1217,24 +1209,24 @@ export default function KanjiHubPage() {
               {/* Right Column: Readings, Meaning & Examples (5 cols) */}
               <div className="md:col-span-5 flex flex-col gap-4">
                 {/* On / Kun Box */}
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex flex-col gap-2">
-                  <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                <div className="p-4 rounded-2xl bg-[#eff4ff] dark:bg-slate-800/60 border border-[#d3e4fe] dark:border-slate-700 shadow-2xs flex flex-col gap-2">
+                  <h4 className="text-xs font-black text-[#0b1c30] dark:text-white uppercase tracking-wider">
                     Cách Đọc Âm On & Kun
                   </h4>
                   <div className="text-xs flex flex-col gap-1.5">
                     <div className="flex items-start gap-2">
-                      <span className="px-2 py-0.5 rounded bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold text-[10px] shrink-0">
+                      <span className="px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 font-black text-[10px] shrink-0 border border-orange-200">
                         Onyomi
                       </span>
-                      <span className="font-semibold text-slate-800 dark:text-slate-200">
+                      <span className="font-bold text-[#0b1c30] dark:text-slate-200">
                         {activeKanji.onyomi.length > 0 ? activeKanji.onyomi.join("、") : "—"}
                       </span>
                     </div>
                     <div className="flex items-start gap-2">
-                      <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-[10px] shrink-0">
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-black text-[10px] shrink-0 border border-emerald-200">
                         Kunyomi
                       </span>
-                      <span className="font-semibold text-slate-800 dark:text-slate-200">
+                      <span className="font-bold text-[#0b1c30] dark:text-slate-200">
                         {activeKanji.kunyomi.length > 0 ? activeKanji.kunyomi.join("、") : "—"}
                       </span>
                     </div>
@@ -1243,26 +1235,26 @@ export default function KanjiHubPage() {
 
                 {/* Common Words & Examples */}
                 <div className="flex flex-col gap-2 flex-1">
-                  <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <h4 className="text-xs font-black text-[#0b1c30] dark:text-white uppercase tracking-wider flex items-center gap-1.5">
                     <BookOpen className="w-3.5 h-3.5 text-orange-500" />
                     Từ Vựng Ghép Thường Gặp
                   </h4>
 
-                  <div className="flex flex-col gap-2 max-h-64 overflow-y-auto custom-scrollbar pr-1">
+                  <div className="flex flex-col gap-2 max-h-64 overflow-y-auto scrollbar-thin pr-1">
                     {activeKanji.examples.map((ex, exIdx) => (
                       <div
                         key={exIdx}
-                        className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 flex flex-col gap-0.5"
+                        className="p-2.5 rounded-2xl bg-[#eff4ff]/60 dark:bg-slate-800/60 border border-[#d3e4fe] dark:border-slate-700 shadow-2xs flex flex-col gap-0.5"
                       >
                         <div className="flex items-baseline justify-between gap-2">
-                          <span className="font-black text-sm text-slate-900 dark:text-white">
+                          <span className="font-black text-sm text-[#0b1c30] dark:text-white">
                             {ex.word}
                           </span>
-                          <span className="font-semibold text-xs text-orange-600 dark:text-orange-400">
+                          <span className="font-bold text-xs text-orange-600 dark:text-orange-400">
                             {ex.reading}
                           </span>
                         </div>
-                        <span className="text-xs text-slate-500 dark:text-slate-400">
+                        <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                           {ex.meaning}
                         </span>
                       </div>
@@ -1273,13 +1265,13 @@ export default function KanjiHubPage() {
             </div>
 
             {/* Modal Footer */}
-            <div className="flex items-center justify-between pt-3 border-t border-slate-200 dark:border-slate-800 text-xs">
-              <span className="text-slate-400 font-medium">
+            <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800 text-xs">
+              <span className="text-slate-400 font-semibold">
                 Sử dụng các phím mũi tên hoặc nút Next/Prev để chuyển nhanh chữ Hán.
               </span>
               <button
                 onClick={() => setActiveKanji(null)}
-                className="px-5 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold shadow-md transition-all active:scale-95"
+                className="btn-tactile-amber px-5 py-2 rounded-full text-xs font-black cursor-pointer"
               >
                 Hoàn Thành Luyện Viết
               </button>

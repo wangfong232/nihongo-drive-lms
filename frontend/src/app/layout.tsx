@@ -16,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="antialiased min-h-screen bg-slate-950 text-slate-100">
+      <body className="antialiased min-h-screen bg-[#f8f9ff] dark:bg-[#090d16] text-[#0b1c30] dark:text-slate-100 font-sans selection:bg-emerald-500/20 selection:text-emerald-900 dark:selection:text-emerald-200">
         <ThemeProvider>
           <I18nProvider>
             <CourseLevelProvider>{children}</CourseLevelProvider>

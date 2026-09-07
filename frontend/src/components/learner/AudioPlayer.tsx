@@ -253,7 +253,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
   const progressPercent = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
 
   return (
-    <div className="w-full shrink-0 min-h-[220px] relative overflow-hidden rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-gradient-to-b from-white via-slate-50/50 to-slate-100/80 dark:from-slate-900 dark:via-slate-900/90 dark:to-slate-950 p-5 sm:p-7 shadow-xl flex flex-col gap-5 block">
+    <div className="w-full shrink-0 min-h-[220px] relative overflow-hidden rounded-3xl border-2 border-[#d3e4fe] dark:border-slate-800 bg-white dark:bg-[#0b1c30] p-5 sm:p-6 shadow-xs flex flex-col gap-4.5 block">
       {/* Hidden Native Audio Element */}
       {streamUrl && (
         <audio
@@ -285,23 +285,23 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
       {/* Top Track Info Row */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3.5 min-w-0">
-          <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/20 shrink-0">
+          <div className="relative w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-[#006c49] dark:text-emerald-400 flex items-center justify-center shadow-inner shrink-0">
             <Headphones className="w-6 h-6" />
             {isPlaying && (
               <span className="absolute -top-1 -right-1 flex h-3 w-3">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-[#006c49]"></span>
               </span>
             )}
           </div>
 
           <div className="flex flex-col min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold uppercase tracking-wide border border-emerald-500/20">
+              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-[#006c49] dark:text-emerald-400 text-[10px] font-black uppercase tracking-wide border border-emerald-500/20">
                 Luyện Nghe • Chōkai
               </span>
               {resumeToast && settings.showResumePrompt && (
-                <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/30 animate-pulse">
+                <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30 animate-pulse">
                   <BookmarkCheck className="w-3 h-3" /> {resumeToast}
                 </span>
               )}
@@ -314,10 +314,10 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
                     setResumeToast(null);
                   }
                 }}
-                className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all border ${
+                className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black transition-all border ${
                   settings.trackVideoWatchTime
-                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20"
-                    : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-300 dark:border-slate-700 hover:bg-slate-200"
+                    ? "bg-emerald-500/10 text-[#006c49] dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20"
+                    : "bg-[#eff4ff] dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-[#d3e4fe] dark:border-slate-700 hover:bg-[#dce9ff]"
                 }`}
                 title={
                   settings.trackVideoWatchTime
@@ -338,7 +338,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
                 )}
               </button>
             </div>
-            <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white truncate mt-1">
+            <h3 className="font-black text-sm sm:text-base text-[#0b1c30] dark:text-white truncate mt-1">
               {title}
             </h3>
           </div>
@@ -354,10 +354,10 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
                   if (audioRef.current) audioRef.current.load();
                 }
               }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors shadow-2xs ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-black border-2 transition-all shadow-xs cursor-pointer ${
                 useIframeFallback
-                  ? "bg-emerald-500 text-white border-emerald-600 shadow-emerald-500/20"
-                  : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-50"
+                  ? "bg-[#006c49] text-white border-[#00422b] shadow-[0_3px_0_#00422b]"
+                  : "bg-[#eff4ff] dark:bg-slate-800 text-[#0b1c30] dark:text-slate-200 border-[#d3e4fe] dark:border-slate-700 hover:bg-[#dce9ff]"
               }`}
               title="Chuyển đổi giữa trình phát Google Drive và Trình phát Native"
             >
@@ -370,7 +370,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
               href={`https://drive.google.com/file/d/${effectiveDriveId}/view`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold border border-slate-200 dark:border-slate-700 transition-colors shadow-2xs shrink-0"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#eff4ff] dark:bg-slate-800 hover:bg-[#dce9ff] dark:hover:bg-slate-700 text-[#0b1c30] dark:text-slate-300 text-xs font-black border border-[#d3e4fe] dark:border-slate-700 transition-colors shadow-2xs shrink-0"
               title="Mở tệp âm thanh trên Google Drive"
             >
               <ExternalLink className="w-3.5 h-3.5" />
@@ -382,11 +382,11 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
 
       {/* Embedded Google Drive Player */}
       {useIframeFallback && effectiveDriveId && (
-        <div className="flex flex-col gap-2 p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-950 dark:text-emerald-200 text-xs">
+        <div className="flex flex-col gap-2.5 p-4 rounded-2xl bg-[#eff4ff] dark:bg-slate-900 border-2 border-[#d3e4fe] dark:border-slate-800 text-xs shadow-xs">
           <div className="flex items-center justify-between gap-2 flex-wrap">
-            <div className="flex items-center gap-1.5 font-bold text-emerald-700 dark:text-emerald-400">
+            <div className="flex items-center gap-2 font-black text-[#006c49] dark:text-emerald-400">
               <Headphones className="w-4 h-4 shrink-0" />
-              <span>Trình phát Google Drive (Tích hợp tài khoản Google trên trình duyệt):</span>
+              <span>Trình phát Google Drive (File riêng tư trên Drive):</span>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -398,13 +398,13 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
                     togglePlay();
                   }
                 }}
-                className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 font-bold text-[10px] border border-slate-200 dark:border-slate-700"
+                className="px-3 py-1 rounded-full bg-white dark:bg-slate-800 text-[#0b1c30] dark:text-slate-200 hover:bg-[#eff4ff] font-black text-[10px] border border-[#d3e4fe] dark:border-slate-700 transition-all cursor-pointer"
               >
                 Thử lại phát trực tiếp
               </button>
             </div>
           </div>
-          <div className="w-full h-24 rounded-xl overflow-hidden bg-slate-950 border border-emerald-500/30 shadow-inner">
+          <div className="w-full h-20 rounded-2xl overflow-hidden bg-black border-2 border-[#d3e4fe] dark:border-slate-800 shadow-inner">
             <iframe
               src={`https://drive.google.com/file/d/${effectiveDriveId}/preview`}
               className="w-full h-full border-0"
@@ -417,23 +417,23 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
 
       {/* Error notice with Drive Fallback options */}
       {hasError && !useIframeFallback && (
-        <div className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-amber-800 dark:text-amber-300 text-xs font-medium flex-wrap">
+        <div className="flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border-2 border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-xs font-semibold flex-wrap">
           <div className="flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 text-amber-500" />
-            <span>Tệp âm thanh chưa thể phát trực tiếp từ máy chủ.</span>
+            <AlertCircle className="w-4 h-4 shrink-0 text-amber-600" />
+            <span>Tệp âm thanh trên Drive ở chế độ riêng tư (Chưa công khai đường link).</span>
           </div>
           <div className="flex items-center gap-2">
             {effectiveDriveId && (
               <button
                 onClick={() => setUseIframeFallback(true)}
-                className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shrink-0 shadow-xs transition-colors"
+                className="px-4 py-1.5 rounded-full bg-[#006c49] hover:bg-[#005237] text-white font-black text-[11px] shrink-0 shadow-[0_3px_0_#00422b] hover:shadow-[0_1px_0_#00422b] hover:translate-y-[1px] active:translate-y-[3px] active:shadow-none transition-all cursor-pointer"
               >
                 Mở Trình Phát Google Drive
               </button>
             )}
             <button
               onClick={() => playJapaneseSpeech(title)}
-              className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-[11px] shrink-0 shadow-xs transition-colors"
+              className="px-3.5 py-1.5 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-black text-[11px] shrink-0 shadow-xs transition-colors cursor-pointer"
             >
               Phát bằng TTS
             </button>
@@ -490,19 +490,19 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
       </div>
 
       {/* Modern Player Controls Bar */}
-      <div className="flex items-center justify-between gap-3 pt-1 border-t border-slate-200/70 dark:border-slate-800/80 flex-wrap">
+      <div className="flex items-center justify-between gap-3 pt-1 border-t-2 border-[#d3e4fe] dark:border-slate-800 flex-wrap">
         {/* Left Side: Playback Speed & Loop */}
         <div className="flex items-center gap-1.5">
           {/* Speed Selector */}
-          <div className="flex items-center rounded-xl bg-slate-100 dark:bg-slate-800/90 p-0.5 border border-slate-200 dark:border-slate-700 text-xs">
+          <div className="flex items-center rounded-full bg-[#eff4ff] dark:bg-slate-800/90 p-0.5 border border-[#d3e4fe] dark:border-slate-700 text-xs">
             {[0.75, 1.0, 1.25, 1.5].map((spd) => (
               <button
                 key={spd}
                 onClick={() => setPlaybackSpeed(spd)}
-                className={`px-2 py-1 rounded-lg font-bold text-[11px] transition-all ${
+                className={`px-2.5 py-1 rounded-full font-black text-[11px] transition-all cursor-pointer ${
                   playbackSpeed === spd
-                    ? "bg-emerald-600 text-white shadow-xs scale-105"
-                    : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    ? "bg-[#006c49] text-white shadow-xs"
+                    : "text-[#0b1c30] dark:text-slate-400 hover:text-emerald-700 dark:hover:text-white"
                 }`}
               >
                 {spd}x
@@ -513,10 +513,10 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
           {/* Loop Toggle */}
           <button
             onClick={() => setIsLooping(!isLooping)}
-            className={`p-2 rounded-xl text-xs font-bold transition-all border ${
+            className={`p-2 rounded-full text-xs font-black transition-all border cursor-pointer ${
               isLooping
-                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/40"
-                : "bg-slate-100 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                ? "bg-emerald-500/15 border-emerald-500/40 text-[#006c49] dark:text-emerald-400"
+                : "bg-[#eff4ff] dark:bg-slate-800/80 border-[#d3e4fe] dark:border-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
             }`}
             title={isLooping ? "Tắt lặp lại" : "Bật lặp lại toàn bài"}
           >
@@ -529,7 +529,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
           {/* Rewind 5s */}
           <button
             onClick={() => skipSeconds(-5)}
-            className="p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-transform active:scale-90 flex items-center justify-center"
+            className="p-2.5 rounded-2xl bg-[#eff4ff] dark:bg-slate-800 hover:bg-[#dce9ff] dark:hover:bg-slate-700 text-[#0b1c30] dark:text-slate-200 border border-[#d3e4fe] dark:border-slate-700 transition-transform active:scale-90 flex items-center justify-center cursor-pointer"
             title="Tua lại 5 giây"
           >
             <Rewind className="w-4 h-4" />
@@ -539,7 +539,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
           <button
             onClick={togglePlay}
             disabled={isLoading}
-            className="w-13 h-13 rounded-2xl bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white flex items-center justify-center shadow-lg shadow-emerald-500/25 transition-all transform active:scale-95 cursor-pointer disabled:opacity-75"
+            className="w-13 h-13 rounded-2xl bg-[#006c49] hover:bg-[#005237] text-white flex items-center justify-center shadow-[0_4px_0_#00422b] hover:shadow-[0_2px_0_#00422b] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all cursor-pointer disabled:opacity-75"
             title={isPlaying ? "Tạm dừng" : "Phát bài học"}
           >
             {isLoading ? (
@@ -554,7 +554,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
           {/* Fast Forward 5s */}
           <button
             onClick={() => skipSeconds(5)}
-            className="p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-transform active:scale-90 flex items-center justify-center"
+            className="p-2.5 rounded-2xl bg-[#eff4ff] dark:bg-slate-800 hover:bg-[#dce9ff] dark:hover:bg-slate-700 text-[#0b1c30] dark:text-slate-200 border border-[#d3e4fe] dark:border-slate-700 transition-transform active:scale-90 flex items-center justify-center cursor-pointer"
             title="Tua tới 5 giây"
           >
             <FastForward className="w-4 h-4" />
@@ -565,21 +565,21 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={() => skipSeconds(-currentTime)}
-            className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-500 dark:text-slate-400 text-xs font-bold"
+            className="p-2 rounded-xl bg-[#eff4ff] dark:bg-slate-800 hover:bg-[#dce9ff] text-slate-500 dark:text-slate-400 text-xs font-black border border-[#d3e4fe] dark:border-slate-700 cursor-pointer"
             title="Phát lại từ đầu"
           >
             <RotateCcw className="w-3.5 h-3.5" />
           </button>
 
-          <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-1.5 bg-[#eff4ff] dark:bg-slate-800/80 px-2.5 py-1.5 rounded-2xl border border-[#d3e4fe] dark:border-slate-700">
             <button
               onClick={() => setIsMuted(!isMuted)}
-              className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+              className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer"
             >
               {isMuted || volume === 0 ? (
                 <VolumeX className="w-4 h-4 text-rose-500" />
               ) : (
-                <Volume2 className="w-4 h-4" />
+                <Volume2 className="w-4 h-4 text-[#006c49]" />
               )}
             </button>
             <input
@@ -592,7 +592,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
                 setVolume(Number(e.target.value));
                 if (isMuted) setIsMuted(false);
               }}
-              className="w-16 h-1.5 bg-slate-300 dark:bg-slate-600 rounded-lg cursor-pointer accent-emerald-500"
+              className="w-16 h-1.5 bg-slate-300 dark:bg-slate-600 rounded-lg cursor-pointer accent-[#006c49]"
             />
           </div>
         </div>

@@ -528,38 +528,41 @@ export default function AdminQuizzesPage() {
     }
     return true;
   });
-
   const selectedQuizObject = quizzes.find((q) => q.id === activeSelectedQuizId);
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-900/5 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+    <div className="min-h-screen flex flex-col bg-[#f8f9ff] dark:bg-[#090d16] text-[#0b1c30] dark:text-slate-100 font-sans">
       <Header />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col gap-6 pt-20">
-        {/* Title Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="px-2.5 py-0.5 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400 text-[10px] font-extrabold uppercase">
-                Assessment CMS
-              </span>
-              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-                <HelpCircle className="w-6 h-6 text-orange-500" />
-                Quản Lý Bộ Đề JLPT & Quiz
-              </h1>
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 md:p-8 flex flex-col gap-6 pt-20">
+        {/* Title Bar (Playful Bento) */}
+        <div className="bento-card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-2xl bg-purple-500/10 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 flex items-center justify-center font-black shadow-xs shrink-0 border border-purple-500/20">
+              <HelpCircle className="w-6 h-6" />
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Quản lý danh sách các bộ đề thi, chọn đề để quản lý câu hỏi & đáp án, import bộ đề nhanh từ CSV/Excel.
-            </p>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl sm:text-2xl font-black tracking-tight text-[#0b1c30] dark:text-white">
+                  Quản Lý Bộ Đề & Quiz
+                </h1>
+                <span className="px-2.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 text-[11px] font-extrabold border border-purple-200 dark:border-purple-800">
+                  {quizzes.length} đề thi
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+                Quản lý bộ đề JLPT, cấu hình câu hỏi/đáp án và import đề thi từ bảng dữ liệu.
+              </p>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2.5 flex-wrap">
             <Link
               href="/quiz/mock"
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition-all shadow-xs"
+              className="btn-tactile-secondary px-3.5 py-2 text-xs font-bold flex items-center gap-1.5"
             >
               <PlayCircle className="w-4 h-4 text-emerald-500" />
-              Xem Trang Luyện Đề (Học Viên)
+              <span>Luyện Đề Học Viên</span>
             </Link>
 
             <button
@@ -570,54 +573,64 @@ export default function AdminQuizzesPage() {
                 setParsedImportQuestions([]);
                 setShowImportModal(true);
               }}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black shadow-md shadow-emerald-500/20 transition-all active:scale-95"
+              className="btn-tactile-secondary px-3.5 py-2 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
             >
-              <FileSpreadsheet className="w-4 h-4" />
-              Import Đề Thi (CSV/TXT/Excel)
+              <FileSpreadsheet className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <span>Import CSV / Excel</span>
             </button>
 
             <button
               onClick={handleOpenCreateQuiz}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white text-xs font-black shadow-md shadow-orange-500/20 transition-all active:scale-95"
+              className="btn-tactile-purple px-4 py-2 text-xs font-black flex items-center gap-1.5 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
-              Thêm Bộ Đề Mới
+              <span>Tạo Bộ Đề Mới</span>
             </button>
           </div>
         </div>
 
-        {/* Filter Bar */}
-        <div className="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        {/* ─── Search & Type Filter Tabs Bar ───────────────────────────────── */}
+        <div className="bento-card p-3.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           <div className="flex items-center gap-1.5 flex-wrap">
             <button
               onClick={() => setSelectedTypeFilter("all")}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
                 selectedTypeFilter === "all"
-                  ? "bg-orange-600 text-white shadow-xs"
-                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                  ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-[0_2px_0_#334155]"
+                  : "bg-[#eff4ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-[#d3e4fe] dark:border-slate-700 hover:bg-[#dce9ff]"
               }`}
             >
               Tất Cả ({quizzes.length})
             </button>
             <button
               onClick={() => setSelectedTypeFilter(2)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
                 selectedTypeFilter === 2
-                  ? "bg-rose-600 text-white shadow-xs"
-                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                  ? "bg-rose-500 text-white shadow-[0_2px_0_#be123c]"
+                  : "bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 hover:bg-rose-100"
               }`}
             >
               Đề Thi Thử JLPT ({quizzes.filter((q) => q.quizType === 2).length})
             </button>
             <button
               onClick={() => setSelectedTypeFilter(0)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
                 selectedTypeFilter === 0
-                  ? "bg-emerald-600 text-white shadow-xs"
-                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                  ? "bg-emerald-600 text-white shadow-[0_2px_0_#059669]"
+                  : "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50 hover:bg-emerald-100"
               }`}
             >
               Quiz Bài Học ({quizzes.filter((q) => q.quizType === 0).length})
+            </button>
+            <button
+              onClick={() => setSelectedTypeFilter(1)}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
+                selectedTypeFilter === 1
+                  ? "bg-amber-500 text-white shadow-[0_2px_0_#b45309]"
+                  : "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900/50 hover:bg-amber-100"
+              }`}
+            >
+              Luyện Tập ({quizzes.filter((q) => q.quizType === 1).length})
             </button>
           </div>
 
@@ -627,28 +640,31 @@ export default function AdminQuizzesPage() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Tìm kiếm đề thi..."
-              className="w-full px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+              className="w-full px-4 py-2 rounded-full bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/50 placeholder:text-slate-400"
             />
           </div>
         </div>
 
         {/* ════════════════════════════ MASTER QUIZ LIST ════════════════════════════ */}
         <div className="flex flex-col gap-4">
-          <h2 className="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wider flex items-center justify-between">
-            <span>Danh Sách Các Bộ Đề Thi ({filteredQuizzes.length})</span>
-            <span className="text-[11px] font-medium text-slate-400 lowercase">
-              (Bấm vào đề để mở chi tiết & chỉnh sửa câu hỏi)
+          <div className="flex items-center justify-between">
+            <h2 className="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+              Danh Sách Các Bộ Đề Thi ({filteredQuizzes.length})
+            </h2>
+            <span className="text-[11px] font-bold text-slate-400">
+              Bấm vào đề để mở chi tiết & chỉnh sửa câu hỏi
             </span>
-          </h2>
+          </div>
 
           {loading ? (
-            <div className="p-12 text-center text-xs text-slate-400 border border-slate-200 dark:border-slate-800 rounded-2xl bg-white dark:bg-slate-900/60 flex items-center justify-center gap-2">
-              <div className="w-4 h-4 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
+            <div className="bento-card p-12 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
+              <div className="w-4 h-4 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" />
               Đang tải danh sách bộ đề...
             </div>
           ) : filteredQuizzes.length === 0 ? (
-            <div className="p-12 text-center text-xs text-slate-400 border border-slate-200 dark:border-slate-800 rounded-2xl bg-white dark:bg-slate-900/60">
-              Không tìm thấy bộ đề nào phù hợp. Bấm &ldquo;Thêm Bộ Đề Mới&rdquo; hoặc &ldquo;Import Đề Thi&rdquo; để bắt đầu!
+            <div className="bento-card p-12 text-center text-xs text-slate-400">
+              Không tìm thấy bộ đề nào phù hợp. Bấm &ldquo;Tạo Bộ Đề Mới&rdquo; hoặc &ldquo;Import CSV / Excel&rdquo; để bắt đầu!
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -659,10 +675,10 @@ export default function AdminQuizzesPage() {
                 return (
                   <div
                     key={quiz.id}
-                    className={`p-4 rounded-2xl border transition-all flex flex-col justify-between gap-3 shadow-sm hover:shadow-md cursor-pointer ${
+                    className={`bento-card p-5 transition-all flex flex-col justify-between gap-3.5 cursor-pointer ${
                       isSelected
-                        ? "border-orange-500 bg-orange-50/20 dark:bg-orange-950/20 ring-2 ring-orange-500/40"
-                        : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 hover:border-slate-300 dark:hover:border-slate-700"
+                        ? "border-purple-500/80 bg-purple-50/30 dark:bg-purple-950/20 ring-2 ring-purple-500/30 shadow-md"
+                        : "hover:border-purple-300 dark:hover:border-purple-700"
                     }`}
                     onClick={() => setActiveSelectedQuizId(isSelected ? null : quiz.id)}
                   >
@@ -670,7 +686,7 @@ export default function AdminQuizzesPage() {
                       <div className="flex items-center justify-between gap-2 mb-2">
                         {getQuizTypeBadge(quiz.quizType ?? 0)}
                         <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5 text-orange-500" />
+                          <Clock className="w-3.5 h-3.5 text-purple-500" />
                           {quiz.timeLimitMinutes || 105} phút
                         </span>
                       </div>
@@ -678,24 +694,24 @@ export default function AdminQuizzesPage() {
                       <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white line-clamp-1">
                         {quiz.title}
                       </h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
                         {quiz.description || "Chưa có mô tả hướng dẫn."}
                       </p>
                     </div>
 
-                    <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+                    <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-2">
                       <div className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">
-                        <span className="text-orange-600 dark:text-orange-400 font-extrabold">{questionCount}</span> câu • Đỗ:{" "}
+                        <span className="text-purple-600 dark:text-purple-400 font-extrabold">{questionCount}</span> câu • Đỗ:{" "}
                         <span className="text-emerald-600 dark:text-emerald-400 font-extrabold">{quiz.passPercentage}%</span>
                       </div>
 
-                      <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                         <button
                           onClick={() => setActiveSelectedQuizId(isSelected ? null : quiz.id)}
-                          className={`px-3 py-1 rounded-xl text-xs font-bold transition-colors ${
+                          className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
                             isSelected
-                              ? "bg-orange-600 text-white"
-                              : "bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
+                              ? "bg-purple-600 text-white shadow-xs"
+                              : "bg-[#eff4ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-[#d3e4fe] dark:border-slate-700 hover:bg-[#dce9ff]"
                           }`}
                         >
                           {isSelected ? "Thu Gọn ▲" : "Chi Tiết ▼"}
@@ -703,14 +719,14 @@ export default function AdminQuizzesPage() {
 
                         <button
                           onClick={() => handleOpenEditQuiz(quiz)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                          className="p-1.5 rounded-full text-slate-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/40 transition-colors"
                           title="Sửa thông tin đề"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => handleDeleteQuiz(quiz.id)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
+                          className="p-1.5 rounded-full text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
                           title="Xóa bộ đề"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -726,11 +742,11 @@ export default function AdminQuizzesPage() {
 
         {/* ════════════════════════════ DETAIL QUESTION MANAGEMENT VIEW ════════════════════════════ */}
         {selectedQuizObject && (
-          <div className="mt-4 p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-900 border-2 border-orange-500/40 shadow-xl flex flex-col gap-5 animate-in fade-in duration-200">
+          <div className="mt-2 bento-card p-5 sm:p-6 border-2 border-purple-500/40 shadow-xl flex flex-col gap-5 animate-in fade-in duration-200">
             {/* Header of Selected Quiz */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-orange-500 text-white flex items-center justify-center font-black shadow-md shrink-0 mt-0.5">
+                <div className="w-10 h-10 rounded-2xl bg-purple-600 text-white flex items-center justify-center font-black shadow-md shrink-0 mt-0.5">
                   <HelpCircle className="w-5 h-5" />
                 </div>
                 <div>
@@ -748,7 +764,7 @@ export default function AdminQuizzesPage() {
                     <span>•</span>
                     <span>Điểm đỗ: <strong className="text-emerald-600 dark:text-emerald-400">{selectedQuizObject.passPercentage}%</strong></span>
                     <span>•</span>
-                    <span>Tổng số: <strong className="text-orange-600 dark:text-orange-400">{selectedQuizObject.questions?.length || 0} câu hỏi</strong></span>
+                    <span>Tổng số: <strong className="text-purple-600 dark:text-purple-400">{selectedQuizObject.questions?.length || 0} câu hỏi</strong></span>
                   </div>
                 </div>
               </div>
@@ -756,20 +772,20 @@ export default function AdminQuizzesPage() {
               <div className="flex items-center gap-2 flex-wrap">
                 <Link
                   href={`/quiz/mock?id=${selectedQuizObject.id}`}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold transition-colors"
+                  className="btn-tactile-secondary px-3 py-1.5 text-xs font-bold flex items-center gap-1.5"
                 >
-                  <PlayCircle className="w-4 h-4" />
+                  <PlayCircle className="w-4 h-4 text-emerald-500" />
                   Làm thử
                 </Link>
                 <button
                   onClick={() => handleOpenAddQuestion(selectedQuizObject)}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-bold text-xs shadow-md transition-all active:scale-95"
+                  className="btn-tactile-emerald px-4 py-1.5 text-xs font-black flex items-center gap-1.5 cursor-pointer"
                 >
                   <Plus className="w-4 h-4" /> Thêm câu hỏi
                 </button>
                 <button
                   onClick={() => setActiveSelectedQuizId(null)}
-                  className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white text-xs font-bold"
+                  className="p-2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white text-xs font-bold cursor-pointer"
                   title="Đóng chi tiết"
                 >
                   <X className="w-4 h-4" />
@@ -780,8 +796,8 @@ export default function AdminQuizzesPage() {
             {/* Questions List for Selected Quiz */}
             <div className="flex flex-col gap-3">
               {!selectedQuizObject.questions || selectedQuizObject.questions.length === 0 ? (
-                <div className="text-xs text-slate-400 italic p-8 text-center bg-slate-50 dark:bg-slate-800/30 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
-                  Đề này chưa có câu hỏi nào. Bấm &ldquo;+ Thêm câu hỏi&rdquo; hoặc &ldquo;Import Đề Thi&rdquo; để nạp câu hỏi!
+                <div className="text-xs text-slate-400 italic p-8 text-center bg-[#eff4ff] dark:bg-slate-800/30 rounded-2xl border border-dashed border-[#d3e4fe] dark:border-slate-800">
+                  Đề này chưa có câu hỏi nào. Bấm &ldquo;+ Thêm câu hỏi&rdquo; hoặc &ldquo;Import CSV / Excel&rdquo; để nạp câu hỏi!
                 </div>
               ) : (
                 selectedQuizObject.questions.map((q, idx) => {
@@ -793,16 +809,16 @@ export default function AdminQuizzesPage() {
                   return (
                     <div
                       key={q.id}
-                      className="p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 flex flex-col gap-3 transition-colors hover:border-orange-500/40"
+                      className="p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-[#eff4ff]/60 dark:bg-slate-800/40 flex flex-col gap-3 transition-colors hover:border-purple-500/40"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-start gap-3 flex-1 min-w-0">
-                          <span className="w-7 h-7 rounded-xl bg-orange-500 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-xs">
+                          <span className="w-7 h-7 rounded-xl bg-purple-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-xs">
                             {idx + 1}
                           </span>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
-                              <span className="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-[10px]">
+                              <span className="px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-[10px]">
                                 {getQuestionTypeName(q.questionType)}
                               </span>
                               <span className="text-[10px] text-slate-400 font-mono font-semibold">
@@ -818,14 +834,14 @@ export default function AdminQuizzesPage() {
                         <div className="flex items-center gap-1 shrink-0">
                           <button
                             onClick={() => handleOpenEditQuestion(selectedQuizObject, q)}
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                             title="Sửa câu hỏi & Cập nhật đáp án"
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDeleteQuestion(q.id)}
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
                             title="Xóa câu hỏi"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -880,7 +896,7 @@ export default function AdminQuizzesPage() {
                       {parsedPayload.acceptableAnswers && (
                         <div className="pl-10 text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1.5">
                           <span>✓ Đáp án chấp nhận:</span>
-                          <span className="font-mono bg-emerald-500/10 px-2 py-0.5 rounded">
+                          <span className="font-mono bg-emerald-500/10 px-2 py-0.5 rounded-full">
                             {parsedPayload.acceptableAnswers.join(" | ")}
                           </span>
                         </div>
@@ -905,44 +921,49 @@ export default function AdminQuizzesPage() {
 
       {/* Batch Import Quiz / Questions Modal */}
       {showImportModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 max-w-4xl w-full flex flex-col gap-4 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bento-card p-6 max-w-4xl w-full flex flex-col gap-4 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar border-[#d3e4fe] dark:border-slate-800">
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-              <div className="flex items-center gap-2">
-                <FileSpreadsheet className="w-5 h-5 text-emerald-500" />
-                <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
-                  Import Đề Thi & Câu Hỏi Hàng Loạt (CSV / TXT / Excel)
-                </h3>
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black">
+                  <FileSpreadsheet className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-base text-[#0b1c30] dark:text-white">
+                    Import Đề Thi & Câu Hỏi Hàng Loạt (CSV / Excel)
+                  </h3>
+                  <p className="text-[11px] text-slate-500">Nạp nhanh danh sách câu hỏi trắc nghiệm vào bộ đề</p>
+                </div>
               </div>
               <button
                 onClick={() => setShowImportModal(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Instruction Banner & Template Download */}
-            <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="p-4 rounded-2xl bg-[#eff4ff] dark:bg-emerald-950/20 border border-[#d3e4fe] dark:border-emerald-800/40 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <div>
                 <span className="font-bold text-emerald-700 dark:text-emerald-300 block mb-1">
                   Định dạng mẫu từng câu hỏi (phân cách bằng dấu chấm phẩy &ldquo;;&rdquo; hoặc Tab):
                 </span>
-                <code className="font-mono text-[11px] text-emerald-800 dark:text-emerald-200 bg-emerald-500/10 px-2 py-1 rounded">
+                <code className="font-mono text-[11px] text-emerald-800 dark:text-emerald-200 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 inline-block">
                   Câu hỏi ; Lựa chọn A ; Lựa chọn B ; Lựa chọn C ; Lựa chọn D ; Đáp án đúng (A/B/C/D) ; Giải thích ; Điểm
                 </code>
               </div>
               <button
                 onClick={handleDownloadQuizTemplate}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shrink-0 shadow-sm transition-all"
+                className="btn-tactile-secondary px-3.5 py-1.5 text-xs font-bold flex items-center gap-1.5 shrink-0 cursor-pointer"
               >
-                <Download className="w-3.5 h-3.5" />
-                Tải File Mẫu Đề Thi (.CSV)
+                <Download className="w-3.5 h-3.5 text-emerald-600" />
+                Tải File Mẫu (.CSV)
               </button>
             </div>
 
             {/* Import Target Selection */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded-2xl bg-[#eff4ff]/60 dark:bg-slate-800/60 border border-[#d3e4fe] dark:border-slate-700">
               <div>
                 <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
                   Mục tiêu Import:
@@ -950,7 +971,7 @@ export default function AdminQuizzesPage() {
                 <select
                   value={importTargetQuizId}
                   onChange={(e) => setImportTargetQuizId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white font-semibold"
+                  className="w-full px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
                 >
                   <option value="new">➕ Tạo Mới Một Bộ Đề Thi Từ File Này</option>
                   {quizzes.map((q) => (
@@ -971,7 +992,7 @@ export default function AdminQuizzesPage() {
                     value={importNewQuizTitle}
                     onChange={(e) => setImportNewQuizTitle(e.target.value)}
                     placeholder="VD: Đề Thi Thử JLPT N5 — Đề Số 02"
-                    className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white font-medium"
+                    className="w-full px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
                   />
                 </div>
               )}
@@ -986,7 +1007,7 @@ export default function AdminQuizzesPage() {
                   <select
                     value={importNewQuizLevel}
                     onChange={(e) => setImportNewQuizLevel(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white font-semibold"
+                    className="w-full px-3.5 py-2 rounded-xl bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
                   >
                     <option value="N5">JLPT N5</option>
                     <option value="N4">JLPT N4</option>
@@ -1004,7 +1025,7 @@ export default function AdminQuizzesPage() {
                     type="number"
                     value={importNewQuizDuration}
                     onChange={(e) => setImportNewQuizDuration(Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white"
+                    className="w-full px-3.5 py-2 rounded-xl bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
                   />
                 </div>
 
@@ -1016,7 +1037,7 @@ export default function AdminQuizzesPage() {
                     type="number"
                     value={importNewQuizPass}
                     onChange={(e) => setImportNewQuizPass(Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white"
+                    className="w-full px-3.5 py-2 rounded-xl bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
                   />
                 </div>
               </div>
@@ -1028,8 +1049,8 @@ export default function AdminQuizzesPage() {
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
                   Dán nội dung câu hỏi từ Excel / File TXT hoặc Chọn file tải lên:
                 </label>
-                <label className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer border border-slate-300 dark:border-slate-700">
-                  <Upload className="w-3.5 h-3.5" />
+                <label className="btn-tactile-secondary px-3 py-1 text-xs font-bold flex items-center gap-1.5 cursor-pointer">
+                  <Upload className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Chọn File .CSV / .TXT</span>
                   <input
                     type="file"
@@ -1048,7 +1069,7 @@ export default function AdminQuizzesPage() {
                 }}
                 rows={6}
                 placeholder={`「先生」の読み方はどれですか。;せんせい;がくせい;いしゃ;かいしゃいん;A;「先生」là thầy cô giáo.;2\n田中さん _____ どこに行きますか。;は;が;を;に;A;Trợ từ は đánh dấu chủ đề.;2`}
-                className="w-full px-3 py-2 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-mono text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500/50 focus:outline-none"
+                className="w-full px-3.5 py-2.5 rounded-2xl bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs font-mono text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-emerald-500/50 focus:outline-none"
               />
             </div>
 
@@ -1061,39 +1082,39 @@ export default function AdminQuizzesPage() {
                   </span>
                 </div>
 
-                <div className="max-h-52 overflow-y-auto border border-slate-200 dark:border-slate-700 rounded-xl">
+                <div className="max-h-52 overflow-y-auto border border-[#d3e4fe] dark:border-slate-700 rounded-2xl">
                   <table className="w-full text-left text-[11px]">
-                    <thead className="bg-slate-100 dark:bg-slate-800 text-slate-500 font-bold sticky top-0">
+                    <thead className="bg-[#eff4ff] dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold sticky top-0">
                       <tr>
-                        <th className="p-2">#</th>
-                        <th className="p-2">Câu Hỏi</th>
-                        <th className="p-2">4 Đáp Án</th>
-                        <th className="p-2">Đáp Án Đúng</th>
-                        <th className="p-2">Giải Thích</th>
-                        <th className="p-2">Điểm</th>
-                        <th className="p-2">Trạng Thái</th>
+                        <th className="p-2.5">#</th>
+                        <th className="p-2.5">Câu Hỏi</th>
+                        <th className="p-2.5">4 Đáp Án</th>
+                        <th className="p-2.5">Đáp Án Đúng</th>
+                        <th className="p-2.5">Giải Thích</th>
+                        <th className="p-2.5">Điểm</th>
+                        <th className="p-2.5">Trạng Thái</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                       {parsedImportQuestions.map((q, idx) => (
                         <tr key={idx} className={q.isValid ? "" : "bg-rose-500/10 text-rose-600"}>
-                          <td className="p-2 font-bold">{idx + 1}</td>
-                          <td className="p-2 font-bold text-slate-900 dark:text-white max-w-[200px] truncate">
+                          <td className="p-2.5 font-bold">{idx + 1}</td>
+                          <td className="p-2.5 font-bold text-slate-900 dark:text-white max-w-[200px] truncate">
                             {q.prompt || "(Trống)"}
                           </td>
-                          <td className="p-2 max-w-[200px] truncate">
+                          <td className="p-2.5 max-w-[200px] truncate">
                             {q.options?.join(" | ") || "(Chưa đủ)"}
                           </td>
-                          <td className="p-2">
-                            <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-black">
+                          <td className="p-2.5">
+                            <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-black">
                               {String.fromCharCode(65 + (q.correctIndex || 0))}
                             </span>
                           </td>
-                          <td className="p-2 max-w-[150px] truncate text-slate-500">
+                          <td className="p-2.5 max-w-[150px] truncate text-slate-500">
                             {q.explanation || "-"}
                           </td>
-                          <td className="p-2 font-mono font-bold">{q.points || 2}đ</td>
-                          <td className="p-2">
+                          <td className="p-2.5 font-mono font-bold">{q.points || 2}đ</td>
+                          <td className="p-2.5">
                             {q.isValid ? (
                               <span className="text-emerald-600 font-bold">✓ Hợp lệ</span>
                             ) : (
@@ -1110,12 +1131,12 @@ export default function AdminQuizzesPage() {
 
             {/* Progress Bar during Import */}
             {isImporting && (
-              <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-slate-100 dark:bg-slate-800">
+              <div className="flex flex-col gap-1.5 p-3 rounded-2xl bg-[#eff4ff] dark:bg-slate-800">
                 <div className="flex justify-between text-xs font-bold text-slate-700 dark:text-slate-300">
                   <span>Đang nhập câu hỏi vào bộ đề thi...</span>
                   <span>{importProgress.current} / {importProgress.total}</span>
                 </div>
-                <div className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-[#d3e4fe] dark:bg-slate-700 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-emerald-500 transition-all duration-150"
                     style={{
@@ -1126,21 +1147,21 @@ export default function AdminQuizzesPage() {
               </div>
             )}
 
-            <div className="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+            <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-slate-800">
               <button
                 onClick={() => setShowImportModal(false)}
                 disabled={isImporting}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50"
+                className="btn-tactile-secondary px-4 py-2 text-xs font-bold cursor-pointer disabled:opacity-50"
               >
                 Hủy
               </button>
               <button
                 onClick={handleExecuteQuizImport}
                 disabled={isImporting || parsedImportQuestions.filter((q) => q.isValid).length === 0}
-                className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-xs shadow-md transition-all active:scale-95"
+                className="btn-tactile-emerald px-5 py-2 text-xs font-black flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                {isImporting ? "Đang Import..." : `Xác Nhận Import ${parsedImportQuestions.filter((q) => q.isValid).length} Câu Hỏi`}
+                {isImporting ? "Đang Import..." : `Xác Nhận Import ${parsedImportQuestions.filter((q) => q.isValid).length} Câu`}
               </button>
             </div>
           </div>
@@ -1149,16 +1170,20 @@ export default function AdminQuizzesPage() {
 
       {/* Create / Edit Quiz Modal */}
       {showQuizModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 max-w-lg w-full flex flex-col gap-4 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bento-card p-6 max-w-lg w-full flex flex-col gap-4 shadow-2xl border-[#d3e4fe] dark:border-slate-800">
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-              <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
-                <HelpCircle className="w-5 h-5 text-orange-500" />
-                {editingQuiz ? "Chỉnh Sửa Bộ Đề" : "Thêm Bộ Đề Thi Mới"}
-              </h3>
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-black">
+                  <HelpCircle className="w-5 h-5" />
+                </div>
+                <h3 className="font-extrabold text-base text-[#0b1c30] dark:text-white">
+                  {editingQuiz ? "Chỉnh Sửa Bộ Đề" : "Thêm Bộ Đề Thi Mới"}
+                </h3>
+              </div>
               <button
                 onClick={() => setShowQuizModal(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1174,7 +1199,7 @@ export default function AdminQuizzesPage() {
                 onChange={(e) => setQuizTitle(e.target.value)}
                 placeholder="e.g. Đề Thi Thử JLPT N5 — Đề Số 01"
                 autoFocus
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/50 focus:outline-none"
+                className="w-full px-3.5 py-2 rounded-full bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-purple-500/50 focus:outline-none"
               />
             </div>
 
@@ -1185,7 +1210,7 @@ export default function AdminQuizzesPage() {
               <select
                 value={quizType}
                 onChange={(e) => setQuizType(Number(e.target.value))}
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/50 focus:outline-none font-medium"
+                className="w-full px-3.5 py-2 rounded-xl bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-purple-500/50 focus:outline-none font-medium"
               >
                 <option value={2}>Đề Thi Thử Chuẩn JLPT (Practice Test N5 - N1)</option>
                 <option value={0}>Bài Kiểm Tra Bài Học (Lesson Quiz)</option>
@@ -1202,7 +1227,7 @@ export default function AdminQuizzesPage() {
                 onChange={(e) => setQuizDescription(e.target.value)}
                 rows={2}
                 placeholder="Mô phỏng cấu trúc đề thi JLPT chuẩn: Chữ Hán - Từ Vựng, Ngữ Pháp, Đọc Hiểu, Nghe Hiểu..."
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/50 focus:outline-none"
+                className="w-full px-3.5 py-2 rounded-2xl bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-purple-500/50 focus:outline-none"
               />
             </div>
 
@@ -1216,7 +1241,7 @@ export default function AdminQuizzesPage() {
                   value={timeLimitMinutes || ""}
                   onChange={(e) => setTimeLimitMinutes(Number(e.target.value))}
                   placeholder="105"
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/50 focus:outline-none"
+                  className="w-full px-3.5 py-2 rounded-full bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-purple-500/50 focus:outline-none"
                 />
               </div>
 
@@ -1229,7 +1254,7 @@ export default function AdminQuizzesPage() {
                   value={passPercentage}
                   onChange={(e) => setPassPercentage(Number(e.target.value))}
                   placeholder="60"
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/50 focus:outline-none"
+                  className="w-full px-3.5 py-2 rounded-full bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-purple-500/50 focus:outline-none"
                 />
               </div>
             </div>
@@ -1241,7 +1266,7 @@ export default function AdminQuizzesPage() {
               <select
                 value={selectedLessonId}
                 onChange={(e) => setSelectedLessonId(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/50 focus:outline-none"
+                className="w-full px-3.5 py-2 rounded-xl bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-purple-500/50 focus:outline-none"
               >
                 <option value="">-- Không gắn vào bài nào (Độc lập / Luyện Đề Chung) --</option>
                 {allLessons.map((l) => (
@@ -1250,17 +1275,17 @@ export default function AdminQuizzesPage() {
               </select>
             </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+            <div className="flex justify-end gap-2.5 pt-2 border-t border-slate-200 dark:border-slate-800">
               <button
                 onClick={() => setShowQuizModal(false)}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="btn-tactile-secondary px-4 py-2 text-xs font-bold cursor-pointer"
               >
                 Hủy
               </button>
               <button
                 onClick={handleSaveQuiz}
                 disabled={!quizTitle.trim()}
-                className="px-5 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold shadow-md transition-all active:scale-95 disabled:opacity-50"
+                className="btn-tactile-purple px-5 py-2 text-xs font-black cursor-pointer disabled:opacity-50"
               >
                 {editingQuiz ? "Cập Nhật Bộ Đề" : "Tạo Bộ Đề"}
               </button>
@@ -1271,23 +1296,28 @@ export default function AdminQuizzesPage() {
 
       {/* Add / Edit Question Modal (with Answer Updates, Explanations, and Local Audio Upload) */}
       {activeQuizForQuestion && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 max-w-xl w-full flex flex-col gap-4 max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bento-card p-6 max-w-xl w-full flex flex-col gap-4 max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl border-[#d3e4fe] dark:border-slate-800">
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-              <div>
-                <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
-                  {editingQuestion ? "Chỉnh Sửa Câu Hỏi & Cập Nhật Đáp Án" : "Thêm Câu Hỏi Mới"}
-                </h3>
-                <p className="text-xs text-orange-500 font-semibold truncate max-w-sm">
-                  Bộ đề: {activeQuizForQuestion.title}
-                </p>
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-black">
+                  <Plus className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-base text-[#0b1c30] dark:text-white">
+                    {editingQuestion ? "Chỉnh Sửa Câu Hỏi & Đáp Án" : "Thêm Câu Hỏi Mới"}
+                  </h3>
+                  <p className="text-[11px] text-purple-600 dark:text-purple-400 font-semibold truncate max-w-sm">
+                    Bộ đề: {activeQuizForQuestion.title}
+                  </p>
+                </div>
               </div>
               <button
                 onClick={() => {
                   setActiveQuizForQuestion(null);
                   setEditingQuestion(null);
                 }}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1301,7 +1331,7 @@ export default function AdminQuizzesPage() {
                 <select
                   value={questionType}
                   onChange={(e) => setQuestionType(Number(e.target.value))}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/50 focus:outline-none font-medium"
+                  className="w-full px-3.5 py-2 rounded-xl bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-purple-500/50 focus:outline-none font-medium"
                 >
                   <option value={0}>Trắc nghiệm 4 lựa chọn (Multiple Choice)</option>
                   <option value={2}>Điền từ vào chỗ trống (Fill in blank)</option>
@@ -1318,7 +1348,7 @@ export default function AdminQuizzesPage() {
                   value={points}
                   onChange={(e) => setPoints(Number(e.target.value))}
                   min={1}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/50 focus:outline-none"
+                  className="w-full px-3.5 py-2 rounded-full bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-purple-500/50 focus:outline-none"
                 />
               </div>
             </div>
@@ -1332,21 +1362,21 @@ export default function AdminQuizzesPage() {
                 onChange={(e) => setPromptText(e.target.value)}
                 rows={2}
                 placeholder="e.g. 【文字・語彙】「先生」の読み方はどれですか。"
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/50 focus:outline-none"
+                className="w-full px-3.5 py-2 rounded-2xl bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-purple-500/50 focus:outline-none"
               />
             </div>
 
             {/* Listening audio URL & Local Upload */}
             {questionType === 6 && (
-              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex flex-col gap-2.5">
+              <div className="p-3.5 rounded-2xl bg-[#eff4ff]/60 dark:bg-slate-800/60 border border-[#d3e4fe] dark:border-slate-700 flex flex-col gap-2.5">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                    <Headphones className="w-4 h-4 text-orange-500" />
+                    <Headphones className="w-4 h-4 text-purple-500" />
                     Tệp Âm Thanh Nghe Hiểu (Dual-Mode: Local Upload / Drive Link)
                   </label>
-                  <label className="flex items-center gap-1 px-3 py-1 rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-bold text-[11px] cursor-pointer shadow-xs transition-all">
-                    <Upload className="w-3 h-3" />
-                    <span>{isUploadingAudio ? "Đang tải lên..." : "Tải Tệp MP3 Lên"}</span>
+                  <label className="btn-tactile-secondary px-3 py-1 text-xs font-bold flex items-center gap-1 cursor-pointer">
+                    <Upload className="w-3.5 h-3.5 text-purple-600" />
+                    <span>{isUploadingAudio ? "Đang tải lên..." : "Tải Tệp MP3"}</span>
                     <input
                       type="file"
                       ref={audioFileInputRef}
@@ -1362,8 +1392,8 @@ export default function AdminQuizzesPage() {
                   type="text"
                   value={listeningAudioUrl}
                   onChange={(e) => setListeningAudioUrl(e.target.value)}
-                  placeholder="Dán link Google Drive hoặc URL tệp MP3 (hoặc bấm Tải Tệp MP3 ở trên)..."
-                  className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white font-mono focus:ring-2 focus:ring-orange-500/50 focus:outline-none"
+                  placeholder="Dán link Google Drive hoặc URL tệp MP3..."
+                  className="w-full px-3.5 py-2 rounded-full bg-white dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white font-mono focus:ring-2 focus:ring-purple-500/50 focus:outline-none"
                 />
 
                 {listeningAudioUrl && (
@@ -1379,7 +1409,7 @@ export default function AdminQuizzesPage() {
 
             {/* Multiple Choice Answers Configuration */}
             {(questionType === 0 || questionType === 6) && (
-              <div className="flex flex-col gap-2.5 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+              <div className="flex flex-col gap-2.5 p-3.5 rounded-2xl bg-[#eff4ff]/60 dark:bg-slate-800/60 border border-[#d3e4fe] dark:border-slate-700">
                 <div className="flex items-center justify-between">
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
                     Cấu hình 4 đáp án (Tích chọn radio tròn để chọn Đáp án ĐÚNG)
@@ -1416,10 +1446,10 @@ export default function AdminQuizzesPage() {
                         setMcOptions(copy);
                       }}
                       placeholder={`Nhập đáp án ${String.fromCharCode(65 + idx)}...`}
-                      className="flex-1 px-3 py-1.5 rounded-lg bg-transparent text-xs text-slate-900 dark:text-white focus:outline-none"
+                      className="flex-1 px-3 py-1.5 rounded-lg bg-transparent text-xs text-[#0b1c30] dark:text-white focus:outline-none"
                     />
                     {mcCorrectIndex === idx && (
-                      <span className="px-2 py-0.5 rounded-md bg-emerald-500 text-white font-bold text-[10px] uppercase shrink-0">
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500 text-white font-bold text-[10px] uppercase shrink-0">
                         ĐÁP ÁN ĐÚNG
                       </span>
                     )}
@@ -1430,7 +1460,7 @@ export default function AdminQuizzesPage() {
 
             {/* Fill-in-the-Blank answer configuration */}
             {questionType === 2 && (
-              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex flex-col gap-1.5">
+              <div className="p-3.5 rounded-2xl bg-[#eff4ff]/60 dark:bg-slate-800/60 border border-[#d3e4fe] dark:border-slate-700 flex flex-col gap-1.5">
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
                   Các đáp án chấp nhận (Ngăn cách bằng dấu phẩy)
                 </label>
@@ -1439,7 +1469,7 @@ export default function AdminQuizzesPage() {
                   value={fillBlankAnswer}
                   onChange={(e) => setFillBlankAnswer(e.target.value)}
                   placeholder="e.g. に, ni, と, to"
-                  className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/50 focus:outline-none font-mono"
+                  className="w-full px-3.5 py-2 rounded-full bg-white dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-purple-500/50 focus:outline-none font-mono"
                 />
                 <span className="text-[11px] text-slate-400">
                   Học viên nhập trùng với bất kỳ từ nào trong danh sách trên sẽ được tính điểm trọn vẹn.
@@ -1457,25 +1487,25 @@ export default function AdminQuizzesPage() {
                 onChange={(e) => setExplanationText(e.target.value)}
                 rows={2}
                 placeholder="e.g. 「先生」đọc là せんせい (sensei) có nghĩa là thầy cô giáo..."
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/50 focus:outline-none"
+                className="w-full px-3.5 py-2 rounded-2xl bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-purple-500/50 focus:outline-none"
               />
             </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+            <div className="flex justify-end gap-2.5 pt-2 border-t border-slate-200 dark:border-slate-800">
               <button
                 onClick={() => {
                   setActiveQuizForQuestion(null);
                   setEditingQuestion(null);
                 }}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="btn-tactile-secondary px-4 py-2 text-xs font-bold cursor-pointer"
               >
                 Hủy
               </button>
               <button
                 onClick={handleSaveQuestion}
-                className="px-5 py-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white text-xs font-bold shadow-md transition-all active:scale-95"
+                className="btn-tactile-emerald px-5 py-2 text-xs font-black cursor-pointer"
               >
-                {editingQuestion ? "Cập Nhật Câu Hỏi & Đáp Án" : "Lưu Câu Hỏi"}
+                {editingQuestion ? "Cập Nhật Câu Hỏi" : "Lưu Câu Hỏi"}
               </button>
             </div>
           </div>

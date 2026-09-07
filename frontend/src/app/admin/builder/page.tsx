@@ -479,75 +479,62 @@ export default function CourseBuilderPage() {
 
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen w-full flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+    <div className="min-h-screen w-full flex flex-col bg-[#f8f9ff] dark:bg-[#090d16] text-slate-900 dark:text-slate-100 font-sans">
       {/* Header — shrink-0 ensures it never collapses */}
       <Header />
 
       {/* Main workspace */}
       <main className="flex-1 flex flex-col gap-0 px-4 pb-3 pt-2 max-w-screen-2xl mx-auto w-full">
-        {/* ── Title + Sync Toolbar (shrink-0) ─────────────────────────────── */}
-        <div className="shrink-0 flex flex-col gap-3 mb-3">
-          {/* Title row */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="min-w-0">
-              <h1 className="text-lg font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-                <Layers className="w-5 h-5 text-indigo-500 shrink-0" />
-                <span className="truncate">{t("navAdmin")} (Course Builder CMS)</span>
-              </h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
-                Decoupled: Drive Tree → Course → Section → Lesson → Resource
-              </p>
-            </div>
-
-            {/* OAuth badge */}
-            <div className="flex items-center gap-2 shrink-0">
-              {authStatus?.isAuthenticated ? (
-                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-extrabold">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  Drive OAuth Connected
-                </span>
-              ) : (
-                <a
-                  href="http://localhost:5222/api/auth/google/login"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 text-white text-xs font-extrabold shadow-md hover:from-orange-700 hover:to-amber-700 transition-all"
-                >
-                  <Key className="w-3.5 h-3.5" />
-                  Kết Nối Google OAuth
-                </a>
-              )}
-            </div>
-          </div>
-
-          {/* Sync Toolbar */}
-          <div className="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+        {/* ── Compact Sync Toolbar with OAuth Badge (shrink-0) ─────────────────────────────── */}
+        <div className="shrink-0 mb-2">
+          <div className="bento-card p-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
             <div className="flex-1 flex items-center gap-2 min-w-0">
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 shrink-0">
-                Root ID:
+              <span className="text-[11px] font-black text-slate-700 dark:text-slate-300 shrink-0 uppercase tracking-wider">
+                Root Folder ID:
               </span>
               <input
                 type="text"
                 value={rootFolderId}
                 onChange={(e) => setRootFolderId(e.target.value)}
                 placeholder="Dán Folder ID từ Google Drive..."
-                className="flex-1 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white font-mono focus:ring-2 focus:ring-orange-500/50 focus:outline-none min-w-0"
+                className="flex-1 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white font-mono font-medium focus:ring-2 focus:ring-emerald-500/50 focus:outline-none min-w-0"
               />
+
+              {/* OAuth status badge inside toolbar */}
+              <div className="shrink-0">
+                {authStatus?.isAuthenticated ? (
+                  <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-black shadow-xs">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                    <span>Drive OAuth Connected</span>
+                  </span>
+                ) : (
+                  <a
+                    href="http://localhost:5222/api/auth/google/login"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-tactile-amber flex items-center gap-1.5 px-3 py-1.5 text-xs font-black"
+                  >
+                    <Key className="w-3.5 h-3.5" />
+                    <span>Kết Nối Google OAuth</span>
+                  </a>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-2">
+
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={() => setShowAutoCourseBuilder(true)}
-                className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-700 hover:to-indigo-700 text-white text-xs font-extrabold shadow-md shadow-emerald-500/20 transition-all active:scale-95 shrink-0"
+                className="btn-tactile-purple flex items-center justify-center gap-2 px-3.5 py-1.5 text-xs font-black shrink-0 cursor-pointer"
               >
                 <Zap className="w-3.5 h-3.5 text-amber-300" />
-                AI Auto-Build Khóa Học (Drive)
+                AI Auto-Build Khóa Học
               </button>
               <button
                 onClick={handleTriggerSync}
                 disabled={syncing}
-                className="flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 disabled:opacity-50 text-white text-xs font-extrabold shadow-md transition-all active:scale-95 shrink-0"
+                className="btn-tactile-dark flex items-center justify-center gap-2 px-3.5 py-1.5 text-xs font-black shrink-0 cursor-pointer disabled:opacity-50"
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${syncing ? "animate-spin" : ""}`} />
+                <RefreshCw className={`w-3.5 h-3.5 ${syncing ? "animate-spin text-emerald-400" : ""}`} />
                 {syncing ? "Đang Đồng Bộ..." : "Sync Drive"}
               </button>
             </div>
@@ -557,7 +544,7 @@ export default function CourseBuilderPage() {
         {/* ── 2-Column Resizable Workspace ──────────────────── */}
         <div
           ref={workspaceRef}
-          className="flex flex-col lg:flex-row gap-0 h-[calc(100vh-145px)] min-h-[600px] pb-1 min-h-0 relative select-none"
+          className="flex flex-col lg:flex-row gap-0 h-[calc(100vh-80px)] min-h-[620px] pb-1 min-h-0 relative select-none"
         >
           {/* Left Column: Raw Drive Tree */}
           <div

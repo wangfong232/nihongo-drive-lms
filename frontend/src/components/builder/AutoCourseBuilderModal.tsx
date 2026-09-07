@@ -433,47 +433,52 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-4xl max-h-[92vh] flex flex-col bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200 font-sans">
+      <div className="bento-card relative w-full max-w-4xl max-h-[92vh] flex flex-col rounded-3xl shadow-2xl overflow-hidden p-0">
         
-        {/* Header with Step Breadcrumbs */}
-        <div className="px-6 py-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white shrink-0">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-amber-300 animate-pulse" />
+        {/* Header with Step Breadcrumbs (Playful Bento) */}
+        <div className="px-6 py-5 bg-[#f8f9ff] dark:bg-slate-900 border-b border-slate-200/80 dark:border-slate-800 shrink-0">
+          <div className="flex items-center justify-between mb-3.5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center shadow-xs">
+                <Sparkles className="w-6 h-6 text-purple-600 dark:text-purple-400 animate-pulse" />
               </div>
               <div>
-                <h2 className="text-base font-extrabold tracking-tight">
-                  Flexible Folder-to-Course Builder
-                </h2>
-                <p className="text-xs text-indigo-100/90">
-                  Dựng Khóa học Thông minh từ Google Drive theo mọi mô hình (N5..N1)
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white">
+                    AI Auto-Course Builder
+                  </h2>
+                  <span className="px-2.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 text-[10px] font-black uppercase tracking-wider">
+                    Drive Sync & PDF
+                  </span>
+                </div>
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5">
+                  Tự động phân tích cây thư mục Google Drive hoặc bóc tách lộ trình PDF theo cấu trúc chuẩn JLPT (N5..N1)
                 </p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+              className="p-2 rounded-2xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          {/* Breadcrumb Steps Indicator */}
-          <div className="flex items-center gap-2 text-xs font-bold pt-1">
-            <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full transition-all ${step === 1 ? "bg-white text-indigo-700 shadow-xs" : "bg-white/20 text-white"}`}>
-              <span className="w-4 h-4 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px]">1</span>
+          {/* Breadcrumb Steps Indicator (Pills) */}
+          <div className="flex items-center gap-2 text-xs font-black pt-1">
+            <div className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition-all ${step === 1 ? "bg-purple-600 text-white shadow-sm" : "bg-slate-100 dark:bg-slate-800 text-slate-500"}`}>
+              <span className="w-4 h-4 rounded-full bg-white text-purple-700 flex items-center justify-center text-[10px] font-black">1</span>
               <span>Nguồn & Preset</span>
             </div>
-            <ArrowRight className="w-3.5 h-3.5 text-white/60" />
-            <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full transition-all ${step === 2 ? "bg-white text-indigo-700 shadow-xs" : "bg-white/20 text-white"}`}>
-              <span className="w-4 h-4 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px]">2</span>
+            <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+            <div className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition-all ${step === 2 ? "bg-purple-600 text-white shadow-sm" : "bg-slate-100 dark:bg-slate-800 text-slate-500"}`}>
+              <span className="w-4 h-4 rounded-full bg-white text-purple-700 flex items-center justify-center text-[10px] font-black">2</span>
               <span>Cấu hình Linh hoạt</span>
             </div>
-            <ArrowRight className="w-3.5 h-3.5 text-white/60" />
-            <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full transition-all ${step === 3 ? "bg-white text-indigo-700 shadow-xs" : "bg-white/20 text-white"}`}>
-              <span className="w-4 h-4 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px]">3</span>
+            <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+            <div className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition-all ${step === 3 ? "bg-purple-600 text-white shadow-sm" : "bg-slate-100 dark:bg-slate-800 text-slate-500"}`}>
+              <span className="w-4 h-4 rounded-full bg-white text-purple-700 flex items-center justify-center text-[10px] font-black">3</span>
               <span>Xem trước & Lưu</span>
             </div>
           </div>
@@ -482,8 +487,8 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
         {/* Content Body */}
         <div className="flex-1 overflow-y-auto p-6 min-h-0">
           {error && (
-            <div className="mb-4 p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0" />
+            <div className="mb-4 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-700 dark:text-rose-400 text-xs flex items-center gap-2.5 font-bold">
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
               <span>{error}</span>
             </div>
           )}
@@ -494,14 +499,14 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
           {step === 1 && (
             <div className="space-y-5 max-w-2xl mx-auto py-2">
               {/* Mode Selection Tabs */}
-              <div className="flex p-1 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80">
+              <div className="flex p-1.5 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80">
                 <button
                   type="button"
                   onClick={() => setScanMode("folder")}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
                     scanMode === "folder"
-                      ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200/60 dark:border-slate-700/60"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                      ? "bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-sm"
+                      : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                   }`}
                 >
                   <FolderTree className="w-4 h-4" />
@@ -510,10 +515,10 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setScanMode("pdf")}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
                     scanMode === "pdf"
-                      ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200/60 dark:border-slate-700/60"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                      ? "bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-sm"
+                      : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
                   }`}
                 >
                   <FileText className="w-4 h-4" />
@@ -525,11 +530,11 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                 <>
                   {/* Quick-Pick Chips for Top Course Roots */}
                   {topCourseFolders.length > 0 && (
-                    <div className="space-y-1.5 p-3 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/60">
+                    <div className="space-y-2 p-4 rounded-2xl bg-purple-50/70 dark:bg-purple-950/20 border border-purple-200/70 dark:border-purple-900/40">
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold text-indigo-900 dark:text-indigo-300 flex items-center gap-1.5">
+                        <span className="text-[11px] font-black text-purple-950 dark:text-purple-200 flex items-center gap-1.5 uppercase tracking-wider">
                           <Sparkles className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
-                          <span>Gợi ý Thư mục Khóa học Nhanh (Click để chọn ngay):</span>
+                          <span>Gợi ý Thư mục Khóa học Nhanh (Click để chọn):</span>
                         </span>
                       </div>
                       <div className="flex flex-wrap gap-1.5">
@@ -540,9 +545,9 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                               key={folder.id}
                               type="button"
                               onClick={() => handleFolderSelect(folder.id)}
-                              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
                                 isSelected
-                                  ? "bg-indigo-600 text-white shadow-sm shadow-indigo-500/30 scale-[1.02]"
+                                  ? "bg-purple-600 text-white shadow-sm scale-[1.02]"
                                   : "bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 shadow-2xs"
                               }`}
                             >
@@ -558,29 +563,29 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                   {/* Folder Selection & Search Bar */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                      <label className="block text-xs font-black text-slate-700 dark:text-slate-300">
                         1. Chọn hoặc Tìm kiếm Thư mục Nguồn trên Google Drive
                       </label>
-                      <span className="text-[10px] text-slate-400 font-mono">
+                      <span className="text-[11px] font-bold text-slate-400 font-mono">
                         {categorizedFolders.length} thư mục
                       </span>
                     </div>
 
                     {/* Live Search Input */}
                     <div className="relative">
-                      <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
                         type="text"
                         value={folderSearchQuery}
                         onChange={(e) => setFolderSearchQuery(e.target.value)}
                         placeholder="🔍 Tìm nhanh (vd: N2, N3, Dũng Mori, Minna, Bài giảng...)..."
-                        className="w-full pl-8 pr-8 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                        className="w-full pl-9 pr-9 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 font-medium"
                       />
                       {folderSearchQuery && (
                         <button
                           type="button"
                           onClick={() => setFolderSearchQuery("")}
-                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 cursor-pointer"
                         >
                           <X className="w-3.5 h-3.5" />
                         </button>
@@ -591,7 +596,7 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                     <select
                       value={selectedRootFolderId}
                       onChange={(e) => handleFolderSelect(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-medium font-mono truncate"
+                      className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all font-medium font-mono truncate cursor-pointer"
                     >
                       <option value="">-- Chọn thư mục khóa học ({categorizedFolders.length} kết quả) --</option>
                       {categorizedFolders.map((folder) => (
@@ -604,8 +609,8 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
 
                   {/* Auto-Detect Status / Analysis Banner */}
                   {isDetecting && (
-                    <div className="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900 flex items-center gap-3 text-xs text-indigo-600 dark:text-indigo-400">
-                      <RefreshCw className="w-4 h-4 animate-spin shrink-0" />
+                    <div className="p-4 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border border-purple-100 dark:border-purple-900 flex items-center gap-3 text-xs font-bold text-purple-700 dark:text-purple-300">
+                      <RefreshCw className="w-4 h-4 animate-spin shrink-0 text-purple-600" />
                       <span>Đang phân tích cấu trúc cây thư mục và độ sâu dữ liệu...</span>
                     </div>
                   )}
@@ -625,19 +630,19 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                       ) : (
                         <>
                           {/* Detection Rationale Banner */}
-                          <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xs">
-                            <div className="flex items-center gap-2 font-bold text-emerald-700 dark:text-emerald-300">
-                              <CheckCircle2 className="w-4 h-4 shrink-0" />
+                          <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xs">
+                            <div className="flex items-center gap-2 font-black text-emerald-700 dark:text-emerald-300">
+                              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-500" />
                               <span>Tự động nhận diện: {detectResult.rationale}</span>
                             </div>
-                            <p className="text-[11px] text-emerald-600/80 dark:text-emerald-400/80 mt-1 pl-6">
+                            <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400 mt-1 pl-6">
                               Phát hiện <b>{detectResult.totalSubFolders} thư mục con</b> • <b>{detectResult.totalFiles} file tài liệu/media</b> • Độ sâu tối đa: <b>{detectResult.maxDepth} cấp</b>
                             </p>
                           </div>
 
                           {/* Presets Cards */}
                           <div>
-                            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
+                            <label className="block text-xs font-black text-slate-700 dark:text-slate-300 mb-2">
                               2. Chọn Preset Ánh Xạ (Mapping Preset)
                             </label>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -647,24 +652,24 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                                   <div
                                     key={preset.presetId}
                                     onClick={() => handleSelectPreset(preset)}
-                                    className={`p-3.5 rounded-2xl border-2 transition-all cursor-pointer relative ${
+                                    className={`p-4 rounded-2xl border-2 transition-all cursor-pointer relative ${
                                       isSelected
-                                        ? "border-indigo-600 bg-indigo-50/50 dark:bg-indigo-950/30 shadow-sm"
+                                        ? "border-purple-600 bg-purple-50/50 dark:bg-purple-950/30 shadow-sm"
                                         : "border-slate-200 dark:border-slate-800 hover:border-slate-300 bg-white dark:bg-slate-900"
                                     }`}
                                   >
                                     {isSelected && (
-                                      <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center">
+                                      <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center">
                                         <Check className="w-3 h-3" />
                                       </div>
                                     )}
-                                    <h4 className="text-xs font-extrabold text-slate-900 dark:text-white pr-6">
+                                    <h4 className="text-xs font-black text-slate-900 dark:text-white pr-6">
                                       {preset.name}
                                     </h4>
-                                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium leading-relaxed">
                                       {preset.description}
                                     </p>
-                                    <div className="mt-2 text-[10px] font-mono text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-2 py-1 rounded-lg">
+                                    <div className="mt-2 text-[10px] font-mono font-bold text-purple-700 dark:text-purple-300 bg-purple-500/10 px-2 py-1 rounded-lg">
                                       Cấu trúc: {preset.samplePathPattern}
                                     </div>
                                   </div>
@@ -679,16 +684,16 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                               <button
                                 type="button"
                                 onClick={() => setShowFolderTree(!showFolderTree)}
-                                className="w-full flex items-center justify-between p-3 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100/50 transition-colors"
+                                className="w-full flex items-center justify-between p-3.5 text-xs font-black text-slate-700 dark:text-slate-300 hover:bg-slate-100/50 transition-colors cursor-pointer"
                               >
                                 <span className="flex items-center gap-2">
-                                  <FolderTree className="w-4 h-4 text-indigo-600" />
+                                  <FolderTree className="w-4 h-4 text-purple-600" />
                                   <span>Xem trước Cây thư mục thu nhỏ ({detectResult.folderTreePreview.length} nhánh chính)</span>
                                 </span>
                                 {showFolderTree ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                               </button>
                               {showFolderTree && (
-                                <div className="p-3 border-t border-slate-200 dark:border-slate-800 max-h-48 overflow-y-auto space-y-1">
+                                <div className="p-3.5 border-t border-slate-200 dark:border-slate-800 max-h-48 overflow-y-auto space-y-1">
                                   {detectResult.folderTreePreview.map((node) => renderFolderTreeNode(node))}
                                 </div>
                               )}
@@ -703,10 +708,10 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                 /* PDF Dropzone Mode */
                 <div className="space-y-4">
                   <div className="text-center space-y-1">
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                    <h3 className="text-sm font-black text-slate-900 dark:text-white">
                       AI Bóc tách Giáo trình / Lộ trình PDF
                     </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                       AI sẽ đọc file PDF giáo trình, trích xuất cấu trúc bài học và tự động tìm các file media tương ứng trong kho Drive.
                     </p>
                   </div>
@@ -714,10 +719,10 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                   <div
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={handlePdfDrop}
-                    className={`relative border-2 border-dashed rounded-2xl p-6 text-center transition-all cursor-pointer ${
+                    className={`relative border-2 border-dashed rounded-3xl p-6 text-center transition-all cursor-pointer ${
                       selectedPdfFile
                         ? "border-emerald-500/50 bg-emerald-500/5 dark:bg-emerald-950/20"
-                        : "border-slate-300 dark:border-slate-700 hover:border-indigo-500 bg-slate-50/50 dark:bg-slate-800/40"
+                        : "border-slate-300 dark:border-slate-700 hover:border-purple-500 bg-slate-50/50 dark:bg-slate-800/40"
                     }`}
                   >
                     <input
@@ -728,27 +733,27 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                     />
                     {selectedPdfFile ? (
                       <div className="flex items-center justify-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                        <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
                           <FileText className="w-6 h-6" />
                         </div>
                         <div className="text-left min-w-0">
-                          <p className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate max-w-xs">
+                          <p className="text-xs font-black text-slate-800 dark:text-slate-200 truncate max-w-xs">
                             {selectedPdfFile.name}
                           </p>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                          <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
                             {(selectedPdfFile.size / 1024 / 1024).toFixed(2)} MB • Nhấp để đổi file khác
                           </p>
                         </div>
                       </div>
                     ) : (
-                      <div className="space-y-1.5">
-                        <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto">
+                      <div className="space-y-2">
+                        <div className="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center mx-auto shadow-xs">
                           <UploadCloud className="w-6 h-6" />
                         </div>
-                        <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                          Kéo thả file PDF vào đây hoặc <span className="text-indigo-600 dark:text-indigo-400 underline">chọn file</span>
+                        <p className="text-xs font-black text-slate-700 dark:text-slate-300">
+                          Kéo thả file PDF vào đây hoặc <span className="text-purple-600 dark:text-purple-400 underline">chọn file</span>
                         </p>
-                        <p className="text-[11px] text-slate-400">
+                        <p className="text-[11px] text-slate-400 font-medium">
                           Hỗ trợ file PDF giáo trình Minna, Shinkanzen, Soumatome...
                         </p>
                       </div>
@@ -780,7 +785,7 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                     }
                     setStep(2);
                   }}
-                  className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold text-sm shadow-lg shadow-indigo-500/25 transition-all active:scale-[0.98]"
+                  className="btn-tactile-purple w-full flex items-center justify-center gap-2 py-3 text-sm font-black cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span>Tiếp tục Cấu hình Ánh Xạ</span>
                   <ArrowRight className="w-4 h-4" />
@@ -796,12 +801,12 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
             <div className="space-y-5 max-w-2xl mx-auto py-2">
               {/* ✨ AI Prompt Helper Card */}
               {scanMode === "folder" && (
-                <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 border border-indigo-500/20 space-y-2.5">
-                  <div className="flex items-center gap-2 text-indigo-950 dark:text-indigo-200">
-                    <Wand2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400 animate-pulse" />
-                    <span className="text-xs font-extrabold">AI Prompt Helper (Trợ lý Phân tích Cấu Trúc Khóa Học)</span>
+                <div className="p-4.5 rounded-3xl bg-purple-50/70 dark:bg-purple-950/20 border border-purple-200/80 dark:border-purple-900/50 space-y-2.5">
+                  <div className="flex items-center gap-2 text-purple-950 dark:text-purple-200">
+                    <Wand2 className="w-4 h-4 text-purple-600 dark:text-purple-400 animate-pulse" />
+                    <span className="text-xs font-black">AI Prompt Helper (Trợ lý Phân tích Cấu Trúc Khóa Học)</span>
                   </div>
-                  <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                  <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
                     Nhập câu lệnh hướng dẫn bằng tiếng Việt (ví dụ: <i>"Gộp Chặng và Kỹ năng làm Section, mỗi Chương hoặc Dạng bài làm 1 Lesson riêng..."</i>), AI sẽ đọc cây thư mục và tự động cấu hình chuẩn nhất.
                   </p>
                   <div className="flex gap-2">
@@ -810,13 +815,13 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                       value={aiPromptInstruction}
                       onChange={(e) => setAiPromptInstruction(e.target.value)}
                       placeholder="Ví dụ: Gộp Chặng 1 + Chữ Hán làm Section, Chương 1..8 làm Lesson..."
-                      className="flex-1 px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                      className="flex-1 px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 font-medium"
                     />
                     <button
                       type="button"
                       onClick={handleAiAnalyze}
                       disabled={isAiAnalyzing}
-                      className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold text-xs shrink-0 shadow-sm transition-all"
+                      className="btn-tactile-purple flex items-center gap-1.5 px-4 py-2 text-xs font-black shrink-0 cursor-pointer disabled:opacity-50"
                     >
                       {isAiAnalyzing ? (
                         <>
@@ -833,11 +838,11 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                   </div>
 
                   {aiFeedbackRationale && (
-                    <div className="p-3 rounded-xl bg-indigo-100/60 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800/70 text-xs text-indigo-900 dark:text-indigo-200 flex items-start gap-2.5 animate-in fade-in">
+                    <div className="p-3.5 rounded-2xl bg-purple-100/70 dark:bg-purple-950/50 border border-purple-200 dark:border-purple-800/70 text-xs text-purple-950 dark:text-purple-200 flex items-start gap-2.5 animate-in fade-in">
                       <Sparkles className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                       <div>
-                        <p className="font-bold text-indigo-700 dark:text-indigo-300">Phản hồi từ AI:</p>
-                        <p className="mt-0.5 text-[11px] text-indigo-800/90 dark:text-indigo-300/90 leading-relaxed">{aiFeedbackRationale}</p>
+                        <p className="font-bold text-purple-800 dark:text-purple-300">Phản hồi từ AI:</p>
+                        <p className="mt-0.5 text-xs text-purple-900 dark:text-purple-200 leading-relaxed font-medium">{aiFeedbackRationale}</p>
                       </div>
                     </div>
                   )}
@@ -847,7 +852,7 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
               {/* Course Title & Level */}
               <div className="grid grid-cols-3 gap-3">
                 <div className="col-span-2">
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  <label className="block text-xs font-black text-slate-700 dark:text-slate-300 mb-1.5">
                     Tên Khóa Học
                   </label>
                   <input
@@ -855,17 +860,17 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                     value={config.courseTitle}
                     onChange={(e) => setConfig({ ...config, courseTitle: e.target.value })}
                     placeholder="Ví dụ: Khóa học Tiếng Nhật N3 Dũng Mori"
-                    className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 font-medium"
+                    className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 font-bold"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  <label className="block text-xs font-black text-slate-700 dark:text-slate-300 mb-1.5">
                     Trình độ JLPT
                   </label>
                   <select
                     value={config.jlptLevel}
                     onChange={(e) => setConfig({ ...config, jlptLevel: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 font-medium"
+                    className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 font-bold cursor-pointer"
                   >
                     <option value="N5">N5 (Sơ cấp 1)</option>
                     <option value="N4">N4 (Sơ cấp 2)</option>
@@ -878,14 +883,14 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
 
               {/* Depth Controls */}
               {scanMode === "folder" && (
-                <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 space-y-3.5">
-                  <h4 className="text-xs font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-                    <Sliders className="w-4 h-4 text-indigo-600" />
+                <div className="p-4.5 rounded-3xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 space-y-3.5">
+                  <h4 className="text-xs font-black text-slate-900 dark:text-white flex items-center gap-2">
+                    <Sliders className="w-4 h-4 text-purple-600" />
                     <span>Cấu hình Phân Cấp Khóa Học (Section & Lesson Mapping)</span>
                   </h4>
 
                   {/* Primary Compound Mode Toggle */}
-                  <label className="flex items-center gap-2.5 text-xs font-bold text-indigo-900 dark:text-indigo-300 cursor-pointer bg-indigo-50 dark:bg-indigo-950/40 p-3 rounded-xl border border-indigo-200 dark:border-indigo-800">
+                  <label className="flex items-center gap-3 text-xs font-bold text-purple-950 dark:text-purple-300 cursor-pointer bg-purple-50/80 dark:bg-purple-950/40 p-3.5 rounded-2xl border border-purple-200 dark:border-purple-800">
                     <input
                       type="checkbox"
                       checked={config.combineParentStages ?? true}
@@ -899,11 +904,11 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                           lessonFolderDepth: checked ? 3 : 2,
                         });
                       }}
-                      className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4 shrink-0"
+                      className="rounded text-purple-600 focus:ring-purple-500 w-4 h-4 shrink-0 cursor-pointer"
                     />
                     <div>
-                      <span className="text-xs font-extrabold">⭐ Gộp [Chặng + Kỹ năng] làm Section (Khuyên dùng cho khóa 4 tầng N3/N2)</span>
-                      <p className="text-[10px] font-normal text-indigo-700/80 dark:text-indigo-400 mt-0.5">
+                      <span className="text-xs font-black">⭐ Gộp [Chặng + Kỹ năng] làm Section (Khuyên dùng cho khóa N3/N2)</span>
+                      <p className="text-[11px] font-medium text-purple-700/90 dark:text-purple-300/80 mt-0.5">
                         Tự động ghép tên Cấp 1 & Cấp 2 thành <i>"Chặng 1 - Chữ Hán"</i>, <i>"Chặng 1 - Ngữ Pháp"</i>; các folder con bên trong (Chương 1..8, Dạng bài) thành từng Lesson riêng biệt.
                       </p>
                     </div>
@@ -911,7 +916,7 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
 
                   <div className="grid grid-cols-2 gap-3 pt-1">
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      <label className="block text-[11px] font-black text-slate-700 dark:text-slate-300 mb-1">
                         Cấp độ Thư mục làm Section
                       </label>
                       <select
@@ -925,7 +930,7 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                             sectionGroupingMode: depth >= 2 ? "combine-stage-skill" : "single-folder"
                           });
                         }}
-                        className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-semibold"
+                        className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold cursor-pointer"
                       >
                         <option value={2}>Cấp 2 (Gộp Chặng + Kỹ năng)</option>
                         <option value={1}>Cấp 1 (Chặng đơn hoặc Bài học lớn)</option>
@@ -934,13 +939,13 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      <label className="block text-[11px] font-black text-slate-700 dark:text-slate-300 mb-1">
                         Cấp độ Thư mục làm Lesson
                       </label>
                       <select
                         value={config.lessonFolderDepth}
                         onChange={(e) => setConfig({ ...config, lessonFolderDepth: parseInt(e.target.value) || 2 })}
-                        className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-semibold"
+                        className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold cursor-pointer"
                       >
                         <option value={3}>Cấp 3 (Chương / Dạng bài: Tanbun, Mondai...)</option>
                         <option value={2}>Cấp 2 (Kỹ năng con hoặc Bài)</option>
@@ -951,22 +956,22 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
 
                   {/* Checkboxes */}
                   <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-700/60">
-                    <label className="flex items-center gap-2 text-xs font-medium text-slate-800 dark:text-slate-200 cursor-pointer">
+                    <label className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={config.includeLeafFilesAsLessons}
                         onChange={(e) => setConfig({ ...config, includeLeafFilesAsLessons: e.target.checked })}
-                        className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4"
+                        className="rounded text-purple-600 focus:ring-purple-500 w-4 h-4 cursor-pointer"
                       />
                       <span>Tự động tạo bài học cho các file media lẻ không có thư mục con</span>
                     </label>
 
-                    <label className="flex items-center gap-2 text-xs font-medium text-slate-800 dark:text-slate-200 cursor-pointer">
+                    <label className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={config.enableCrossFolderMatching}
                         onChange={(e) => setConfig({ ...config, enableCrossFolderMatching: e.target.checked })}
-                        className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4"
+                        className="rounded text-purple-600 focus:ring-purple-500 w-4 h-4 cursor-pointer"
                       />
                       <span>Tự động gom tài liệu tổng hợp ngoài folder bài giảng vào đúng bài học</span>
                     </label>
@@ -979,7 +984,7 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors"
+                  className="btn-tactile-secondary flex items-center gap-1.5 px-4 py-2.5 text-xs font-black cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Quay lại</span>
@@ -989,7 +994,7 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                   type="button"
                   onClick={handleGeneratePreview}
                   disabled={loading}
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:to-pink-700 text-white font-extrabold text-xs shadow-lg shadow-indigo-500/25 transition-all active:scale-[0.98]"
+                  className="btn-tactile-purple flex items-center gap-2 px-6 py-2.5 text-xs font-black cursor-pointer disabled:opacity-50"
                 >
                   {loading ? (
                     <>
@@ -1013,21 +1018,21 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
           {step === 3 && scanResult && (
             <div className="space-y-4">
               {/* Summary Header */}
-              <div className="p-4 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900 flex flex-wrap items-center justify-between gap-3">
+              <div className="p-4.5 rounded-3xl bg-purple-50/70 dark:bg-purple-950/30 border border-purple-200/80 dark:border-purple-900/50 flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-sm font-black text-indigo-950 dark:text-indigo-200">
+                  <h3 className="text-sm font-black text-purple-950 dark:text-purple-200">
                     {scanResult.courseTitle}
                   </h3>
-                  <p className="text-xs text-indigo-700/80 dark:text-indigo-300/80 mt-0.5">
-                    Phát hiện: <b className="text-indigo-900 dark:text-indigo-100">{scanResult.totalSections} Section</b> •{" "}
-                    <b className="text-indigo-900 dark:text-indigo-100">{scanResult.totalLessons} Bài học</b> •{" "}
-                    <b className="text-indigo-900 dark:text-indigo-100">{scanResult.totalFilesMatched} File tài liệu/media khớp</b>
+                  <p className="text-xs text-purple-700/90 dark:text-purple-300/80 mt-0.5 font-medium">
+                    Phát hiện: <b className="text-purple-950 dark:text-purple-100">{scanResult.totalSections} Section</b> •{" "}
+                    <b className="text-purple-950 dark:text-purple-100">{scanResult.totalLessons} Bài học</b> •{" "}
+                    <b className="text-purple-950 dark:text-purple-100">{scanResult.totalFilesMatched} File tài liệu/media khớp</b>
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setStep(2)}
-                    className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors"
+                    className="btn-tactile-secondary px-3.5 py-1.5 text-xs font-black cursor-pointer"
                   >
                     Chỉnh Cấu Hình
                   </button>
@@ -1051,7 +1056,7 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                           onClick={() => toggleSection(secIdx)}
                           className="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer"
                         >
-                          <span className="w-7 h-7 rounded-lg bg-indigo-600 text-white font-black text-xs flex items-center justify-center shrink-0">
+                          <span className="w-7 h-7 rounded-xl bg-purple-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-xs">
                             {section.lessonNumber || secIdx + 1}
                           </span>
 
@@ -1061,23 +1066,23 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                                 type="text"
                                 value={editingSecTitle}
                                 onChange={(e) => setEditingSecTitle(e.target.value)}
-                                className="px-2.5 py-1 text-xs font-bold rounded-lg border border-indigo-500 bg-white dark:bg-slate-900"
+                                className="px-3 py-1 text-xs font-bold rounded-xl border border-purple-500 bg-white dark:bg-slate-900"
                                 autoFocus
                               />
                               <button
                                 onClick={() => handleSaveSecTitle(secIdx)}
-                                className="px-2 py-1 rounded-md bg-indigo-600 text-white text-[10px] font-bold"
+                                className="btn-tactile-purple px-2.5 py-1 text-[10px] font-black"
                               >
                                 Lưu
                               </button>
                             </div>
                           ) : (
-                            <span className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
+                            <span className="text-xs font-black text-slate-900 dark:text-white truncate">
                               {section.title}
                             </span>
                           )}
 
-                          <span className="px-2 py-0.5 rounded-full bg-slate-200/60 dark:bg-slate-700 text-[10px] font-bold text-slate-600 dark:text-slate-300 shrink-0">
+                          <span className="px-2.5 py-0.5 rounded-full bg-slate-200/60 dark:bg-slate-700 text-[10px] font-black text-slate-600 dark:text-slate-300 shrink-0">
                             {totalFilesInSec} files
                           </span>
                         </div>
@@ -1090,7 +1095,7 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                                 setEditingSecIdx(secIdx);
                                 setEditingSecTitle(section.title);
                               }}
-                              className="p-1 rounded-lg text-slate-400 hover:text-indigo-600 transition-colors"
+                              className="p-1 rounded-lg text-slate-400 hover:text-purple-600 transition-colors cursor-pointer"
                               title="Sửa tên Section"
                             >
                               <Edit3 className="w-3.5 h-3.5" />
@@ -1098,7 +1103,7 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                           )}
                           <button
                             onClick={() => toggleSection(secIdx)}
-                            className="p-1 text-slate-400"
+                            className="p-1 text-slate-400 cursor-pointer"
                           >
                             {isExpanded ? (
                               <ChevronDown className="w-4 h-4" />
@@ -1111,23 +1116,23 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
 
                       {/* Lessons inside Section */}
                       {isExpanded && (
-                        <div className="p-3 space-y-2.5 divide-y divide-slate-100 dark:divide-slate-800/60">
+                        <div className="p-3.5 space-y-2.5 divide-y divide-slate-100 dark:divide-slate-800/60">
                           {section.lessons.map((lesson, lesIdx) => (
                             <div key={lesIdx} className="pt-2.5 first:pt-0">
                               <div className="flex items-center justify-between mb-1.5">
-                                <span className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                                  <span className="w-5 h-5 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[11px] font-extrabold flex items-center justify-center">
+                                <span className="text-xs font-black text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                                  <span className="w-5 h-5 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 text-[11px] font-black flex items-center justify-center">
                                     {lesson.flowOrder}
                                   </span>
                                   <span>{lesson.title}</span>
                                   {getSkillBadge(lesson.skill)}
                                 </span>
-                                <span className="text-[10px] text-slate-400 font-mono">⏱ {lesson.estimatedDurationMinutes}p</span>
+                                <span className="text-[10px] text-slate-400 font-mono font-bold">⏱ {lesson.estimatedDurationMinutes}p</span>
                               </div>
 
                               {/* Resources List */}
                               {lesson.resources.length === 0 ? (
-                                <p className="text-[11px] text-slate-400 italic pl-6">Chưa có file tài liệu nào khớp</p>
+                                <p className="text-[11px] text-slate-400 italic pl-6 font-medium">Chưa có file tài liệu nào khớp</p>
                               ) : (
                                 <div className="space-y-1.5 pl-6">
                                   {lesson.resources.map((res, resIdx) => (
@@ -1139,11 +1144,11 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                                         {getTypeIcon(res.resourceType)}
                                         <div className="min-w-0 flex-1">
                                           <div className="flex items-center gap-1.5">
-                                            <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">
+                                            <span className="font-bold text-slate-800 dark:text-slate-200 truncate">
                                               {res.title}
                                             </span>
                                             {res.sourceTier === "CrossFolder" && (
-                                              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
                                                 Tài liệu tổng hợp
                                               </span>
                                             )}
@@ -1162,7 +1167,7 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                                             href={res.webViewLink}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="p-1 rounded-lg text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-slate-700"
+                                            className="p-1 rounded-lg text-purple-600 hover:text-purple-700 hover:bg-purple-50 dark:hover:bg-slate-700"
                                             title="Xem file"
                                           >
                                             <ExternalLink className="w-3.5 h-3.5" />
@@ -1170,7 +1175,7 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                                         )}
                                         <button
                                           onClick={() => removeResource(secIdx, lesIdx, resIdx)}
-                                          className="p-1 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 opacity-0 group-hover:opacity-100 transition-opacity"
+                                          className="p-1 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                                           title="Xóa khỏi bài học"
                                         >
                                           <Trash2 className="w-3.5 h-3.5" />
@@ -1196,14 +1201,14 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
           ════════════════════════════════════════════════════════════ */}
           {step === 4 && (
             <div className="text-center py-8 space-y-4 max-w-md mx-auto">
-              <div className="w-16 h-16 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center mx-auto">
+              <div className="w-16 h-16 rounded-3xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center mx-auto shadow-sm">
                 <CheckCircle2 className="w-10 h-10" />
               </div>
               <div>
-                <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+                <h3 className="text-base font-black text-slate-900 dark:text-white">
                   Tạo Khóa Học Thành Công!
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">
                   Đã tạo thành công khóa học <b>"{appliedCourseTitle}"</b> với toàn bộ cây Section, Bài học và Tài liệu liên kết từ Google Drive.
                 </p>
               </div>
@@ -1213,7 +1218,7 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                   setScanResult(null);
                   onClose();
                 }}
-                className="px-6 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs shadow-md transition-all active:scale-95"
+                className="btn-tactile-emerald px-6 py-2.5 text-xs font-black cursor-pointer"
               >
                 Hoàn tất & Đóng
               </button>
@@ -1223,17 +1228,17 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
 
         {/* Footer Actions for Step 3 */}
         {step === 3 && (
-          <div className="flex items-center justify-between px-6 py-3.5 bg-slate-50 dark:bg-slate-900/80 border-t border-slate-200/80 dark:border-slate-800 shrink-0">
+          <div className="flex items-center justify-between px-6 py-4 bg-[#f8f9ff] dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 shrink-0">
             <button
               onClick={() => setStep(2)}
-              className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="btn-tactile-secondary px-4 py-2 text-xs font-black cursor-pointer"
             >
               Quay lại cấu hình
             </button>
             <button
               onClick={handleApply}
               disabled={isApplying}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 disabled:opacity-50 text-white font-extrabold text-xs shadow-md shadow-emerald-500/25 transition-all active:scale-95"
+              className="btn-tactile-emerald flex items-center gap-2 px-6 py-2.5 text-xs font-black cursor-pointer disabled:opacity-50"
             >
               {isApplying ? (
                 <>
@@ -1242,7 +1247,7 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <CheckCircle2 className="w-4 h-4" />
                   <span>Xác Nhận Tạo Khóa Học (Apply Course)</span>
                 </>
               )}

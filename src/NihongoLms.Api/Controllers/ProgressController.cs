@@ -37,6 +37,51 @@ public class ProgressController : ControllerBase
         return Ok(progress);
     }
 
+    [HttpGet("lesson/{lessonId}/resources")]
+    public async Task<IActionResult> GetLessonMicroProgress(string lessonId, CancellationToken cancellationToken)
+    {
+        if (!Guid.TryParse(lessonId, out var parsedId))
+        {
+            return Ok(new LessonMicroProgressSummaryDto
+            {
+                LessonId = Guid.Empty,
+                IsLessonCompleted = false,
+                CompletedCount = 0,
+                TotalResourceCount = 0,
+                CompletedVideoCount = 0,
+                TotalVideoCount = 0,
+                ResourceProgresses = new List<UserResourceProgressDto>()
+            });
+        }
+
+        var summary = await _progressService.GetLessonMicroProgressAsync(parsedId, "default-user", cancellationToken);
+        return Ok(summary);
+    }
+
+    [HttpPost("resource/{resourceId}/toggle")]
+    public async Task<IActionResult> ToggleResourceComplete(string resourceId, CancellationToken cancellationToken)
+    {
+        if (!Guid.TryParse(resourceId, out var parsedId))
+        {
+            return Ok(new { success = true, skipped = true });
+        }
+
+        var result = await _progressService.ToggleResourceCompleteAsync(parsedId, "default-user", cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPost("resource/{resourceId}/complete")]
+    public async Task<IActionResult> MarkResourceComplete(string resourceId, CancellationToken cancellationToken)
+    {
+        if (!Guid.TryParse(resourceId, out var parsedId))
+        {
+            return Ok(new { success = true, skipped = true });
+        }
+
+        var result = await _progressService.MarkResourceCompleteAsync(parsedId, true, "default-user", cancellationToken);
+        return Ok(result);
+    }
+
     [HttpPost("playback")]
     public async Task<IActionResult> SavePlaybackPosition([FromBody] PlaybackProgressDto dto, CancellationToken cancellationToken)
     {

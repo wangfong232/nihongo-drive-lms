@@ -93,10 +93,17 @@ public interface IRoadmapService
 public interface IVocabularyService
 {
     Task<List<VocabularyEntryDto>> GetVocabularyAsync(Guid? lessonId, string? jlptLevel, string? search, CancellationToken cancellationToken = default);
+    Task<LessonVocabulariesResponseDto> GetVocabulariesByLessonAsync(Guid lessonId, CancellationToken cancellationToken = default);
     Task<VocabularyEntryDto?> GetVocabularyByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<VocabularyEntryDto> CreateVocabularyAsync(CreateVocabularyEntryDto dto, CancellationToken cancellationToken = default);
     Task<VocabularyEntryDto> UpdateVocabularyAsync(Guid id, CreateVocabularyEntryDto dto, CancellationToken cancellationToken = default);
     Task DeleteVocabularyAsync(Guid id, CancellationToken cancellationToken = default);
+}
+
+public interface IKanjiService
+{
+    Task<List<KanjiItemDto>> GetAllKanjisAsync(string? jlptLevel, string? search, string? radical, CancellationToken cancellationToken = default);
+    Task<LessonKanjisResponseDto> GetKanjisByLessonAsync(Guid lessonId, CancellationToken cancellationToken = default);
 }
 
 public interface IQuizAdminService
@@ -125,8 +132,11 @@ public interface IQuizGradingEngine
 public interface IProgressService
 {
     Task<LessonProgressDto> GetLessonProgressAsync(Guid lessonId, string userId = "default-user", CancellationToken cancellationToken = default);
+    Task<LessonMicroProgressSummaryDto> GetLessonMicroProgressAsync(Guid lessonId, string userId = "default-user", CancellationToken cancellationToken = default);
     Task<LessonProgressDto> SavePlaybackPositionAsync(Guid lessonId, double positionSeconds, double durationSeconds, string userId = "default-user", CancellationToken cancellationToken = default);
     Task<LessonProgressDto> ToggleLessonCompleteAsync(Guid lessonId, bool isManuallyCompleted = true, string userId = "default-user", CancellationToken cancellationToken = default);
+    Task<ToggleResourceProgressResultDto> ToggleResourceCompleteAsync(Guid resourceId, string userId = "default-user", CancellationToken cancellationToken = default);
+    Task<ToggleResourceProgressResultDto> MarkResourceCompleteAsync(Guid resourceId, bool isCompleted = true, string userId = "default-user", CancellationToken cancellationToken = default);
     Task<WeeklyPacingDto> GetWeeklyPacingAsync(string userId = "default-user", CancellationToken cancellationToken = default);
     Task<WeeklyPacingDto> SetWeeklyGoalAsync(int targetLessonsPerWeek, string userId = "default-user", CancellationToken cancellationToken = default);
 }
@@ -255,3 +265,9 @@ public interface ISystemSettingsService
     Task<VerifyDriveConnectionResultDto> VerifyDriveConnectionAsync(UpdateDriveSettingsRequestDto? request = null, CancellationToken ct = default);
     Task<(string ClientId, string ClientSecret, string RefreshToken, string RootFolderId)> GetEffectiveDriveCredentialsAsync(CancellationToken ct = default);
 }
+
+public interface IAiSenseiService
+{
+    Task<SenseiChatResponseDto> AskSenseiAsync(SenseiChatRequestDto request, CancellationToken ct = default);
+}
+

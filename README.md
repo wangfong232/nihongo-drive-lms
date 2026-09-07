@@ -8,11 +8,12 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![EF Core](https://img.shields.io/badge/EF%20Core-10.0-512BD4)](https://docs.microsoft.com/ef/core/)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind-4.0-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Discord](https://img.shields.io/badge/Discord-Join%20Community-5865F2?logo=discord&logoColor=white)](https://discord.gg/84FUJWUR6s)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **Nền tảng Quản lý và Học tập Tiếng Nhật Toàn Diện — Tự động đồng bộ và chuyển hóa Google Drive thành khóa học JLPT tương tác theo mô hình chuẩn Prep / Riki.**
 
-[Hình Ảnh Demo](#-hình-ảnh-giao-diện-demo--showcase) • [Tính Năng](#-tính-năng-nổi-bật) • [Kiến Trúc](#-kiến-trúc-hệ-thống) • [Cài Đặt & Chạy](#-hướng-dẫn-cài-đặt--chạy-dự-án) • [Cấu Hình Google Drive](#-cấu-hình-google-drive-api) • [Tài Liệu API](#-danh-sách-api-chính-api-reference)
+[Hình Ảnh Demo](#-hình-ảnh-giao-diện-demo--showcase) • [Tính Năng](#-tính-năng-nổi-bật) • [Kiến Trúc](#-kiến-trúc-hệ-thống) • [Cài Đặt & Chạy](#-hướng-dẫn-cài-đặt--chạy-dự-án) • [Cấu Hình Google Drive](#-cấu-hình-google-drive-api) • [Tài Liệu API](#-danh-sách-api-chính-api-reference) • [Cộng Đồng Discord](https://discord.gg/84FUJWUR6s)
 
 ---
 
@@ -31,7 +32,7 @@
 ## 📸 Hình Ảnh Giao Diện Demo (Showcase)
 
 ### 1. 🎓 Giao Diện Học Tập Toàn Diện (Learner Experience)
-> Phát video bài giảng HD, tài liệu đính kèm, danh sách từ vựng & Kanji theo bài học, cùng trình phát âm thanh hỗ trợ luyện nghe Chōkai chuyên sâu.
+> Phát video bài giảng HD, tài liệu đính kèm, danh sách từ vựng & Kanji theo bài học, trình phát âm thanh Bento chuyên sâu, tích hợp **Trợ lý AI Sensei** giải đáp ngữ pháp trực tiếp.
 
 <p align="center">
   <img src="demo/course.png" alt="Giao diện học tập DriveLearn" width="95%" />
@@ -40,7 +41,7 @@
 ---
 
 ### 2. 🛠️ Trình Quản Lý & Xây Dựng Khóa Học (Course Builder CMS)
-> Quản lý cây bài học phân cấp (Course $\rightarrow$ Chặng $\rightarrow$ Bài học), kéo thả tự do, và công cụ **Auto-Suggest** tự động phân loại tài nguyên Google Drive.
+> Quản lý cây bài học phân cấp (Course $\rightarrow$ Chặng $\rightarrow$ Bài học), kéo thả tự do, và công cụ **Auto-Suggest / AI Auto Course Builder** tự động cấu trúc giáo trình thông minh.
 
 <p align="center">
   <img src="demo/CMS.png" alt="Course Builder CMS" width="95%" />
@@ -97,12 +98,14 @@
 
 ## ✨ Tính Năng Nổi Bật (Key Features)
 
+- **🤖 AI Sensei & AI Auto Builder:** Trợ lý ảo AI thông minh (Gemini/OpenAI) giải thích ngữ pháp, dịch nghĩa ngữ cảnh và hỗ trợ tạo khóa học tự động.
+- **🍱 Playful Bento Japanese UI:** Giao diện Bento Nhật Bản tinh tế, bố cục gọn gàng, hỗ trợ cả Dark/Light Mode và tương thích di động.
 - **📂 Google Drive Raw Mirror & Smart Auto-Curator:** Đồng bộ hóa Google Drive sang database PostgreSQL theo mô hình phân cấp, hỗ trợ gom nhóm bài học tự động với Regex pattern.
 - **🎵 Zero-CORS Adaptive Media Streamer:** Tối ưu hóa phát Audio/Video trực tiếp với hỗ trợ HTTP 206 Partial Content (Byte Range requests), tự động chuyển đổi giữa Direct Stream và Google Drive Preview Player.
 - **🧠 SM-2 Spaced Repetition Engine:** Hệ thống Flashcard thông minh giúp ghi nhớ từ vựng vĩnh viễn, hỗ trợ quản lý theo chuyên đề và theo dõi chuỗi ngày học (*Streak*).
 - **🀄 Interactive Kanji Canvas:** Nhận diện nét viết Kanji với KanjiVG & HanziWriter, hỗ trợ cả chuột máy tính và màn hình cảm ứng Touch/Tablet.
 - **📝 JLPT Quiz & Exam Engine:** Chấm điểm tự động 8 dạng câu hỏi, hỗ trợ lưu lịch sử làm bài và công cụ **Bulk Import câu hỏi từ CSV/TXT/Excel**.
-- **🌓 Modern UI & Next.js 16 App Router:** Giao diện song ngữ Việt - Nhật - Anh, Dark/Light Mode, tối ưu SEO và Dynamic Import giúp tải trang mượt mà.
+- **⚙️ Quản Trị Hệ Thống Linh Hoạt (`/admin/settings`):** Tùy chỉnh API Key AI, kết nối OAuth 2.0 và Refresh Token Google Drive cho private files dễ dàng qua giao diện.
 
 ---
 
@@ -111,13 +114,13 @@
 ```
 DriveLearn_v1.0/
 ├── src/
-│   ├── NihongoLms.Domain/           # Entities (Course, Lesson, Quiz, Vocabulary, DriveNode)
-│   ├── NihongoLms.Application/      # DTOs, Interfaces (ICuratorService, ISrsService, IProgressService)
+│   ├── NihongoLms.Domain/           # Entities (Course, Lesson, Quiz, Vocabulary, DriveNode, SystemSetting)
+│   ├── NihongoLms.Application/      # DTOs, Interfaces (ICuratorService, ISrsService, IProgressService, IAiSenseiService)
 │   ├── NihongoLms.Infrastructure/   # EF Core DbContext, PostgreSQL, Services, SM-2 Engine, Quartz Sync
 │   └── NihongoLms.Api/              # ASP.NET Core Web API Controllers, DI Registration, CORS
 ├── frontend/                        # Next.js 16 (App Router), Tailwind CSS, TypeScript
-│   ├── src/app/                     # Pages: / (LMS), /admin/builder, /admin/quizzes, /kanji, /quiz/mock
-│   ├── src/components/              # Reusable UI, KanjiCanvas, AudioPlayer, Modals
+│   ├── src/app/                     # Pages: / (LMS), /admin/builder, /admin/quizzes, /admin/settings, /kanji, /quiz/mock
+│   ├── src/components/              # Reusable UI, KanjiCanvas, AudioPlayer, AiSenseiWidget, Modals
 │   └── src/lib/                     # API Client, SRS, TTS, i18n, Favorites
 └── demo/                            # Screenshots & Interface Demo Assets
 ```
@@ -167,28 +170,13 @@ npm run dev
 
 ---
 
-## 🔑 Cấu Hình Google Drive API
+## 🔑 Cấu Hình Google Drive API & Private Token
 
-1. Truy cập [Google Cloud Console](https://console.cloud.google.com/) và tạo một Project mới.
-2. Bật **Google Drive API**.
-3. Tạo **OAuth 2.0 Client ID** (chọn *Web Application*):
-   - **Authorized redirect URIs:** `http://localhost:5222/api/auth/google/callback`
-4. Cập nhật thông tin vào file cấu hình môi trường phát triển:
-   ```json
-   {
-     "Authentication": {
-       "Google": {
-         "ClientId": "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com",
-         "ClientSecret": "YOUR_GOOGLE_CLIENT_SECRET",
-         "RedirectUri": "http://localhost:5222/api/auth/google/callback"
-       }
-     },
-     "GoogleDrive": {
-       "RootFolderId": "YOUR_GOOGLE_DRIVE_ROOT_FOLDER_ID"
-     }
-   }
-   ```
-5. Đăng nhập tại `http://localhost:5222/api/auth/google/login` hoặc nút **"Kết Nối Google OAuth"** trong trang Builder để bắt đầu đồng bộ.
+1. **Cách 1 (Nhanh nhất):** Chia sẻ thư mục khóa học trên Google Drive ở chế độ **"Bất kỳ ai có đường liên kết" (Anyone with link)** $\rightarrow$ Hệ thống tự stream ngay lập tức.
+2. **Cách 2 (Private Drive):**
+   - Vào [Google Cloud Console](https://console.cloud.google.com/) tạo **OAuth 2.0 Client ID** và lấy `Client ID` + `Client Secret`.
+   - Vào [Google OAuth Playground](https://developers.google.com/oauthplayground) cấp quyền `https://www.googleapis.com/auth/drive.readonly` để lấy `refresh_token`.
+   - Mở trang **Cài Đặt Hệ Thống (`/admin/settings`)** của DriveLearn và dán Client ID, Secret, Refresh Token $\rightarrow$ Nhấn **"Lưu Cấu Hình Drive"**.
 
 ---
 
@@ -207,8 +195,19 @@ npm run dev
 | `GET` | `/api/quiz/{id}` | Lấy đề thi dành cho học viên |
 | `POST` | `/api/quiz/{id}/submit` | Nộp bài và chấm điểm tự động |
 | `GET` | `/api/vocabulary` | Tra cứu danh sách từ vựng theo cấp độ JLPT / bài học |
+| `GET` | `/api/kanji/search` | Tìm kiếm và tra cứu Kanji N5-N1 |
+| `POST` | `/api/ai/chat` | Trợ lý AI Sensei hỏi đáp ngữ pháp & giải thích bài học |
 | `GET` | `/api/progress/{lessonId}` | Lấy tiến độ học và vị trí phát media của bài học |
 | `POST` | `/api/progress/playback` | Lưu vị trí phát video/audio theo thời gian thực |
+
+---
+
+## 💬 Cộng Đồng & Hỗ Trợ (Community & Support)
+
+Tham gia cộng đồng học viên & lập trình viên DriveLearn để cùng thảo luận, nhận thông báo cập nhật và hỗ trợ kỹ thuật:
+
+* 💬 **Discord Community:** [https://discord.gg/84FUJWUR6s](https://discord.gg/84FUJWUR6s)
+* 🐛 **Báo Lỗi / Đóng Góp:** [GitHub Issues](https://github.com/nihongo-drive-lms/issues)
 
 ---
 

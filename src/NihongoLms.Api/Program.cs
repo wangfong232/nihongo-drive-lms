@@ -53,6 +53,7 @@ builder.Services.AddScoped<IDriveSyncService, DriveSyncService>();
 builder.Services.AddScoped<ICuratorService, CuratorService>();
 builder.Services.AddScoped<IAutoSuggestPatternEngine, AutoSuggestPatternEngine>();
 builder.Services.AddScoped<IVocabularyService, VocabularyService>();
+builder.Services.AddScoped<IKanjiService, KanjiService>();
 builder.Services.AddScoped<IQuizAdminService, QuizAdminService>();
 builder.Services.AddScoped<IProgressService, ProgressService>();
 builder.Services.AddScoped<ISrsService, SrsService>();
@@ -67,6 +68,7 @@ builder.Services.AddScoped<ISystemSettingsService, SystemSettingsService>();
 builder.Services.AddScoped<ISyllabusParserService, SyllabusParserService>();
 builder.Services.AddScoped<IRoadmapService, RoadmapService>();
 builder.Services.AddScoped<IFolderCourseBuilderService, FolderCourseBuilderService>();
+builder.Services.AddScoped<IAiSenseiService, AiSenseiService>();
 
 // Quartz.NET Background Sync Job Setup
 builder.Services.AddQuartz(q =>
@@ -108,7 +110,7 @@ app.UseCors("AllowFrontend");
 app.UseAuthorization();
 app.MapControllers();
 
-// DB Health Check on startup
+// DB Health Check and Schema Verification on startup
 using (var scope = app.Services.CreateScope())
 {
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
@@ -117,13 +119,50 @@ using (var scope = app.Services.CreateScope())
         var db = scope.ServiceProvider.GetRequiredService<LmsDbContext>();
         var canConnect = await db.Database.CanConnectAsync();
         if (canConnect)
+        {
             logger.LogInformation("[DriveLearn] PostgreSQL connected: {Host}", connectionString.Split(';')[0]);
+
+            // Ensure UserResourceProgresses table and indexes exist
+            const string createTableSql = @"
+CREATE TABLE IF NOT EXISTS ""UserResourceProgresses"" (
+    ""Id"" uuid NOT NULL PRIMARY KEY,
+    ""UserId"" text NOT NULL,
+    ""ResourceId"" uuid NOT NULL,
+    ""LessonId"" uuid NOT NULL,
+    ""IsCompleted"" boolean NOT NULL,
+    ""LastPlaybackPositionSeconds"" integer,
+    ""TotalDurationSeconds"" integer,
+    ""CompletedAtUtc"" timestamp with time zone,
+    ""LastAccessedAtUtc"" timestamp with time zone NOT NULL,
+    CONSTRAINT ""FK_UserResourceProgresses_Resources_ResourceId"" FOREIGN KEY (""ResourceId"") REFERENCES ""Resources"" (""Id"") ON DELETE CASCADE,
+    CONSTRAINT ""FK_UserResourceProgresses_Lessons_LessonId"" FOREIGN KEY (""LessonId"") REFERENCES ""Lessons"" (""Id"") ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS ""IX_UserResourceProgresses_UserId_ResourceId"" ON ""UserResourceProgresses"" (""UserId"", ""ResourceId"");
+CREATE INDEX IF NOT EXISTS ""IX_UserResourceProgresses_UserId_LessonId"" ON ""UserResourceProgresses"" (""UserId"", ""LessonId"");
+CREATE INDEX IF NOT EXISTS ""IX_UserResourceProgresses_ResourceId"" ON ""UserResourceProgresses"" (""ResourceId"");
+CREATE INDEX IF NOT EXISTS ""IX_UserResourceProgresses_LessonId"" ON ""UserResourceProgresses"" (""LessonId"");
+
+CREATE TABLE IF NOT EXISTS ""SystemSettings"" (
+    ""Id"" uuid NOT NULL PRIMARY KEY,
+    ""Key"" text NOT NULL,
+    ""EncryptedValue"" text NOT NULL,
+    ""Description"" text,
+    ""CreatedAtUtc"" timestamp with time zone NOT NULL,
+    ""UpdatedAtUtc"" timestamp with time zone NOT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS ""IX_SystemSettings_Key"" ON ""SystemSettings"" (""Key"");
+";
+            await db.Database.ExecuteSqlRawAsync(createTableSql);
+            logger.LogInformation("[DriveLearn] UserResourceProgresses and SystemSettings tables verified/created.");
+        }
         else
+        {
             logger.LogWarning("[DriveLearn] PostgreSQL CanConnect returned false.");
+        }
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "[DriveLearn] PostgreSQL connection FAILED. Verify Port=5433 and Docker container is running.");
+        logger.LogError(ex, "[DriveLearn] PostgreSQL connection/setup FAILED. Verify Port=5433 and Docker container is running.");
     }
 }
 

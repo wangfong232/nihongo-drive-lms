@@ -20,6 +20,7 @@ public class LmsDbContext : DbContext
     public DbSet<QuizQuestion> QuizQuestions => Set<QuizQuestion>();
     public DbSet<QuizAttempt> QuizAttempts => Set<QuizAttempt>();
     public DbSet<LessonProgress> LessonProgresses => Set<LessonProgress>();
+    public DbSet<UserResourceProgress> UserResourceProgresses => Set<UserResourceProgress>();
 
     // Roadmap Template System
     public DbSet<RoadmapTemplate> RoadmapTemplates => Set<RoadmapTemplate>();
@@ -203,6 +204,26 @@ public class LmsDbContext : DbContext
             entity.HasOne(lp => lp.Lesson)
                   .WithMany(l => l.ProgressRecords)
                   .HasForeignKey(lp => lp.LessonId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // UserResourceProgress (Micro-progress per video/file)
+        modelBuilder.Entity<UserResourceProgress>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.UserId, e.ResourceId }).IsUnique();
+            entity.HasIndex(e => new { e.UserId, e.LessonId });
+            entity.HasIndex(e => e.ResourceId);
+            entity.HasIndex(e => e.LessonId);
+
+            entity.HasOne(urp => urp.Resource)
+                  .WithMany()
+                  .HasForeignKey(urp => urp.ResourceId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(urp => urp.Lesson)
+                  .WithMany()
+                  .HasForeignKey(urp => urp.LessonId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
 

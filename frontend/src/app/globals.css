@@ -1,28 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
   :root {
-    --bg-primary: #f8fafc;
+    --bg-primary: #f8f9ff;
     --bg-surface: #ffffff;
-    --bg-glass: rgba(255, 255, 255, 0.7);
-    --border-color: #e2e8f0;
-    --text-main: #0f172a;
-    --text-muted: #64748b;
-    --accent: #4f46e5;
-    --accent-hover: #4338ca;
+    --bg-surface-low: #eff4ff;
+    --bg-surface-container: #e5eeff;
+    --bg-surface-high: #dce9ff;
+    --bg-glass: rgba(255, 255, 255, 0.85);
+    --border-color: rgba(226, 232, 240, 0.8);
+    --text-main: #0b1c30;
+    --text-muted: #475569;
+    --primary-emerald: #10b981;
+    --secondary-amber: #f97316;
+    --tertiary-purple: #8b5cf6;
+    --accent-cyan: #0284c7;
   }
 
   .dark {
     --bg-primary: #090d16;
     --bg-surface: #111827;
-    --bg-glass: rgba(17, 24, 39, 0.75);
-    --border-color: #1e293b;
+    --bg-surface-low: #1e293b;
+    --bg-surface-container: #0f172a;
+    --bg-surface-high: #334155;
+    --bg-glass: rgba(17, 24, 39, 0.85);
+    --border-color: rgba(30, 41, 59, 0.8);
     --text-main: #f8fafc;
     --text-muted: #94a3b8;
-    --accent: #6366f1;
-    --accent-hover: #818cf8;
+    --primary-emerald: #10b981;
+    --secondary-amber: #f97316;
+    --tertiary-purple: #8b5cf6;
+    --accent-cyan: #0284c7;
   }
 
   /* Smooth natural page scrolling */
@@ -35,7 +46,8 @@
 body {
   background-color: var(--bg-primary);
   color: var(--text-main);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-weight: 500;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
@@ -44,6 +56,134 @@ body {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-color);
+}
+
+/* ─── Playful Bento Tactile 3D Buttons & Cards ─── */
+.btn-tactile-emerald {
+  background-color: #10b981;
+  color: #ffffff;
+  border-radius: 9999px;
+  font-weight: 700;
+  box-shadow: 0 4px 0 #059669;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-tactile-emerald:hover {
+  background-color: #059669;
+  transform: translateY(1px);
+  box-shadow: 0 3px 0 #047857;
+}
+.btn-tactile-emerald:active {
+  transform: translateY(4px);
+  box-shadow: none;
+}
+
+.btn-tactile-amber {
+  background-color: #f97316;
+  color: #ffffff;
+  border-radius: 9999px;
+  font-weight: 700;
+  box-shadow: 0 4px 0 #c2410c;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-tactile-amber:hover {
+  background-color: #ea580c;
+  transform: translateY(1px);
+  box-shadow: 0 3px 0 #9a3412;
+}
+.btn-tactile-amber:active {
+  transform: translateY(4px);
+  box-shadow: none;
+}
+
+.btn-tactile-dark {
+  background-color: #0b1c30;
+  color: #ffffff;
+  border-radius: 9999px;
+  font-weight: 700;
+  box-shadow: 0 4px 0 #020617;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-tactile-dark:hover {
+  background-color: #1e293b;
+  transform: translateY(1px);
+  box-shadow: 0 3px 0 #020617;
+}
+.btn-tactile-dark:active {
+  transform: translateY(4px);
+  box-shadow: none;
+}
+
+.dark .btn-tactile-dark {
+  background-color: #ffffff;
+  color: #0b1c30;
+  box-shadow: 0 4px 0 #cbd5e1;
+}
+.dark .btn-tactile-dark:hover {
+  background-color: #f1f5f9;
+  box-shadow: 0 3px 0 #94a3b8;
+}
+.dark .btn-tactile-dark:active {
+  box-shadow: none;
+}
+
+.btn-tactile-secondary {
+  background-color: #eff4ff;
+  color: #0b1c30;
+  border: 1px solid #d3e4fe;
+  border-radius: 9999px;
+  font-weight: 700;
+  box-shadow: 0 3px 0 #d3e4fe;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-tactile-secondary:hover {
+  background-color: #dce9ff;
+  transform: translateY(1px);
+  box-shadow: 0 2px 0 #cbd5e1;
+}
+.btn-tactile-secondary:active {
+  transform: translateY(3px);
+  box-shadow: none;
+}
+
+.dark .btn-tactile-secondary {
+  background-color: #1e293b;
+  color: #f8fafc;
+  border-color: #334155;
+  box-shadow: 0 3px 0 #0f172a;
+}
+.dark .btn-tactile-secondary:hover {
+  background-color: #334155;
+  box-shadow: 0 2px 0 #0f172a;
+}
+
+.btn-tactile-purple {
+  background-color: #8b5cf6;
+  color: #ffffff;
+  border-radius: 9999px;
+  font-weight: 700;
+  box-shadow: 0 4px 0 #6d28d9;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-tactile-purple:hover {
+  background-color: #7c3aed;
+  transform: translateY(1px);
+  box-shadow: 0 3px 0 #5b21b6;
+}
+.btn-tactile-purple:active {
+  transform: translateY(4px);
+  box-shadow: none;
+}
+
+.bento-card {
+  background-color: #ffffff;
+  border-radius: 1.75rem; /* 28px */
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 10px 30px -5px rgba(16, 24, 40, 0.04), 0 4px 12px -2px rgba(16, 24, 40, 0.02);
+}
+.dark .bento-card {
+  background-color: #0f172a;
+  border-color: rgba(30, 41, 59, 0.8);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
 }
 
 /* ─── Custom Scrollbars ─────────────────────────────────────────────────── */
@@ -84,9 +224,9 @@ body {
 
 /* ─── Drop Zone Highlight ───────────────────────────────────────────────── */
 .drop-zone-active {
-  outline: 2px dashed #6366f1;
+  outline: 2px dashed #10b981;
   outline-offset: -2px;
-  background: rgba(99, 102, 241, 0.06);
+  background: rgba(16, 185, 129, 0.06);
 }
 
 /* ─── Kanji Canvas Grid Overlay ─────────────────────────────────────────── */

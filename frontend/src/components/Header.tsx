@@ -101,34 +101,38 @@ export const Header: React.FC<HeaderProps> = ({ srsStats }) => {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800 shadow-sm transition-colors h-16">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl border-b border-slate-200/70 dark:border-slate-800 shadow-[0_4px_20px_rgba(16,24,40,0.03)] transition-colors h-16">
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 h-full flex items-center justify-between gap-3">
 
           {/* Brand Logo */}
           <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-orange-600 via-amber-500 to-rose-500 flex items-center justify-center text-white shadow-md shadow-orange-500/25 group-hover:scale-105 transition-all duration-300 shrink-0">
-              <span className="font-black text-base">日</span>
+            <div className="w-10 h-10 rounded-2xl overflow-hidden shadow-md shadow-slate-900/10 group-hover:scale-105 transition-all duration-300 shrink-0 border border-slate-200/60 dark:border-slate-700 bg-[#1c1a1a] flex items-center justify-center p-0.5">
+              <img
+                src="/logo.png"
+                alt="DriveLearn Logo"
+                className="w-full h-full object-contain rounded-xl"
+              />
             </div>
             <div className="hidden sm:block">
               <div className="flex items-center gap-1.5">
-                <span className="font-black text-base text-slate-900 dark:text-white tracking-tight">
-                  Drive<span className="text-orange-600 dark:text-orange-500">Learn</span>
+                <span className="font-black text-base text-[#0b1c30] dark:text-white tracking-tight">
+                  Drive<span className="text-[#f97316]">Learn</span>
                 </span>
               </div>
-              <span className="block text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-                Self-Hosted Japanese Platform
+              <span className="block text-[10px] text-slate-400 dark:text-slate-400 font-bold">
+                Playful Japanese Platform
               </span>
             </div>
           </Link>
 
-          {/* Center Nav */}
-          <nav className="hidden md:flex items-center gap-0.5 bg-slate-100/80 dark:bg-slate-800/60 p-1 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shrink-0">
+          {/* Center Nav (Playful Bento Pill Bar) */}
+          <nav className="hidden md:flex items-center gap-1 bg-[#eff4ff] dark:bg-slate-800/80 p-1.5 rounded-full border border-[#d3e4fe] dark:border-slate-700 shrink-0">
             <Link
               href="/"
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer ${
                 pathname === "/"
-                  ? "bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-sm"
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                  ? "bg-emerald-500 text-white shadow-[0_2px_0_#059669]"
+                  : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
               <BookOpen className="w-3.5 h-3.5 shrink-0" />
@@ -137,10 +141,10 @@ export const Header: React.FC<HeaderProps> = ({ srsStats }) => {
 
             <Link
               href="/admin/builder"
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer ${
                 pathname?.startsWith("/admin/builder")
-                  ? "bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-sm"
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                  ? "bg-emerald-500 text-white shadow-[0_2px_0_#059669]"
+                  : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
               <Layers className="w-3.5 h-3.5 shrink-0" />
@@ -149,33 +153,34 @@ export const Header: React.FC<HeaderProps> = ({ srsStats }) => {
 
             <Link
               href="/admin/vocabulary"
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer ${
                 pathname === "/admin/vocabulary"
-                  ? "bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-sm"
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                  ? "bg-emerald-500 text-white shadow-[0_2px_0_#059669]"
+                  : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
+              <Sparkles className="w-3.5 h-3.5 shrink-0" />
               {t("navVocabulary")}
             </Link>
 
             <Link
               href="/kanji"
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer ${
                 pathname?.startsWith("/kanji")
-                  ? "bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-sm"
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                  ? "bg-indigo-600 text-white shadow-[0_2px_0_#4338ca]"
+                  : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
-              <span className="text-orange-500 font-black text-xs">漢</span>
+              <span className="font-black text-xs">漢</span>
               {t("navKanji")}
             </Link>
 
             <Link
               href="/admin/quizzes"
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer ${
                 pathname === "/admin/quizzes"
-                  ? "bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-sm"
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                  ? "bg-purple-600 text-white shadow-[0_2px_0_#6d28d9]"
+                  : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
               <HelpCircle className="w-3.5 h-3.5 shrink-0" />
@@ -183,7 +188,7 @@ export const Header: React.FC<HeaderProps> = ({ srsStats }) => {
             </Link>
           </nav>
 
-          {/* Right Actions — Pill Controls (Image 2 style) */}
+          {/* Right Actions — Pill Controls */}
           <div ref={rightActionsRef} className="flex items-center gap-2 shrink-0">
 
             {/* 1. Three-dot Status Pill */}

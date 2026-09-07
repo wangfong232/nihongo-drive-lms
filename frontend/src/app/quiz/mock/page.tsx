@@ -200,51 +200,56 @@ function JlptMockTestContent() {
   });
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-900/5 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+    <div className="min-h-screen flex flex-col bg-[#f8f9ff] dark:bg-[#090d16] text-[#0b1c30] dark:text-slate-100 font-sans">
       <Header />
 
       <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 flex flex-col gap-6 pt-20">
         {/* ═══════════════════════ PHASE: CATALOG ═══════════════════════ */}
         {phase === "catalog" && (
           <div className="flex flex-col gap-6 animate-in fade-in duration-200">
-            {/* Hero Banner */}
-            <div className="rounded-3xl p-6 sm:p-8 bg-gradient-to-r from-orange-600 via-amber-600 to-rose-600 text-white shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative overflow-hidden">
-              <div className="z-10 max-w-xl">
-                <span className="px-3 py-1 rounded-full bg-white/20 text-white font-extrabold text-[10px] uppercase tracking-wider backdrop-blur-md">
-                  Trung Tâm Luyện Đề JLPT
-                </span>
-                <h1 className="text-2xl sm:text-3xl font-black mt-2 tracking-tight">
-                  Luyện Thi JLPT N5 — N1 Chuẩn
-                </h1>
-                <p className="text-xs sm:text-sm text-white/90 mt-1.5 leading-relaxed">
-                  Thi thử trực tuyến với đồng hồ bấm giờ chuẩn, đầy đủ 3 phân môn: Từ Vựng/Chữ Hán, Ngữ Pháp/Đọc Hiểu và Nghe Hiểu có đáp án & lời giải thích chi tiết.
-                </p>
+            {/* Bento Hero Bar */}
+            <div className="bento-card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-5 border-[#d3e4fe] dark:border-slate-800">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-black shadow-xs shrink-0 border border-amber-500/20">
+                  <Trophy className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-xl sm:text-2xl font-black tracking-tight text-[#0b1c30] dark:text-white">
+                      Trung Tâm Luyện Đề JLPT
+                    </h1>
+                    <span className="px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 text-[11px] font-extrabold border border-amber-200 dark:border-amber-800">
+                      N5 — N1
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xl font-medium leading-relaxed">
+                    Thi thử trực tuyến với đồng hồ bấm giờ chuẩn, đầy đủ Từ Vựng/Chữ Hán, Ngữ Pháp, Đọc Hiểu và Nghe Hiểu có đáp án & lời giải chi tiết.
+                  </p>
+                </div>
               </div>
 
-              <div className="z-10 shrink-0 flex items-center gap-3">
+              <div className="shrink-0 flex items-center gap-3">
                 <Link
                   href="/admin/quizzes"
-                  className="px-4 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-bold text-xs border border-white/20 transition-all"
+                  className="btn-tactile-secondary px-3.5 py-2 text-xs font-bold flex items-center gap-1.5"
                 >
-                  Quản Lý Đề Thi (CMS)
+                  <BookOpen className="w-4 h-4 text-purple-600" />
+                  <span>Quản Lý Đề (CMS)</span>
                 </Link>
               </div>
-
-              {/* Decorative background glow */}
-              <div className="absolute right-0 bottom-0 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none" />
             </div>
 
             {/* Level Filter Tabs */}
-            <div className="flex items-center justify-between gap-3 flex-wrap">
-              <div className="flex items-center gap-1.5 p-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs">
+            <div className="bento-card p-3.5 flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-1.5 flex-wrap">
                 {["all", "N5", "N4", "N3", "N2", "N1"].map((lvl) => (
                   <button
                     key={lvl}
                     onClick={() => setLevelFilter(lvl)}
-                    className={`px-4 py-1.5 rounded-xl text-xs font-black transition-all ${
+                    className={`px-4 py-1.5 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
                       levelFilter === lvl
-                        ? "bg-orange-600 text-white shadow-sm"
-                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                        ? "bg-amber-500 text-white shadow-[0_2px_0_#b45309]"
+                        : "bg-[#eff4ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-[#d3e4fe] dark:border-slate-700 hover:bg-[#dce9ff]"
                     }`}
                   >
                     {lvl === "all" ? "Tất Cả Cấp Độ" : lvl}
@@ -252,19 +257,19 @@ function JlptMockTestContent() {
                 ))}
               </div>
 
-              <span className="text-xs text-slate-400 font-medium">
-                Tìm thấy <strong>{filteredCatalog.length}</strong> bộ đề luyện thi
+              <span className="text-xs text-slate-400 font-bold">
+                Tìm thấy <strong className="text-slate-700 dark:text-slate-200">{filteredCatalog.length}</strong> bộ đề luyện thi
               </span>
             </div>
 
             {/* Quiz Cards Grid */}
             {loading ? (
-              <div className="p-16 flex items-center justify-center gap-3 text-xs text-slate-400">
-                <Loader2 className="w-5 h-5 animate-spin text-orange-500" />
+              <div className="bento-card p-16 flex items-center justify-center gap-3 text-xs text-slate-400">
+                <Loader2 className="w-5 h-5 animate-spin text-amber-500" />
                 Đang tải danh mục đề thi...
               </div>
             ) : filteredCatalog.length === 0 ? (
-              <div className="p-12 text-center text-xs text-slate-400 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+              <div className="bento-card p-12 text-center text-xs text-slate-400">
                 Chưa có đề thi nào cho cấp độ này. Hãy quay lại CMS để thêm đề mới!
               </div>
             ) : (
@@ -272,30 +277,30 @@ function JlptMockTestContent() {
                 {filteredCatalog.map((quiz) => (
                   <div
                     key={quiz.id}
-                    className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:border-orange-500/50 hover:shadow-md transition-all flex flex-col justify-between gap-4 group"
+                    className="bento-card p-5 transition-all flex flex-col justify-between gap-4 group hover:border-amber-400"
                   >
                     <div>
                       <div className="flex items-center justify-between gap-2 mb-2">
-                        <span className="px-2.5 py-0.5 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400 font-extrabold text-[10px] uppercase tracking-wide border border-orange-500/20">
+                        <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 font-extrabold text-[10px] uppercase tracking-wide border border-amber-500/20">
                           {quiz.quizType === 2 ? "JLPT Mock Test" : "Practice Quiz"}
                         </span>
                         <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5 text-orange-500" />
+                          <Clock className="w-3.5 h-3.5 text-amber-500" />
                           {quiz.timeLimitMinutes || 105} phút
                         </span>
                       </div>
 
-                      <h3 className="font-black text-base text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+                      <h3 className="font-extrabold text-base text-[#0b1c30] dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
                         {quiz.title}
                       </h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed font-medium">
                         {quiz.description || "Bộ đề thi thử trực tuyến kiểm tra kiến thức tổng hợp."}
                       </p>
                     </div>
 
-                    <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                      <div className="text-[11px] text-slate-400 font-medium">
-                        Số câu: <strong className="text-slate-700 dark:text-slate-300">{quiz.questions?.length || 0} câu</strong> • Điểm đỗ:{" "}
+                    <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">
+                        Số câu: <strong className="text-amber-600 dark:text-amber-400">{quiz.questions?.length || 0} câu</strong> • Điểm đỗ:{" "}
                         <strong className="text-emerald-600 dark:text-emerald-400">{quiz.passPercentage}%</strong>
                       </div>
 
@@ -304,7 +309,7 @@ function JlptMockTestContent() {
                           setSelectedQuiz(quiz);
                           setPhase("intro");
                         }}
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-xs shadow-md shadow-orange-500/20 transition-all active:scale-95"
+                        className="btn-tactile-amber px-4 py-2 text-xs font-black flex items-center gap-1.5 cursor-pointer"
                       >
                         <PlayCircle className="w-4 h-4" />
                         Vào Thi
@@ -319,48 +324,48 @@ function JlptMockTestContent() {
 
         {/* ═══════════════════════ PHASE: INTRO ═══════════════════════ */}
         {phase === "intro" && selectedQuiz && (
-          <div className="max-w-2xl mx-auto w-full p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl flex flex-col gap-6 animate-in fade-in duration-200">
+          <div className="max-w-2xl mx-auto w-full bento-card p-6 sm:p-8 shadow-xl flex flex-col gap-6 animate-in fade-in duration-200 border-[#d3e4fe] dark:border-slate-800">
             <button
               onClick={() => setPhase("catalog")}
-              className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-900 dark:hover:text-white font-bold w-fit"
+              className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-[#0b1c30] dark:hover:text-white font-bold w-fit cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4" /> Quay lại danh mục đề
             </button>
 
             <div className="text-center flex flex-col items-center gap-2">
-              <div className="w-14 h-14 rounded-2xl bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center shadow-inner">
+              <div className="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-black shadow-xs border border-amber-500/20">
                 <Trophy className="w-7 h-7" />
               </div>
-              <h2 className="font-black text-xl sm:text-2xl text-slate-900 dark:text-white">
+              <h2 className="font-black text-xl sm:text-2xl text-[#0b1c30] dark:text-white">
                 {selectedQuiz.title}
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md">
+              <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md font-medium">
                 {selectedQuiz.description}
               </p>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-center">
+            <div className="grid grid-cols-3 gap-3 p-4 rounded-2xl bg-[#eff4ff] dark:bg-slate-800/60 border border-[#d3e4fe] dark:border-slate-700 text-center">
               <div>
-                <span className="block text-[10px] uppercase font-bold text-slate-400">Thời gian</span>
-                <span className="font-black text-base text-orange-600 dark:text-orange-400">
+                <span className="block text-[10px] uppercase font-extrabold text-slate-400">Thời gian</span>
+                <span className="font-black text-base text-amber-600 dark:text-amber-400">
                   {selectedQuiz.timeLimitMinutes || 105} phút
                 </span>
               </div>
               <div>
-                <span className="block text-[10px] uppercase font-bold text-slate-400">Số câu hỏi</span>
-                <span className="font-black text-base text-slate-900 dark:text-white">
+                <span className="block text-[10px] uppercase font-extrabold text-slate-400">Số câu hỏi</span>
+                <span className="font-black text-base text-[#0b1c30] dark:text-white">
                   {selectedQuiz.questions?.length || 0} câu
                 </span>
               </div>
               <div>
-                <span className="block text-[10px] uppercase font-bold text-slate-400">Điểm Đỗ</span>
+                <span className="block text-[10px] uppercase font-extrabold text-slate-400">Điểm Đỗ</span>
                 <span className="font-black text-base text-emerald-600 dark:text-emerald-400">
                   {selectedQuiz.passPercentage}%
                 </span>
               </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 text-xs text-amber-700 dark:text-amber-300 flex flex-col gap-1.5 leading-relaxed">
+            <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 text-xs text-amber-800 dark:text-amber-300 flex flex-col gap-1.5 leading-relaxed font-medium">
               <span className="font-extrabold flex items-center gap-1">
                 <AlertTriangle className="w-4 h-4 text-amber-500" /> Lưu ý phòng thi:
               </span>
@@ -371,7 +376,7 @@ function JlptMockTestContent() {
 
             <button
               onClick={() => handleStartExam(selectedQuiz)}
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-black text-sm shadow-lg shadow-orange-500/25 transition-all active:scale-95"
+              className="btn-tactile-amber w-full py-3 text-sm font-black cursor-pointer text-center"
             >
               Bắt Đầu Làm Bài Thi Ngay
             </button>
@@ -382,7 +387,7 @@ function JlptMockTestContent() {
         {phase === "test" && selectedQuiz && (
           <div className="flex flex-col gap-6 animate-in fade-in duration-200">
             {/* Top Exam Header & Timer */}
-            <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-4 sticky top-20 z-30">
+            <div className="bento-card p-4 flex items-center justify-between gap-4 sticky top-20 z-30 border-[#d3e4fe] dark:border-slate-800 shadow-md">
               <div className="flex items-center gap-3 min-w-0">
                 <button
                   onClick={() => {
@@ -390,12 +395,12 @@ function JlptMockTestContent() {
                       setPhase("catalog");
                     }
                   }}
-                  className="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400"
+                  className="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
                 <div className="min-w-0">
-                  <h2 className="font-black text-sm text-slate-900 dark:text-white truncate">
+                  <h2 className="font-black text-sm text-[#0b1c30] dark:text-white truncate">
                     {selectedQuiz.title}
                   </h2>
                   <span className="text-[10px] text-slate-400 font-semibold">
@@ -406,10 +411,10 @@ function JlptMockTestContent() {
 
               {/* Timer Badge */}
               <div
-                className={`flex items-center gap-2 px-4 py-2 rounded-2xl font-mono font-black text-sm shadow-sm ${
+                className={`flex items-center gap-2 px-4 py-1.5 rounded-full font-mono font-black text-xs sm:text-sm shadow-xs ${
                   isTimeWarning
                     ? "bg-rose-500 text-white animate-pulse"
-                    : "bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20"
+                    : "bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/30"
                 }`}
               >
                 <Clock className="w-4 h-4" />
@@ -428,7 +433,7 @@ function JlptMockTestContent() {
                   handleSubmit();
                 }}
                 disabled={submitting}
-                className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold text-xs shadow-md transition-all active:scale-95 shrink-0"
+                className="btn-tactile-emerald px-4 sm:px-5 py-2 text-xs font-black cursor-pointer shrink-0"
               >
                 {submitting ? "Đang Chấm..." : "Nộp Bài Thi"}
               </button>
@@ -447,17 +452,17 @@ function JlptMockTestContent() {
                     } catch {}
 
                     return (
-                      <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col gap-5">
+                      <div className="bento-card p-6 flex flex-col gap-5 border-[#d3e4fe] dark:border-slate-800">
                         {/* Question Prompt */}
                         <div className="flex items-start gap-3">
-                          <span className="w-8 h-8 rounded-xl bg-orange-500 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-sm">
+                          <span className="w-8 h-8 rounded-xl bg-amber-500 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-xs">
                             {currentQIndex + 1}
                           </span>
                           <div className="flex-1">
-                            <span className="text-[10px] font-bold uppercase text-orange-500 tracking-wider">
+                            <span className="text-[10px] font-extrabold uppercase text-amber-600 dark:text-amber-400 tracking-wider">
                               Câu {currentQIndex + 1} / {selectedQuiz.questions.length} • {q.points || 1} Điểm
                             </span>
-                            <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1 leading-relaxed">
+                            <h3 className="text-base sm:text-lg font-black text-[#0b1c30] dark:text-white mt-1 leading-relaxed">
                               {q.prompt}
                             </h3>
                           </div>
@@ -479,23 +484,23 @@ function JlptMockTestContent() {
                                 <button
                                   key={optIdx}
                                   onClick={() => handleSelectChoice(q.id, optIdx)}
-                                  className={`w-full p-4 rounded-2xl border text-left font-medium text-xs sm:text-sm flex items-center gap-3.5 transition-all ${
+                                  className={`w-full p-4 rounded-2xl border text-left font-semibold text-xs sm:text-sm flex items-center gap-3.5 transition-all cursor-pointer ${
                                     isSelected
-                                      ? "border-orange-500 bg-orange-500/10 text-orange-600 dark:text-orange-400 font-black shadow-sm ring-2 ring-orange-500/30"
-                                      : "border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 text-slate-800 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-700"
+                                      ? "border-amber-500 bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold shadow-xs ring-2 ring-amber-500/30"
+                                      : "border-[#d3e4fe] dark:border-slate-800 bg-[#eff4ff]/60 dark:bg-slate-800/40 text-slate-800 dark:text-slate-200 hover:bg-[#dce9ff]"
                                   }`}
                                 >
                                   <span
                                     className={`w-6 h-6 rounded-full text-xs font-black flex items-center justify-center shrink-0 ${
                                       isSelected
-                                        ? "bg-orange-500 text-white shadow-xs"
+                                        ? "bg-amber-500 text-white shadow-xs"
                                         : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400"
                                     }`}
                                   >
                                     {String.fromCharCode(65 + optIdx)}
                                   </span>
                                   <span className="flex-1">{opt}</span>
-                                  {isSelected && <Check className="w-4 h-4 text-orange-500 shrink-0" />}
+                                  {isSelected && <Check className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />}
                                 </button>
                               );
                             })}
@@ -515,7 +520,7 @@ function JlptMockTestContent() {
                               }
                               onChange={(e) => handleTextAnswer(q.id, e.target.value)}
                               placeholder="Nhập đáp án..."
-                              className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/50 focus:outline-none font-medium"
+                              className="w-full px-4 py-3 rounded-full bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-sm text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-amber-500/50 focus:outline-none font-medium"
                             />
                           </div>
                         )}
@@ -525,7 +530,7 @@ function JlptMockTestContent() {
                           <button
                             onClick={() => setCurrentQIndex((prev) => Math.max(0, prev - 1))}
                             disabled={currentQIndex === 0}
-                            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-40 text-xs font-bold text-slate-700 dark:text-slate-300 transition-colors"
+                            className="btn-tactile-secondary px-4 py-2 text-xs font-bold flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
                           >
                             <ChevronLeft className="w-4 h-4" /> Câu Trước
                           </button>
@@ -537,7 +542,7 @@ function JlptMockTestContent() {
                               )
                             }
                             disabled={currentQIndex === (selectedQuiz.questions?.length || 1) - 1}
-                            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 disabled:opacity-40 text-xs font-bold text-white transition-colors"
+                            className="btn-tactile-amber px-4 py-2 text-xs font-black flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
                           >
                             Câu Tiếp Theo <ChevronRight className="w-4 h-4" />
                           </button>
@@ -550,9 +555,9 @@ function JlptMockTestContent() {
 
               {/* Question Palette Sidebar — 4/12 */}
               <div className="lg:col-span-4 flex flex-col gap-4">
-                <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col gap-4 sticky top-36">
-                  <h4 className="font-extrabold text-xs text-slate-900 dark:text-white uppercase tracking-wider">
-                    Danh Sách Câu Hỏi ({selectedQuiz.questions?.length || 0})
+                <div className="bento-card p-5 flex flex-col gap-4 sticky top-36 border-[#d3e4fe] dark:border-slate-800">
+                  <h4 className="font-extrabold text-xs text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                    Bảng Câu Hỏi ({selectedQuiz.questions?.length || 0})
                   </h4>
 
                   <div className="grid grid-cols-5 gap-2 max-h-[300px] overflow-y-auto custom-scrollbar p-1">
@@ -564,12 +569,12 @@ function JlptMockTestContent() {
                         <button
                           key={q.id}
                           onClick={() => setCurrentQIndex(idx)}
-                          className={`h-9 rounded-xl font-black text-xs transition-all flex items-center justify-center ${
+                          className={`h-9 rounded-xl font-black text-xs transition-all flex items-center justify-center cursor-pointer ${
                             isCurrent
-                              ? "ring-2 ring-orange-500 bg-orange-500 text-white shadow-sm"
+                              ? "ring-2 ring-amber-500 bg-amber-500 text-white shadow-xs"
                               : isAnswered
                               ? "bg-emerald-500 text-white shadow-2xs"
-                              : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
+                              : "bg-[#eff4ff] dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-[#dce9ff]"
                           }`}
                         >
                           {idx + 1}
@@ -578,13 +583,13 @@ function JlptMockTestContent() {
                     })}
                   </div>
 
-                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-2 text-[11px]">
+                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-2 text-[11px] font-semibold">
                     <div className="flex items-center gap-2">
-                      <span className="w-3 h-3 rounded-md bg-emerald-500 shrink-0" />
+                      <span className="w-3 h-3 rounded-full bg-emerald-500 shrink-0" />
                       <span className="text-slate-600 dark:text-slate-400">Đã trả lời ({Object.keys(userAnswers).length})</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="w-3 h-3 rounded-md bg-slate-200 dark:bg-slate-700 shrink-0" />
+                      <span className="w-3 h-3 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0" />
                       <span className="text-slate-600 dark:text-slate-400">
                         Chưa trả lời ({(selectedQuiz.questions?.length || 0) - Object.keys(userAnswers).length})
                       </span>
@@ -600,7 +605,7 @@ function JlptMockTestContent() {
         {phase === "result" && reportCard && selectedQuiz && (
           <div className="flex flex-col gap-6 animate-in fade-in duration-200">
             {/* Score Summary Card */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="bento-card p-6 sm:p-8 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6 border-[#d3e4fe] dark:border-slate-800">
               <div className="flex items-center gap-5">
                 <div
                   className={`w-20 h-20 rounded-3xl flex items-center justify-center text-white font-black text-2xl shadow-lg shrink-0 ${
@@ -622,27 +627,27 @@ function JlptMockTestContent() {
                   >
                     {reportCard.isPassed ? "🎉 KẾT QUẢ: ĐẠT (PASS)" : "⚠️ KẾT QUẢ: CHƯA ĐẠT (FAIL)"}
                   </span>
-                  <h2 className="font-black text-xl text-slate-900 dark:text-white mt-1.5">
+                  <h2 className="font-black text-xl text-[#0b1c30] dark:text-white mt-1.5">
                     {selectedQuiz.title}
                   </h2>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    Điểm số: <strong>{reportCard.score}</strong> / {reportCard.maxScore} điểm • Chuẩn đỗ:{" "}
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">
+                    Điểm số: <strong className="text-emerald-600 dark:text-emerald-400">{reportCard.score}</strong> / {reportCard.maxScore} điểm • Chuẩn đỗ:{" "}
                     <strong>{reportCard.passPercentage}%</strong>
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-2.5 flex-wrap">
                 <button
                   onClick={() => handleStartExam(selectedQuiz)}
-                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-black shadow-md transition-all active:scale-95"
+                  className="btn-tactile-amber px-4 py-2.5 text-xs font-black flex items-center gap-1.5 cursor-pointer"
                 >
                   <RotateCcw className="w-4 h-4" />
                   Làm Lại Đề Này
                 </button>
                 <button
                   onClick={() => setPhase("catalog")}
-                  className="px-4 py-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-colors"
+                  className="btn-tactile-secondary px-4 py-2.5 text-xs font-bold cursor-pointer"
                 >
                   Chọn Đề Khác
                 </button>
@@ -651,8 +656,8 @@ function JlptMockTestContent() {
 
             {/* Detailed Question Review List */}
             <div className="flex flex-col gap-4">
-              <h3 className="font-black text-base text-slate-900 dark:text-white flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-orange-500" />
+              <h3 className="font-black text-base text-[#0b1c30] dark:text-white flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-amber-500" />
                 Xem Lại Đáp Án & Lời Giải Thích Chi Tiết ({reportCard.questionResults?.length || 0} câu)
               </h3>
 
@@ -666,10 +671,10 @@ function JlptMockTestContent() {
                 return (
                   <div
                     key={res.questionId}
-                    className={`p-5 rounded-2xl border transition-all ${
+                    className={`bento-card p-5 transition-all ${
                       res.isCorrect
-                        ? "bg-emerald-50/20 dark:bg-emerald-950/10 border-emerald-500/30"
-                        : "bg-rose-50/20 dark:bg-rose-950/10 border-rose-500/30"
+                        ? "bg-emerald-50/30 dark:bg-emerald-950/10 border-emerald-500/30"
+                        : "bg-rose-50/30 dark:bg-rose-950/10 border-rose-500/30"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -686,7 +691,7 @@ function JlptMockTestContent() {
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             <span
-                              className={`px-2 py-0.5 rounded-md font-bold text-[10px] ${
+                              className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${
                                 res.isCorrect
                                   ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                                   : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
@@ -695,7 +700,7 @@ function JlptMockTestContent() {
                               {res.isCorrect ? "✓ Chính xác" : "✗ Sai"} (+{res.pointsEarned}/{res.maxPoints}đ)
                             </span>
                           </div>
-                          <h4 className="font-black text-sm text-slate-900 dark:text-white leading-relaxed">
+                          <h4 className="font-black text-sm text-[#0b1c30] dark:text-white leading-relaxed">
                             {res.prompt}
                           </h4>
                         </div>
@@ -767,7 +772,7 @@ function JlptMockTestContent() {
 
                     {/* Explanation */}
                     {res.explanation && (
-                      <div className="mt-3 ml-10 p-3 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 leading-relaxed shadow-2xs">
+                      <div className="mt-3 ml-10 p-3 rounded-2xl bg-white/80 dark:bg-slate-900/80 border border-[#d3e4fe] dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 leading-relaxed shadow-2xs font-medium">
                         💡 <strong>Lời giải thích chi tiết:</strong> {res.explanation}
                       </div>
                     )}

@@ -1,36 +1,26 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎌 DriveLearn LMS — Frontend
+ 
+This is the Next.js 16 (App Router) + Tailwind CSS + TypeScript frontend for **DriveLearn (Nihongo LMS)**.
 
-## Getting Started
-
-First, run the development server:
+## 🚀 Quick Start
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to explore the LMS.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📱 Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **🍱 Playful Bento Japanese UI**: High aesthetics, responsive, mobile & tablet ready.
+- **🤖 AI Sensei Widget**: Interactive AI tutor for Japanese learners.
+- **🛠️ Course Builder CMS**: Hierarchical course & lesson management, drag-and-drop, and AI auto-builder.
+- **🀄 Kanji Hub & Canvas**: Interactive canvas for Kanji stroke order practice.
+- **🧠 SRS Flashcards**: SuperMemo SM-2 spaced repetition for vocabulary retention.
+- **📝 JLPT Quiz Engine**: Full timed mock tests and interactive quizzes.
 
-## Learn More
+## 💬 Community
 
-To learn more about Next.js, take a look at the following resources:
+Join our Discord community: [https://discord.gg/84FUJWUR6s](https://discord.gg/84FUJWUR6s)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

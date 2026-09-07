@@ -32,6 +32,14 @@ public class VocabularyController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("lesson/{lessonId:guid}")]
+    [HttpGet("/api/learner/lessons/{lessonId:guid}/vocabularies")]
+    public async Task<IActionResult> GetVocabulariesByLesson(Guid lessonId, CancellationToken cancellationToken)
+    {
+        var result = await _vocabService.GetVocabulariesByLessonAsync(lessonId, cancellationToken);
+        return Ok(result);
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetVocabularyById(Guid id, CancellationToken cancellationToken)
     {

@@ -261,109 +261,118 @@ export default function SyllabusImportModal({
   // ─── Render ───
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="bg-[#f8f9ff] dark:bg-[#0b1c30] rounded-3xl border-2 border-[#d3e4fe] dark:border-slate-800 shadow-2xl w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-indigo-600 to-purple-600">
+        <div className="flex items-center justify-between px-6 py-4 border-b-2 border-[#d3e4fe] dark:border-slate-800 bg-white dark:bg-[#090d16]/80">
           <div className="flex items-center gap-3">
-            <span className="text-2xl">📚</span>
+            <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-600 shadow-inner text-xl">
+              📚
+            </div>
             <div>
-              <h2 className="text-white font-bold text-lg">Smart Syllabus Extractor</h2>
-              <p className="text-indigo-200 text-xs">Import lộ trình học từ PDF → AI phân tích → Lưu Template</p>
+              <h2 className="text-[#0b1c30] dark:text-white font-black text-base">Smart Syllabus Extractor</h2>
+              <p className="text-[#3c4a42] dark:text-slate-400 text-xs">Import lộ trình học từ PDF → AI phân tích → Lưu Template</p>
             </div>
           </div>
           {/* Step indicator */}
           <div className="flex items-center gap-2">
             {[1, 2, 3].map(s => (
               <React.Fragment key={s}>
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all
-                  ${step === s ? 'bg-white text-indigo-600' : step > s ? 'bg-indigo-400 text-white' : 'bg-indigo-800 text-indigo-300'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all
+                  ${step === s ? 'bg-[#006c49] text-white shadow-[0_3px_0_#00422b]' : step > s ? 'bg-emerald-500 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'}`}>
                   {step > s ? '✓' : s}
                 </div>
-                {s < 3 && <div className={`w-8 h-0.5 ${step > s ? 'bg-indigo-400' : 'bg-indigo-800'}`} />}
+                {s < 3 && <div className={`w-8 h-1 rounded-full ${step > s ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-800'}`} />}
               </React.Fragment>
             ))}
           </div>
-          <button onClick={handleClose} className="text-white/70 hover:text-white text-2xl leading-none ml-4">×</button>
+          <button
+            onClick={handleClose}
+            className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-rose-500 border border-[#d3e4fe] dark:border-slate-700 flex items-center justify-center transition-transform hover:scale-105 active:scale-95 ml-4"
+          >
+            ×
+          </button>
         </div>
 
         {/* Error banner */}
         {error && (
-          <div className="bg-red-50 border-b border-red-200 px-6 py-2 flex items-center gap-2 text-red-700 text-sm">
+          <div className="bg-rose-50 dark:bg-rose-950/40 border-b-2 border-rose-200 dark:border-rose-900 px-6 py-2.5 flex items-center gap-2 text-rose-700 dark:text-rose-300 text-xs font-bold">
             <span>⚠️</span> {error}
-            <button onClick={() => setError(null)} className="ml-auto text-red-400 hover:text-red-600">×</button>
+            <button onClick={() => setError(null)} className="ml-auto text-rose-400 hover:text-rose-600 font-black">×</button>
           </div>
         )}
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
 
           {/* ── STEP 1: Upload ── */}
           {step === 1 && (
             <div className="p-8 max-w-xl mx-auto space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tên Template (tuỳ chỉnh)</label>
-                <input
-                  type="text"
-                  value={templateTitle}
-                  onChange={e => setTemplateTitle(e.target.value)}
-                  placeholder="VD: Lộ trình N4 180 ngày (Minna no Nihongo)"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Cấp độ JLPT</label>
-                <select
-                  value={jlptLevel}
-                  onChange={e => setJlptLevel(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border-2 border-[#d3e4fe] dark:border-slate-800 flex flex-col gap-4 shadow-xs">
+                <div>
+                  <label className="block text-xs font-black text-[#0b1c30] dark:text-slate-300 mb-1.5">Tên Template (tuỳ chỉnh)</label>
+                  <input
+                    type="text"
+                    value={templateTitle}
+                    onChange={e => setTemplateTitle(e.target.value)}
+                    placeholder="VD: Lộ trình N4 180 ngày (Minna no Nihongo)"
+                    className="w-full border-2 border-[#d3e4fe] dark:border-slate-700 rounded-2xl px-4 py-2.5 text-xs font-bold text-[#0b1c30] dark:text-white bg-[#eff4ff] dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-black text-[#0b1c30] dark:text-slate-300 mb-1.5">Cấp độ JLPT</label>
+                  <select
+                    value={jlptLevel}
+                    onChange={e => setJlptLevel(e.target.value)}
+                    className="w-full border-2 border-[#d3e4fe] dark:border-slate-700 rounded-2xl px-4 py-2.5 text-xs font-bold text-[#0b1c30] dark:text-white bg-[#eff4ff] dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  >
+                    {JLPT_LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
+                  </select>
+                </div>
+
+                {/* Drop zone */}
+                <div
+                  onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`border-2 border-dashed rounded-3xl p-8 text-center cursor-pointer transition-all
+                    ${isDragging ? 'border-[#006c49] bg-[#eff4ff]' : 'border-[#d3e4fe] dark:border-slate-700 hover:border-emerald-400 bg-[#f8f9ff] dark:bg-slate-800/50'}`}
                 >
-                  {JLPT_LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
-                </select>
-              </div>
+                  <input ref={fileInputRef} type="file" accept=".pdf" className="hidden" onChange={handleFileInput} />
+                  <div className="text-4xl mb-2">{pdfFile ? '✅' : '📄'}</div>
+                  {pdfFile ? (
+                    <div>
+                      <p className="font-black text-sm text-[#0b1c30] dark:text-white">{pdfFile.name}</p>
+                      <p className="text-xs text-slate-500 mt-1 font-bold">{(pdfFile.size / 1024).toFixed(0)} KB • Nhấn để đổi file</p>
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="font-black text-xs text-[#0b1c30] dark:text-slate-200">Kéo thả file PDF giáo trình vào đây</p>
+                      <p className="text-[11px] text-slate-400 mt-1 font-medium">hoặc nhấp để duyệt file • Tối đa 50 MB</p>
+                    </div>
+                  )}
+                </div>
 
-              {/* Drop zone */}
-              <div
-                onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
-                onDragLeave={() => setIsDragging(false)}
-                onDrop={handleDrop}
-                onClick={() => fileInputRef.current?.click()}
-                className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all
-                  ${isDragging ? 'border-indigo-400 bg-indigo-50' : 'border-gray-300 hover:border-indigo-300 hover:bg-gray-50'}`}
-              >
-                <input ref={fileInputRef} type="file" accept=".pdf" className="hidden" onChange={handleFileInput} />
-                <div className="text-5xl mb-3">{pdfFile ? '✅' : '📄'}</div>
-                {pdfFile ? (
-                  <div>
-                    <p className="font-medium text-gray-800">{pdfFile.name}</p>
-                    <p className="text-sm text-gray-500 mt-1">{(pdfFile.size / 1024).toFixed(0)} KB • Nhấn để đổi file</p>
-                  </div>
-                ) : (
-                  <div>
-                    <p className="font-medium text-gray-700">Kéo thả file PDF vào đây</p>
-                    <p className="text-sm text-gray-400 mt-1">hoặc nhấp để duyệt file • Tối đa 50 MB</p>
-                  </div>
-                )}
+                <button
+                  onClick={handleParsePdf}
+                  disabled={!pdfFile || isLoading}
+                  className="w-full py-3 bg-[#006c49] hover:bg-[#005237] disabled:opacity-40 text-white font-black rounded-full shadow-[0_4px_0_#00422b] hover:shadow-[0_2px_0_#00422b] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all flex items-center justify-center gap-2 text-xs"
+                >
+                  {isLoading ? (
+                    <>
+                      <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                      </svg>
+                      AI đang phân tích PDF...
+                    </>
+                  ) : (
+                    <>🤖 Bắt Đầu Phân Tích AI</>
+                  )}
+                </button>
               </div>
-
-              <button
-                onClick={handleParsePdf}
-                disabled={!pdfFile || isLoading}
-                className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2"
-              >
-                {isLoading ? (
-                  <>
-                    <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                    </svg>
-                    AI đang phân tích PDF...
-                  </>
-                ) : (
-                  <>🤖 Phân tích AI</>
-                )}
-              </button>
             </div>
           )}
 
@@ -371,50 +380,50 @@ export default function SyllabusImportModal({
           {step === 2 && syllabus && (
             <div className="p-6 space-y-4">
               {/* Summary bar */}
-              <div className="flex flex-wrap items-center gap-3 p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+              <div className="flex flex-wrap items-center gap-3 p-4 bg-white dark:bg-slate-900 rounded-3xl border-2 border-[#d3e4fe] dark:border-slate-800 shadow-xs">
                 <div className="flex-1">
-                  <p className="font-semibold text-gray-800">{templateTitle || syllabus.courseTitle}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{syllabus.description}</p>
+                  <p className="font-black text-sm text-[#0b1c30] dark:text-white">{templateTitle || syllabus.courseTitle}</p>
+                  <p className="text-xs text-[#3c4a42] dark:text-slate-400 mt-0.5">{syllabus.description}</p>
                 </div>
-                <span className="px-3 py-1 bg-indigo-600 text-white text-xs font-bold rounded-full">{jlptLevel}</span>
-                <span className="text-sm text-gray-600">
+                <span className="px-3 py-1 bg-[#006c49] text-white text-xs font-black rounded-full shadow-xs">{jlptLevel}</span>
+                <span className="text-xs font-bold text-[#0b1c30] dark:text-slate-300 bg-[#eff4ff] dark:bg-slate-800 px-3 py-1 rounded-full border border-[#d3e4fe]">
                   {syllabus.sections.length} tuần •{' '}
                   {syllabus.sections.reduce((a, s) => a + s.lessons.length, 0)} ngày
                 </span>
               </div>
 
               {/* Legend */}
-              <div className="flex flex-wrap gap-2 text-xs text-gray-500">
-                <span className="font-medium">Kỹ năng:</span>
+              <div className="flex flex-wrap gap-2 text-xs text-slate-500 font-bold px-1">
+                <span>Kỹ năng:</span>
                 {Object.entries(SKILL_COLORS).map(([s, c]) => (
-                  <span key={s} className={`px-2 py-0.5 rounded-full text-xs font-medium ${c}`}>{s}</span>
+                  <span key={s} className={`px-2.5 py-0.5 rounded-full text-xs font-black ${c}`}>{s}</span>
                 ))}
               </div>
 
               {/* Sections accordion */}
               {syllabus.sections.map((section, sIdx) => (
-                <div key={sIdx} className="border border-gray-200 rounded-xl overflow-hidden">
+                <div key={sIdx} className="border-2 border-[#d3e4fe] dark:border-slate-800 rounded-3xl overflow-hidden bg-white dark:bg-slate-900 shadow-xs">
                   <button
                     onClick={() => toggleSection(sIdx)}
-                    className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+                    className="w-full flex items-center justify-between px-5 py-3.5 bg-[#eff4ff]/60 dark:bg-slate-800/60 hover:bg-[#eff4ff] transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <span className="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center">
+                      <span className="w-8 h-8 rounded-2xl bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 text-xs font-black flex items-center justify-center border border-indigo-500/20">
                         {sIdx + 1}
                       </span>
-                      <span className="font-medium text-gray-800">{section.title}</span>
-                      <span className="text-xs text-gray-400">{section.lessons.length} ngày</span>
+                      <span className="font-black text-xs sm:text-sm text-[#0b1c30] dark:text-white">{section.title}</span>
+                      <span className="text-xs font-bold text-slate-400 bg-white dark:bg-slate-700 px-2 py-0.5 rounded-full border border-[#d3e4fe]">{section.lessons.length} ngày</span>
                     </div>
-                    <span className="text-gray-400">{expandedSections.has(sIdx) ? '▲' : '▼'}</span>
+                    <span className="text-slate-400 font-black">{expandedSections.has(sIdx) ? '▲' : '▼'}</span>
                   </button>
 
                   {expandedSections.has(sIdx) && (
-                    <div className="divide-y divide-gray-100">
+                    <div className="divide-y divide-slate-100 dark:divide-slate-800">
                       {section.lessons.map((lesson: any, lIdx: number) => (
-                        <div key={lIdx} className="px-4 py-3 hover:bg-gray-50 transition-colors">
+                        <div key={lIdx} className="px-5 py-3 hover:bg-[#f8f9ff] dark:hover:bg-slate-800/30 transition-colors">
                           <div className="flex items-start gap-3">
                             {/* Day badge */}
-                            <span className="w-10 h-10 rounded-lg bg-indigo-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span className="w-10 h-10 rounded-2xl bg-[#006c49] text-white text-xs font-black flex items-center justify-center flex-shrink-0 mt-0.5 shadow-xs">
                               N{lesson.dayNumber}
                             </span>
 
@@ -424,7 +433,7 @@ export default function SyllabusImportModal({
                                 type="text"
                                 value={lesson.title}
                                 onChange={e => updateLessonTitle(sIdx, lIdx, e.target.value)}
-                                className="w-full text-sm font-medium text-gray-800 bg-transparent border-b border-transparent hover:border-indigo-300 focus:border-indigo-500 focus:outline-none py-0.5 transition-colors"
+                                className="w-full text-xs sm:text-sm font-black text-[#0b1c30] dark:text-white bg-transparent border-b-2 border-transparent hover:border-emerald-300 focus:border-[#006c49] focus:outline-none py-0.5 transition-colors"
                               />
 
                               {/* Skills + Duration */}
@@ -432,34 +441,34 @@ export default function SyllabusImportModal({
                                 {lesson.skills.map((skill: string) => (
                                   <SkillBadge key={skill} skill={skill} />
                                 ))}
-                                <span className="text-xs text-gray-400 ml-auto">⏱ {lesson.estimatedDurationMinutes} phút</span>
+                                <span className="text-xs font-bold text-slate-400 ml-auto">⏱ {lesson.estimatedDurationMinutes} phút</span>
                               </div>
 
                               {/* Drive file suggestions */}
                               {lesson.suggestedDriveFiles.length > 0 && (
-                                <div className="mt-2 space-y-1">
+                                <div className="mt-2 space-y-1.5">
                                   {lesson.suggestedDriveFiles.map((file: SuggestedDriveFile) => {
                                     const isConfirmed = lesson._confirmedFileIds.includes(file.driveNodeId);
                                     const typeIcon = file.resourceType === 0 ? '🎬' : file.resourceType === 1 ? '🎧' : file.resourceType === 2 ? '📝' : '📄';
                                     return (
                                       <div
                                         key={file.driveNodeId}
-                                        className={`flex items-center gap-2 text-xs px-2.5 py-1.5 rounded-lg border transition-all cursor-pointer
+                                        className={`flex items-center gap-2 text-xs px-3 py-2 rounded-2xl border-2 transition-all cursor-pointer
                                           ${isConfirmed
-                                            ? 'border-emerald-300 bg-emerald-50/80 shadow-xs'
-                                            : 'border-gray-200 bg-gray-50 opacity-60'}`}
+                                            ? 'border-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/20 shadow-xs'
+                                            : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40 opacity-60'}`}
                                         onClick={() => toggleConfirmedFile(sIdx, lIdx, file.driveNodeId)}
                                       >
                                         <span className="text-sm">{isConfirmed ? '✅' : '⬜'}</span>
                                         <span className="text-sm">{typeIcon}</span>
                                         <MatchScoreBadge score={file.matchScore} />
                                         <div className="flex-1 min-w-0 flex flex-col">
-                                          <span className="truncate text-gray-800 font-semibold">{file.fileName}</span>
+                                          <span className="truncate text-[#0b1c30] dark:text-white font-bold">{file.fileName}</span>
                                           {file.rawPath && (
-                                            <span className="truncate text-[10px] text-gray-400 font-mono">📂 {file.rawPath}</span>
+                                            <span className="truncate text-[10px] text-slate-400 font-mono">📂 {file.rawPath}</span>
                                           )}
                                         </div>
-                                        <span className="px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-600 text-[10px] font-medium border border-indigo-100 flex-shrink-0">
+                                        <span className="px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-700 dark:text-purple-300 text-[10px] font-black border border-purple-500/20 flex-shrink-0">
                                           {file.matchedKeyword}
                                         </span>
                                         {file.webViewLink && (
@@ -491,21 +500,21 @@ export default function SyllabusImportModal({
           {/* ── STEP 3: Success ── */}
           {step === 3 && (
             <div className="p-12 text-center space-y-6">
-              <div className="text-7xl">🎉</div>
-              <h3 className="text-2xl font-bold text-gray-800">Template đã được lưu thành công!</h3>
+              <div className="text-6xl">🎉</div>
+              <h3 className="text-xl font-black text-[#0b1c30] dark:text-white">Template đã được lưu thành công!</h3>
               <div className="grid grid-cols-2 gap-4 max-w-xs mx-auto">
-                <div className="bg-indigo-50 rounded-xl p-4">
-                  <p className="text-3xl font-bold text-indigo-600">{savedStats.totalDays}</p>
-                  <p className="text-xs text-gray-500 mt-1">Ngày học</p>
+                <div className="bg-emerald-50 dark:bg-emerald-950/40 rounded-3xl p-5 border-2 border-emerald-300 dark:border-emerald-800 shadow-xs">
+                  <p className="text-3xl font-black text-[#006c49] dark:text-emerald-400">{savedStats.totalDays}</p>
+                  <p className="text-xs text-slate-500 font-bold mt-1">Ngày học</p>
                 </div>
-                <div className="bg-purple-50 rounded-xl p-4">
-                  <p className="text-3xl font-bold text-purple-600">
+                <div className="bg-purple-50 dark:bg-purple-950/40 rounded-3xl p-5 border-2 border-purple-300 dark:border-purple-800 shadow-xs">
+                  <p className="text-3xl font-black text-purple-600 dark:text-purple-400">
                     {Math.round(savedStats.totalMinutes / 60)}h
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">Tổng thời lượng</p>
+                  <p className="text-xs text-slate-500 font-bold mt-1">Tổng thời lượng</p>
                 </div>
               </div>
-              <p className="text-sm text-gray-500">
+              <p className="text-xs text-[#3c4a42] dark:text-slate-400 font-medium">
                 Xuất bản template để học viên có thể đăng ký lộ trình này.
               </p>
             </div>
@@ -513,11 +522,11 @@ export default function SyllabusImportModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50">
+        <div className="flex items-center justify-between px-6 py-4 border-t-2 border-[#d3e4fe] dark:border-slate-800 bg-white dark:bg-[#090d16]/80">
           <button
             onClick={step === 1 ? handleClose : () => setStep(s => (s - 1) as any)}
             disabled={isLoading || isSaving}
-            className="px-5 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-white transition-colors"
+            className="px-5 py-2.5 text-xs font-black text-[#0b1c30] dark:text-slate-200 border-2 border-[#d3e4fe] dark:border-slate-700 rounded-full hover:bg-[#eff4ff] transition-all"
           >
             {step === 1 ? 'Hủy' : '← Quay lại'}
           </button>
@@ -526,7 +535,7 @@ export default function SyllabusImportModal({
             <button
               onClick={handleSaveTemplate}
               disabled={isSaving}
-              className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white font-semibold rounded-lg transition-all flex items-center gap-2"
+              className="px-7 py-2.5 bg-[#006c49] hover:bg-[#005237] disabled:opacity-40 text-white font-black rounded-full shadow-[0_4px_0_#00422b] hover:shadow-[0_2px_0_#00422b] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all flex items-center gap-2 text-xs"
             >
               {isSaving ? (
                 <>
@@ -543,7 +552,7 @@ export default function SyllabusImportModal({
           {step === 3 && (
             <button
               onClick={handleClose}
-              className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-all"
+              className="px-7 py-2.5 bg-[#006c49] hover:bg-[#005237] text-white font-black rounded-full shadow-[0_4px_0_#00422b] hover:shadow-[0_2px_0_#00422b] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-none transition-all text-xs"
             >
               Đóng ✓
             </button>

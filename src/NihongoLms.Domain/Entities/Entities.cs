@@ -267,6 +267,28 @@ public class LessonProgress
     public DateTime LastAccessedAtUtc { get; set; } = DateTime.UtcNow;
 }
 
+public class UserResourceProgress
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string UserId { get; set; } = "default-user";
+
+    public Guid ResourceId { get; set; }
+
+    [JsonIgnore]
+    public Resource? Resource { get; set; }
+
+    public Guid LessonId { get; set; }
+
+    [JsonIgnore]
+    public Lesson? Lesson { get; set; }
+
+    public bool IsCompleted { get; set; } = true;
+    public double LastPlaybackPositionSeconds { get; set; } = 0;
+    public double TotalDurationSeconds { get; set; } = 0;
+    public DateTime? CompletedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime LastAccessedAtUtc { get; set; } = DateTime.UtcNow;
+}
+
 // ─────────────────────────────────────────────────
 //  ROADMAP TEMPLATE SYSTEM
 // ─────────────────────────────────────────────────

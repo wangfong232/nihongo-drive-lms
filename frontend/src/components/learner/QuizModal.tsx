@@ -152,17 +152,17 @@ export const QuizModal: React.FC<QuizModalProps> = ({ quizId, onClose, onSuccess
   const currentQ = quiz.questions[currentQIndex];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col min-h-[500px] max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bento-card max-w-2xl w-full flex flex-col min-h-[500px] max-h-[90vh] shadow-2xl border-[#d3e4fe] dark:border-slate-800 overflow-hidden">
 
         {/* ── Header ── */}
-        <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-[#eff4ff]/60 dark:bg-slate-900/50">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black">
               <HelpCircle className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="font-extrabold text-sm text-slate-900 dark:text-white line-clamp-1">{quiz.title}</h3>
+              <h3 className="font-extrabold text-sm text-[#0b1c30] dark:text-white line-clamp-1">{quiz.title}</h3>
               <span className="text-[10px] text-slate-400 font-mono font-bold">Điểm đạt: {quiz.passPercentage}%</span>
             </div>
           </div>
@@ -170,16 +170,16 @@ export const QuizModal: React.FC<QuizModalProps> = ({ quizId, onClose, onSuccess
           <div className="flex items-center gap-2">
             {/* Timer */}
             {timeLeft !== null && !reportCard && (
-              <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-extrabold border font-mono transition-colors ${
+              <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black font-mono transition-colors ${
                 isTimeWarning
-                  ? "bg-rose-500/10 border-rose-500/30 text-rose-500 animate-pulse"
-                  : "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"
+                  ? "bg-rose-500 text-white animate-pulse"
+                  : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30"
               }`}>
                 <Clock className="w-3.5 h-3.5" />
                 {formatTime(timeLeft)}
               </div>
             )}
-            <button onClick={onClose} className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+            <button onClick={onClose} className="p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 cursor-pointer">
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -191,28 +191,28 @@ export const QuizModal: React.FC<QuizModalProps> = ({ quizId, onClose, onSuccess
             /* ── Report Card ── */
             <div className="flex flex-col items-center text-center gap-4 py-2">
               {reportCard.isTimeout && (
-                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-600 text-xs font-bold w-full justify-center">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-700 text-xs font-bold w-full justify-center">
                   <AlertTriangle className="w-4 h-4" /> Đã hết giờ — Bài được chấm tự động
                 </div>
               )}
 
-              <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${
-                reportCard.isPassed ? "bg-emerald-500/10 text-emerald-500" : "bg-rose-500/10 text-rose-500"
+              <div className={`w-16 h-16 rounded-3xl flex items-center justify-center font-black shadow-lg ${
+                reportCard.isPassed ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/30" : "bg-rose-500/10 text-rose-600 border border-rose-500/30"
               }`}>
                 {reportCard.isPassed ? <Award className="w-8 h-8" /> : <XCircle className="w-8 h-8" />}
               </div>
 
               <div>
-                <h2 className="text-xl font-black text-slate-900 dark:text-white">
+                <h2 className="text-xl font-black text-[#0b1c30] dark:text-white">
                   {reportCard.isPassed ? "Xuất Sắc! Bạn Đã Vượt Qua! 🎉" : "Chưa Đạt — Thử Lại Nhé!"}
                 </h2>
-                <p className="text-sm font-extrabold text-orange-500 mt-1">
-                  Kết quả: {reportCard.score} / {reportCard.maxScore} điểm ({reportCard.percentage}%)
+                <p className="text-xs font-bold text-slate-500 mt-1">
+                  Kết quả: <strong className="text-emerald-600 dark:text-emerald-400">{reportCard.score}</strong> / {reportCard.maxScore} điểm ({reportCard.percentage}%)
                 </p>
                 {/* Score ring */}
-                <div className="flex items-center justify-center mt-3">
+                <div className="flex items-center justify-center mt-2">
                   <div className={`text-3xl font-black ${
-                    reportCard.percentage >= quiz.passPercentage ? "text-emerald-500" : "text-rose-500"
+                    reportCard.percentage >= quiz.passPercentage ? "text-emerald-600" : "text-rose-600"
                   }`}>
                     {reportCard.percentage}%
                   </div>
@@ -222,19 +222,19 @@ export const QuizModal: React.FC<QuizModalProps> = ({ quizId, onClose, onSuccess
               {/* Question breakdown */}
               <div className="w-full flex flex-col gap-2 mt-2 text-left max-h-64 overflow-y-auto pr-1">
                 {reportCard.questionResults.map((qr, idx: number) => (
-                  <div key={idx} className={`p-3 rounded-xl border text-xs ${
+                  <div key={idx} className={`p-3.5 rounded-2xl border text-xs ${
                     qr.isCorrect
-                      ? "border-emerald-500/20 bg-emerald-500/5"
-                      : "border-rose-500/20 bg-rose-500/5"
+                      ? "border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20"
+                      : "border-rose-500/30 bg-rose-50/40 dark:bg-rose-950/20"
                   }`}>
                     <div className="flex items-start justify-between gap-2 mb-1">
                       <span className="font-bold text-slate-800 dark:text-slate-200 line-clamp-2">{qr.prompt || `Câu hỏi ${idx + 1}`}</span>
-                      <span className={`shrink-0 font-extrabold ${qr.isCorrect ? "text-emerald-500" : "text-rose-500"}`}>
+                      <span className={`shrink-0 font-extrabold ${qr.isCorrect ? "text-emerald-600" : "text-rose-600"}`}>
                         {qr.isCorrect ? `+${qr.pointsEarned}đ` : "Sai"}
                       </span>
                     </div>
                     {qr.correctAnswerExplanation && (
-                      <p className="text-[11px] text-orange-600 dark:text-orange-400 italic font-medium">
+                      <p className="text-[11px] text-amber-700 dark:text-amber-400 italic font-medium mt-1">
                         💡 {qr.correctAnswerExplanation}
                       </p>
                     )}
@@ -243,7 +243,7 @@ export const QuizModal: React.FC<QuizModalProps> = ({ quizId, onClose, onSuccess
               </div>
 
               <div className="flex gap-2 mt-2">
-                <button onClick={onClose} className="px-6 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-xs transition-colors">
+                <button onClick={onClose} className="btn-tactile-emerald px-6 py-2 text-xs font-black cursor-pointer">
                   Đóng
                 </button>
               </div>
@@ -259,15 +259,15 @@ export const QuizModal: React.FC<QuizModalProps> = ({ quizId, onClose, onSuccess
                     <span>Câu hỏi {currentQIndex + 1} / {quiz.questions.length}</span>
                     <span className="text-slate-500">{currentQ.points} điểm</span>
                   </div>
-                  <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                  <div className="w-full h-2 rounded-full bg-[#eff4ff] dark:bg-slate-800 overflow-hidden border border-[#d3e4fe] dark:border-slate-700">
                     <div
-                      className="h-full bg-gradient-to-r from-orange-500 to-amber-500 rounded-full transition-all duration-300"
+                      className="h-full bg-emerald-500 rounded-full transition-all duration-300"
                       style={{ width: `${((currentQIndex + 1) / quiz.questions.length) * 100}%` }}
                     />
                   </div>
                 </div>
 
-                <h3 className="text-base font-extrabold text-slate-900 dark:text-white leading-snug">{currentQ.prompt}</h3>
+                <h3 className="text-base font-extrabold text-[#0b1c30] dark:text-white leading-snug">{currentQ.prompt}</h3>
 
                 {/* Answer options */}
                 <div className="flex flex-col gap-2">
@@ -281,15 +281,15 @@ export const QuizModal: React.FC<QuizModalProps> = ({ quizId, onClose, onSuccess
                             <button
                               key={idx}
                               onClick={() => handleSelectChoice(currentQ.id, idx)}
-                              className={`p-3.5 rounded-xl border text-xs font-bold text-left transition-all ${
+                              className={`p-3.5 rounded-2xl border text-xs font-semibold text-left transition-all cursor-pointer ${
                                 isSelected
-                                  ? "border-orange-500 bg-orange-500/10 text-orange-600 dark:text-orange-400 shadow-sm"
-                                  : "border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                  ? "border-emerald-500 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-bold shadow-xs ring-2 ring-emerald-500/30"
+                                  : "border-[#d3e4fe] dark:border-slate-800 bg-[#eff4ff]/60 dark:bg-slate-800/40 text-slate-700 dark:text-slate-300 hover:bg-[#dce9ff]"
                               }`}
                             >
-                              <span className="inline-flex items-center gap-2">
+                              <span className="inline-flex items-center gap-2.5">
                                 <span className={`w-5 h-5 rounded-full border flex items-center justify-center text-[10px] font-extrabold shrink-0 ${
-                                  isSelected ? "border-orange-500 bg-orange-500 text-white" : "border-slate-300 dark:border-slate-600 text-slate-400"
+                                  isSelected ? "border-emerald-500 bg-emerald-500 text-white" : "border-slate-300 dark:border-slate-600 text-slate-400"
                                 }`}>
                                   {String.fromCharCode(65 + idx)}
                                 </span>
@@ -307,7 +307,7 @@ export const QuizModal: React.FC<QuizModalProps> = ({ quizId, onClose, onSuccess
                         value={userAnswers[currentQ.id] ? JSON.parse(userAnswers[currentQ.id]) : ""}
                         onChange={(e) => handleTextAnswer(currentQ.id, e.target.value)}
                         placeholder="Nhập câu trả lời của bạn..."
-                        className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white font-medium focus:outline-none focus:border-orange-500"
+                        className="w-full p-3 rounded-full bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                       />
                     );
                   })()}
@@ -319,7 +319,7 @@ export const QuizModal: React.FC<QuizModalProps> = ({ quizId, onClose, onSuccess
                 <button
                   onClick={() => setCurrentQIndex((prev) => Math.max(prev - 1, 0))}
                   disabled={currentQIndex === 0}
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-extrabold text-slate-500 disabled:opacity-30 hover:text-slate-800 dark:hover:text-white transition-colors"
+                  className="btn-tactile-secondary px-4 py-1.5 text-xs font-bold flex items-center gap-1 cursor-pointer disabled:opacity-30"
                 >
                   <ChevronLeft className="w-4 h-4" /> Câu Trước
                 </button>
@@ -328,7 +328,7 @@ export const QuizModal: React.FC<QuizModalProps> = ({ quizId, onClose, onSuccess
                   <button
                     onClick={() => handleSubmit(false)}
                     disabled={submitting}
-                    className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition-colors"
+                    className="btn-tactile-emerald px-5 py-2 text-xs font-black flex items-center gap-1.5 cursor-pointer"
                   >
                     {submitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                     <CheckCircle2 className="w-3.5 h-3.5" />
@@ -337,7 +337,7 @@ export const QuizModal: React.FC<QuizModalProps> = ({ quizId, onClose, onSuccess
                 ) : (
                   <button
                     onClick={() => setCurrentQIndex((prev) => Math.min(prev + 1, quiz.questions.length - 1))}
-                    className="flex items-center gap-1 px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-extrabold transition-colors"
+                    className="btn-tactile-emerald px-4 py-1.5 text-xs font-black flex items-center gap-1 cursor-pointer"
                   >
                     Câu Tiếp <ChevronRight className="w-4 h-4" />
                   </button>

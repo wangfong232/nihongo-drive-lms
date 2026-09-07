@@ -444,28 +444,32 @@ export default function AdminVocabularyPage() {
   });
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-900/5 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+    <div className="min-h-screen flex flex-col bg-[#f8f9ff] dark:bg-[#090d16] text-[#0b1c30] dark:text-slate-100 font-sans">
       <Header />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col gap-6 pt-20">
-        {/* Title Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="px-2.5 py-0.5 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400 text-[10px] font-extrabold uppercase tracking-wider">
-                Vocabulary CMS & Folders
-              </span>
-              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-                <BookOpen className="w-6 h-6 text-orange-500" />
-                Quản Lý Kho Từ Vựng & Thư Mục Chủ Đề
-              </h1>
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 md:p-8 flex flex-col gap-6 pt-20">
+        {/* Title Bar (Playful Bento) */}
+        <div className="bento-card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-2xl bg-emerald-500/10 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black shadow-xs shrink-0 border border-emerald-500/20">
+              <Sparkles className="w-6 h-6" />
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Tạo folder/chủ đề tùy chỉnh, lưu từ vựng yêu thích (⭐), phát âm giọng Nhật (TTS), và import CSV Anki.
-            </p>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl sm:text-2xl font-black tracking-tight text-[#0b1c30] dark:text-white">
+                  Quản Lý Kho Từ Vựng
+                </h1>
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[11px] font-extrabold border border-emerald-200 dark:border-emerald-800">
+                  {vocabList.length} từ vựng
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+                Tạo thư mục chủ đề, lưu từ vựng yêu thích (⭐), phát âm giọng Nhật (TTS) và nạp file Anki/CSV.
+              </p>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2.5 flex-wrap">
             <button
               onClick={() => {
                 setEditingFolderId(null);
@@ -473,10 +477,10 @@ export default function AdminVocabularyPage() {
                 setFolderDescInput("");
                 setShowFolderModal(true);
               }}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow-md shadow-indigo-500/20 transition-all active:scale-95"
+              className="btn-tactile-purple px-3.5 py-2 text-xs font-black flex items-center gap-1.5 cursor-pointer"
             >
               <FolderPlus className="w-4 h-4" />
-              Tạo Thư Mục Mới
+              <span>Tạo Thư Mục</span>
             </button>
 
             <button
@@ -485,10 +489,10 @@ export default function AdminVocabularyPage() {
                 setParsedImportList([]);
                 setShowImportModal(true);
               }}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black shadow-md shadow-emerald-500/20 transition-all active:scale-95"
+              className="btn-tactile-secondary px-3.5 py-2 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
             >
-              <FileSpreadsheet className="w-4 h-4" />
-              Import CSV / Excel
+              <FileSpreadsheet className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <span>Import CSV / Excel</span>
             </button>
 
             <button
@@ -504,34 +508,34 @@ export default function AdminVocabularyPage() {
                 setVocabFolderId(selectedFolderId !== "all" && selectedFolderId !== "fav" ? selectedFolderId : "");
                 setShowModal(true);
               }}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white text-xs font-black shadow-md shadow-orange-500/20 transition-all active:scale-95"
+              className="btn-tactile-emerald px-4 py-2 text-xs font-black flex items-center gap-1.5 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
-              Thêm Từ Vựng
+              <span>Thêm Từ Vựng</span>
             </button>
           </div>
         </div>
 
         {/* ─── FOLDERS & COLLECTIONS HORIZONTAL BAR ─────────────────────────── */}
-        <div className="flex flex-col gap-2 p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+        <div className="bento-card p-5 flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-extrabold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-              <Folder className="w-4 h-4 text-orange-500" />
+            <span className="text-xs font-extrabold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+              <Folder className="w-4 h-4 text-[#f97316]" />
               Thư Mục & Bộ Sưu Tập Từ Vựng:
             </span>
-            <span className="text-[11px] text-slate-400 font-medium">
+            <span className="text-[11px] text-slate-400 font-bold">
               {folders.length} thư mục người dùng
             </span>
           </div>
 
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 custom-scrollbar">
+          <div className="flex items-center gap-2.5 overflow-x-auto pb-1 custom-scrollbar">
             {/* All Words Button */}
             <button
               onClick={() => setSelectedFolderId("all")}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black shrink-0 transition-all cursor-pointer ${
                 selectedFolderId === "all"
-                  ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm"
-                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
+                  ? "btn-tactile-dark"
+                  : "btn-tactile-secondary"
               }`}
             >
               <BookOpen className="w-3.5 h-3.5" />
@@ -541,13 +545,13 @@ export default function AdminVocabularyPage() {
             {/* Favorite Words Button */}
             <button
               onClick={() => setSelectedFolderId("fav")}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all border ${
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black shrink-0 transition-all cursor-pointer ${
                 selectedFolderId === "fav"
-                  ? "bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/20"
-                  : "bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20"
+                  ? "btn-tactile-amber"
+                  : "bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800 text-amber-700 dark:text-amber-300 shadow-[0_2px_0_#fed7aa] hover:bg-amber-100"
               }`}
             >
-              <Star className="w-3.5 h-3.5 fill-current" />
+              <Star className="w-3.5 h-3.5 fill-current text-amber-500" />
               <span>Yêu Thích ({vocabList.filter((v) => isVocabFavorite(v.id)).length})</span>
             </button>
 
@@ -559,31 +563,31 @@ export default function AdminVocabularyPage() {
               return (
                 <div
                   key={f.id}
-                  className={`group relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all border ${
+                  className={`group relative flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold shrink-0 transition-all cursor-pointer ${
                     isSelected
-                      ? "bg-orange-500/10 border-orange-500 text-orange-600 dark:text-orange-400 ring-1 ring-orange-500/40 shadow-xs"
-                      : "bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-orange-400"
+                      ? "btn-tactile-emerald"
+                      : "btn-tactile-secondary"
                   }`}
                 >
-                  <button onClick={() => setSelectedFolderId(f.id)} className="flex items-center gap-1.5">
-                    <Folder className="w-3.5 h-3.5 text-orange-500" />
+                  <button onClick={() => setSelectedFolderId(f.id)} className="flex items-center gap-1.5 cursor-pointer">
+                    <Folder className="w-3.5 h-3.5 opacity-80" />
                     <span>{f.name}</span>
-                    <span className="px-1.5 py-0.2 rounded-md bg-slate-200/80 dark:bg-slate-700 text-[10px] font-mono text-slate-600 dark:text-slate-300">
+                    <span className="px-2 py-0.2 rounded-full bg-white/30 dark:bg-black/20 text-[10px] font-mono font-black">
                       {count}
                     </span>
                   </button>
 
-                  <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity ml-1 pl-1 border-l border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-1 pl-1 border-l border-current/20">
                     <button
                       onClick={(e) => { e.stopPropagation(); handleOpenEditFolder(f); }}
-                      className="p-0.5 text-slate-400 hover:text-indigo-500"
+                      className="p-0.5 hover:scale-110 transition-transform"
                       title="Sửa thư mục"
                     >
                       <Edit2 className="w-3 h-3" />
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); handleDeleteFolder(f.id, f.name); }}
-                      className="p-0.5 text-slate-400 hover:text-rose-500"
+                      className="p-0.5 hover:scale-110 transition-transform text-rose-300"
                       title="Xóa thư mục"
                     >
                       <Trash2 className="w-3 h-3" />
@@ -596,16 +600,16 @@ export default function AdminVocabularyPage() {
         </div>
 
         {/* ─── Search & Level Filter Row ──────────────────────────────────── */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 p-4 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
+        <div className="bento-card p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           <div className="flex items-center gap-1.5 flex-wrap">
             {["", "N5", "N4", "N3", "N2", "N1"].map((lvl) => (
               <button
                 key={lvl}
                 onClick={() => setSelectedLevel(lvl)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
                   selectedLevel === lvl
-                    ? "bg-orange-600 text-white shadow-xs"
-                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    ? "bg-emerald-500 text-white shadow-[0_2px_0_#059669]"
+                    : "bg-[#eff4ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-[#d3e4fe] dark:border-slate-700 hover:bg-[#dce9ff]"
                 }`}
               >
                 {lvl === "" ? "Tất Cả Cấp Độ" : lvl}
@@ -614,19 +618,19 @@ export default function AdminVocabularyPage() {
           </div>
 
           <div className="relative min-w-[260px]">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Tìm theo từ, cách đọc, nghĩa..."
-              className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+              className="w-full pl-9 pr-4 py-2 rounded-full bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 font-medium"
             />
           </div>
         </div>
 
-        {/* ─── Vocabulary Table ───────────────────────────────────────────── */}
-        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-sm">
+        {/* ─── Vocabulary Table / Bento List ─────────────────────────────────── */}
+        <div className="bento-card overflow-hidden shadow-sm">
           {loading ? (
             <div className="p-12 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
               <div className="w-4 h-4 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
@@ -796,16 +800,20 @@ export default function AdminVocabularyPage() {
 
       {/* Single Add / Edit Vocabulary Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 max-w-lg w-full flex flex-col gap-4 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bento-card p-6 max-w-lg w-full flex flex-col gap-4 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar border-[#d3e4fe] dark:border-slate-800">
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-              <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-orange-500" />
-                {editingVocabId ? "Chỉnh Sửa Từ Vựng" : "Thêm Từ Vựng Mới"}
-              </h3>
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black">
+                  <BookOpen className="w-5 h-5" />
+                </div>
+                <h3 className="font-extrabold text-base text-[#0b1c30] dark:text-white">
+                  {editingVocabId ? "Chỉnh Sửa Từ Vựng" : "Thêm Từ Vựng Mới"}
+                </h3>
+              </div>
               <button
                 onClick={() => setShowModal(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -822,7 +830,7 @@ export default function AdminVocabularyPage() {
                   onChange={(e) => setWord(e.target.value)}
                   placeholder="e.g. 先生"
                   autoFocus
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/50 focus:outline-none"
+                  className="w-full px-3.5 py-2 rounded-full bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-emerald-500/50 focus:outline-none"
                 />
               </div>
 
@@ -835,7 +843,7 @@ export default function AdminVocabularyPage() {
                   value={reading}
                   onChange={(e) => setReading(e.target.value)}
                   placeholder="e.g. せんせい"
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/50 focus:outline-none"
+                  className="w-full px-3.5 py-2 rounded-full bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-emerald-500/50 focus:outline-none"
                 />
               </div>
             </div>
@@ -850,7 +858,7 @@ export default function AdminVocabularyPage() {
                   value={hanViet}
                   onChange={(e) => setHanViet(e.target.value)}
                   placeholder="e.g. TIÊN SINH"
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white uppercase focus:ring-2 focus:ring-orange-500/50 focus:outline-none font-bold"
+                  className="w-full px-3.5 py-2 rounded-full bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white uppercase focus:ring-2 focus:ring-emerald-500/50 focus:outline-none font-bold"
                 />
               </div>
 
@@ -863,7 +871,7 @@ export default function AdminVocabularyPage() {
                   value={meaning}
                   onChange={(e) => setMeaning(e.target.value)}
                   placeholder="e.g. Thầy cô giáo"
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/50 focus:outline-none"
+                  className="w-full px-3.5 py-2 rounded-full bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-emerald-500/50 focus:outline-none"
                 />
               </div>
             </div>
@@ -877,7 +885,7 @@ export default function AdminVocabularyPage() {
               <select
                 value={vocabFolderId}
                 onChange={(e) => setVocabFolderId(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/50 focus:outline-none font-medium"
+                className="w-full px-3.5 py-2 rounded-xl bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-emerald-500/50 focus:outline-none font-medium"
               >
                 <option value="">-- Không xếp vào thư mục nào (Chung) --</option>
                 {folders.map((f) => (
@@ -889,7 +897,7 @@ export default function AdminVocabularyPage() {
             {/* Image URL Field (Anki-style) */}
             <div>
               <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                <ImageIcon className="w-3.5 h-3.5 text-orange-500" />
+                <ImageIcon className="w-3.5 h-3.5 text-emerald-600" />
                 Link Hình Ảnh Minh Họa (Anki Image URL)
               </label>
               <input
@@ -897,10 +905,10 @@ export default function AdminVocabularyPage() {
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
                 placeholder="Dán link ảnh online (VD: https://images.unsplash.com/...)"
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white font-mono focus:ring-2 focus:ring-orange-500/50 focus:outline-none"
+                className="w-full px-3.5 py-2 rounded-full bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white font-mono focus:ring-2 focus:ring-emerald-500/50 focus:outline-none"
               />
               {imageUrl && (
-                <div className="mt-2 w-20 h-20 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-2xs">
+                <div className="mt-2 w-20 h-20 rounded-2xl overflow-hidden border border-[#d3e4fe] dark:border-slate-700 shadow-2xs">
                   <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
                 </div>
               )}
@@ -914,7 +922,7 @@ export default function AdminVocabularyPage() {
                 <select
                   value={partOfSpeech}
                   onChange={(e) => setPartOfSpeech(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/50 focus:outline-none font-medium"
+                  className="w-full px-3.5 py-2 rounded-xl bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-emerald-500/50 focus:outline-none font-medium"
                 >
                   <option value="Danh từ">Danh từ (Noun)</option>
                   <option value="Động từ">Động từ (Verb)</option>
@@ -932,7 +940,7 @@ export default function AdminVocabularyPage() {
                 <select
                   value={jlptLevel}
                   onChange={(e) => setJlptLevel(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/50 focus:outline-none font-bold"
+                  className="w-full px-3.5 py-2 rounded-xl bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-emerald-500/50 focus:outline-none font-bold"
                 >
                   <option value="N5">JLPT N5</option>
                   <option value="N4">JLPT N4</option>
@@ -952,7 +960,7 @@ export default function AdminVocabularyPage() {
                 value={exampleSentence}
                 onChange={(e) => setExampleSentence(e.target.value)}
                 placeholder="e.g. 田中先生は日本語を教えます。"
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/50 focus:outline-none"
+                className="w-full px-3.5 py-2 rounded-2xl bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-emerald-500/50 focus:outline-none"
               />
             </div>
 
@@ -965,7 +973,7 @@ export default function AdminVocabularyPage() {
                 value={exampleTranslation}
                 onChange={(e) => setExampleTranslation(e.target.value)}
                 placeholder="e.g. Thầy Tanaka dạy tiếng Nhật."
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/50 focus:outline-none"
+                className="w-full px-3.5 py-2 rounded-2xl bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-emerald-500/50 focus:outline-none"
               />
             </div>
 
@@ -976,7 +984,7 @@ export default function AdminVocabularyPage() {
               <select
                 value={selectedLessonId}
                 onChange={(e) => setSelectedLessonId(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/50 focus:outline-none"
+                className="w-full px-3.5 py-2 rounded-xl bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-emerald-500/50 focus:outline-none"
               >
                 <option value="">-- Không gắn bài học nào --</option>
                 {allLessons.map((l) => (
@@ -985,18 +993,18 @@ export default function AdminVocabularyPage() {
               </select>
             </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+            <div className="flex justify-end gap-2.5 pt-2 border-t border-slate-200 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                className="btn-tactile-secondary px-4 py-2 text-xs font-bold cursor-pointer"
               >
                 Hủy
               </button>
               <button
                 type="button"
                 onClick={handleSaveVocab}
-                className="px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition-colors"
+                className="btn-tactile-emerald px-5 py-2 text-xs font-black cursor-pointer"
               >
                 {editingVocabId ? "Lưu Cập Nhật" : "Lưu Từ Vựng"}
               </button>
@@ -1007,16 +1015,20 @@ export default function AdminVocabularyPage() {
 
       {/* ─── Create / Edit Folder Modal ────────────────────────────────────── */}
       {showFolderModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 max-w-md w-full flex flex-col gap-4 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bento-card p-6 max-w-md w-full flex flex-col gap-4 shadow-2xl border-[#d3e4fe] dark:border-slate-800">
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-              <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
-                <FolderPlus className="w-5 h-5 text-indigo-500" />
-                {editingFolderId ? "Chỉnh Sửa Thư Mục" : "Tạo Thư Mục / Chủ Đề Mới"}
-              </h3>
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-black">
+                  <FolderPlus className="w-5 h-5" />
+                </div>
+                <h3 className="font-extrabold text-base text-[#0b1c30] dark:text-white">
+                  {editingFolderId ? "Chỉnh Sửa Thư Mục" : "Tạo Thư Mục / Chủ Đề Mới"}
+                </h3>
+              </div>
               <button
                 onClick={() => setShowFolderModal(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1032,7 +1044,7 @@ export default function AdminVocabularyPage() {
                 onChange={(e) => setFolderNameInput(e.target.value)}
                 placeholder="e.g. Minna no Nihongo Bài 1 - 5, Du Lịch, IT..."
                 autoFocus
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 focus:outline-none"
+                className="w-full px-3.5 py-2 rounded-full bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-purple-500/50 focus:outline-none"
               />
             </div>
 
@@ -1045,22 +1057,22 @@ export default function AdminVocabularyPage() {
                 value={folderDescInput}
                 onChange={(e) => setFolderDescInput(e.target.value)}
                 placeholder="Mục đích lưu trữ hoặc ghi chú..."
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 focus:outline-none"
+                className="w-full px-3.5 py-2 rounded-full bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white focus:ring-2 focus:ring-purple-500/50 focus:outline-none"
               />
             </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+            <div className="flex justify-end gap-2.5 pt-2 border-t border-slate-200 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => setShowFolderModal(false)}
-                className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                className="btn-tactile-secondary px-4 py-2 text-xs font-bold cursor-pointer"
               >
                 Hủy
               </button>
               <button
                 type="button"
                 onClick={handleSaveFolder}
-                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-colors"
+                className="btn-tactile-purple px-5 py-2 text-xs font-black cursor-pointer"
               >
                 {editingFolderId ? "Cập Nhật Thư Mục" : "Tạo Thư Mục"}
               </button>
@@ -1071,38 +1083,41 @@ export default function AdminVocabularyPage() {
 
       {/* ─── Batch Import Modal ────────────────────────────────────────────── */}
       {showImportModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/75 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 max-w-2xl w-full flex flex-col gap-4 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bento-card p-6 max-w-2xl w-full flex flex-col gap-4 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar border-[#d3e4fe] dark:border-slate-800">
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black">
                   <FileSpreadsheet className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-black text-base text-slate-900 dark:text-white">
+                  <h3 className="font-black text-base text-[#0b1c30] dark:text-white">
                     Import Từ Vựng Hàng Loạt (CSV / Excel / Anki)
                   </h3>
-                  <p className="text-[11px] text-slate-400 font-medium">
-                    Hỗ trợ đầy đủ các trường: Từ vựng, Furigana, Hán Việt, Nghĩa, Loại từ, Cấp độ, Ví dụ & Link Ảnh minh họa.
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                    Hỗ trợ đầy đủ: Từ vựng, Furigana, Hán Việt, Nghĩa, Loại từ, Cấp độ, Ví dụ & Ảnh minh họa.
                   </p>
                 </div>
               </div>
-              <button onClick={() => setShowImportModal(false)} className="p-1 text-slate-400 hover:text-slate-600">
+              <button
+                onClick={() => setShowImportModal(false)}
+                className="p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Template Download & File Upload Buttons */}
-            <div className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-[#eff4ff] dark:bg-slate-800/60 border border-[#d3e4fe] dark:border-slate-700">
               <div className="text-xs">
-                <span className="font-bold text-slate-900 dark:text-white block">1. Tải file mẫu CSV</span>
-                <span className="text-[11px] text-slate-400">Xem cấu trúc mẫu đầy đủ để copy dán nhanh</span>
+                <span className="font-bold text-[#0b1c30] dark:text-white block">1. Tải file mẫu CSV</span>
+                <span className="text-[11px] text-slate-500">Xem cấu trúc mẫu chuẩn để copy dán nhanh</span>
               </div>
               <button
                 onClick={handleDownloadTemplate}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 hover:border-orange-500 text-xs font-bold text-slate-700 dark:text-slate-200 shadow-2xs"
+                className="btn-tactile-secondary px-3.5 py-1.5 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
               >
-                <Download className="w-3.5 h-3.5 text-orange-500" />
+                <Download className="w-3.5 h-3.5 text-emerald-600" />
                 Tải File Mẫu .CSV
               </button>
             </div>
@@ -1116,7 +1131,7 @@ export default function AdminVocabularyPage() {
               <select
                 value={importFolderId}
                 onChange={(e) => setImportFolderId(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white font-medium focus:outline-none"
+                className="w-full px-3.5 py-2 rounded-xl bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs text-[#0b1c30] dark:text-white font-medium focus:outline-none"
               >
                 <option value="">-- Không gán (Chung) --</option>
                 {folders.map((f) => (
@@ -1131,8 +1146,8 @@ export default function AdminVocabularyPage() {
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
                   2. Dán nội dung text hoặc chọn file CSV từ máy tính:
                 </label>
-                <label className="cursor-pointer flex items-center gap-1 text-xs font-bold text-orange-600 hover:underline">
-                  <Upload className="w-3.5 h-3.5" />
+                <label className="btn-tactile-secondary px-3 py-1 text-xs font-bold flex items-center gap-1.5 cursor-pointer">
+                  <Upload className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Chọn File .CSV</span>
                   <input type="file" accept=".csv,.txt" onChange={handleFileUpload} className="hidden" />
                 </label>
@@ -1146,7 +1161,7 @@ export default function AdminVocabularyPage() {
                   parseImportData(e.target.value, importDelimiter);
                 }}
                 placeholder="先生;せんせい;TIÊN SINH;Thầy giáo;Danh từ;N5;田中先生...;Thầy Tanaka...;https://...&#10;学生;がくせい;HỌC SINH;Học sinh;Danh từ;N5"
-                className="w-full p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-mono text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                className="w-full p-3.5 rounded-2xl bg-[#eff4ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 text-xs font-mono text-[#0b1c30] dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
               />
             </div>
 
@@ -1158,16 +1173,16 @@ export default function AdminVocabularyPage() {
                   Đã nhận diện: {parsedImportList.filter((x) => x.isValid).length} / {parsedImportList.length} dòng từ vựng hợp lệ
                 </span>
 
-                <div className="max-h-40 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+                <div className="max-h-40 overflow-y-auto rounded-2xl border border-[#d3e4fe] dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-800 text-xs">
                   {parsedImportList.map((item, idx) => (
-                    <div key={idx} className="p-2 flex items-center justify-between gap-2 bg-slate-50/50 dark:bg-slate-800/40">
+                    <div key={idx} className="p-2.5 flex items-center justify-between gap-2 bg-[#eff4ff]/60 dark:bg-slate-800/40">
                       <div className="flex items-center gap-2">
                         <span className="font-black text-slate-900 dark:text-white">{item.word}</span>
-                        <span className="text-orange-500 font-bold">{item.reading}</span>
-                        {item.hanViet && <span className="text-[10px] text-indigo-400 uppercase font-mono">({item.hanViet})</span>}
+                        <span className="text-emerald-600 dark:text-emerald-400 font-bold">{item.reading}</span>
+                        {item.hanViet && <span className="text-[10px] text-purple-600 uppercase font-mono font-bold">({item.hanViet})</span>}
                         <span className="text-slate-600 dark:text-slate-300 truncate max-w-[200px]">: {item.meaning}</span>
                       </div>
-                      <span className="px-2 py-0.5 rounded-md bg-orange-500/10 text-orange-600 text-[10px] font-bold shrink-0">
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 text-[10px] font-bold shrink-0">
                         {item.jlptLevel}
                       </span>
                     </div>
@@ -1176,11 +1191,11 @@ export default function AdminVocabularyPage() {
               </div>
             )}
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+            <div className="flex justify-end gap-2.5 pt-2 border-t border-slate-200 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => setShowImportModal(false)}
-                className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="btn-tactile-secondary px-4 py-2 text-xs font-bold cursor-pointer"
               >
                 Đóng
               </button>
@@ -1188,7 +1203,7 @@ export default function AdminVocabularyPage() {
                 type="button"
                 disabled={isImporting || parsedImportList.filter((x) => x.isValid).length === 0}
                 onClick={handleExecuteBatchImport}
-                className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold shadow-md shadow-emerald-500/20"
+                className="btn-tactile-emerald px-5 py-2 text-xs font-black cursor-pointer disabled:opacity-50"
               >
                 {isImporting ? `Đang nạp ${importProgress.current}/${importProgress.total}...` : `Nạp ${parsedImportList.filter((x) => x.isValid).length} Từ Vựng`}
               </button>
@@ -1199,27 +1214,27 @@ export default function AdminVocabularyPage() {
 
       {/* ─── Kanji Canvas Practice Modal ───────────────────────────────────── */}
       {practiceKanji && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 max-w-sm w-full flex flex-col items-center gap-4 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bento-card p-6 max-w-sm w-full flex flex-col items-center gap-4 shadow-2xl border-[#d3e4fe] dark:border-slate-800">
             <div className="w-full flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2">
                 <BrainCircuit className="w-5 h-5 text-indigo-500" />
                 <h3 className="font-extrabold text-sm text-slate-900 dark:text-white">
-                  Tập Viết Chữ Hán: <span className="text-orange-500 text-lg">{practiceKanji}</span>
+                  Tập Viết Chữ Hán: <span className="text-emerald-600 text-lg font-black">{practiceKanji}</span>
                 </h3>
               </div>
-              <button onClick={() => setPracticeKanji(null)} className="p-1 text-slate-400 hover:text-slate-600">
+              <button onClick={() => setPracticeKanji(null)} className="p-1 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 shadow-inner flex flex-col items-center">
+            <div className="p-4 rounded-2xl bg-[#eff4ff] dark:bg-slate-800/50 border border-[#d3e4fe] dark:border-slate-700/80 shadow-inner flex flex-col items-center">
               <KanjiCanvas kanji={practiceKanji} size={220} />
             </div>
 
             <button
               onClick={() => setPracticeKanji(null)}
-              className="w-full py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shadow-md"
+              className="btn-tactile-emerald w-full py-2.5 text-xs font-black cursor-pointer"
             >
               Đóng Bảng Tập Viết
             </button>

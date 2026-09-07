@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import { Header } from "@/components/Header";
-import { LearnerSidebar } from "@/components/learner/LearnerSidebar";
 import { LessonContentView } from "@/components/learner/LessonContentView";
 import { SrsFlashcardModal } from "@/components/learner/SrsFlashcardModal";
 import { QuizModal } from "@/components/learner/QuizModal";
@@ -223,14 +222,6 @@ export default function LearnerPortalPage() {
       )}
 
       <main className="flex-1 flex overflow-hidden min-h-0">
-        {/* Collapsible Left Sidebar */}
-        <LearnerSidebar
-          courses={courses}
-          activeLessonId={activeLesson?.id}
-          onSelectLesson={handleSelectLesson}
-          completedLessonIds={completedLessonIds}
-        />
-
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {loading ? (
@@ -243,9 +234,12 @@ export default function LearnerPortalPage() {
           ) : activeLesson && activeCourse && activeSection ? (
             <LessonContentView
               lesson={activeLesson}
+              course={activeCourse}
               courseTitle={activeCourse.title}
               sectionTitle={activeSection.title}
               isCompleted={!!completedLessonIds[activeLesson.id]}
+              completedLessonIds={completedLessonIds}
+              onSelectLesson={handleSelectLesson}
               onToggleComplete={handleToggleComplete}
               onLaunchQuiz={handleLaunchQuiz}
               hasNextLesson={!!nextTarget}

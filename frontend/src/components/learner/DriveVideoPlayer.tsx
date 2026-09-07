@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Video, ExternalLink, Info, Tv, Maximize2, Minimize2, X, BookmarkCheck, EyeOff } from "lucide-react";
+import { Video, ExternalLink, Info, Tv, Maximize2, Minimize2, X, BookmarkCheck, EyeOff, CheckCircle2 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useUserSettings } from "@/lib/userSettings";
 
@@ -10,9 +10,22 @@ interface DriveVideoPlayerProps {
   title: string;
   customUrl?: string;
   lessonId?: string;
+  resourceId?: string;
+  isCompleted?: boolean;
+  onToggleComplete?: () => void;
+  onVideoEnded?: () => void;
 }
 
-export const DriveVideoPlayer: React.FC<DriveVideoPlayerProps> = ({ driveFileId, title, customUrl, lessonId }) => {
+export const DriveVideoPlayer: React.FC<DriveVideoPlayerProps> = ({
+  driveFileId,
+  title,
+  customUrl,
+  lessonId,
+  resourceId,
+  isCompleted,
+  onToggleComplete,
+  onVideoEnded,
+}) => {
   const { settings, isLoaded, toggleTrackVideoWatchTime } = useUserSettings();
   const [showSignInBanner, setShowSignInBanner] = useState(true);
   const [isTheaterMode, setIsTheaterMode] = useState(false);
@@ -255,17 +268,17 @@ export const DriveVideoPlayer: React.FC<DriveVideoPlayerProps> = ({ driveFileId,
       )}
 
       {/* Standard In-Page Player */}
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2">
         {/* Video Control Top Bar */}
-        <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-              <Tv className="w-4 h-4 text-orange-500" />
-              <span>Trình Phát Bài Giảng HD (Drive Player)</span>
+        <div className="flex items-center justify-between px-1 text-xs">
+          <div className="flex items-center gap-2.5">
+            <span className="font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5 text-xs">
+              <Tv className="w-3.5 h-3.5 text-[#f97316]" />
+              <span>Drive Player HD</span>
             </span>
             {resumeToast && settings.showResumePrompt && (
-              <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-lg border border-emerald-500/30 animate-pulse">
-                <BookmarkCheck className="w-3.5 h-3.5" />
+              <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/30 animate-pulse">
+                <BookmarkCheck className="w-3 h-3" />
                 {resumeToast}
               </span>
             )}
@@ -279,7 +292,7 @@ export const DriveVideoPlayer: React.FC<DriveVideoPlayerProps> = ({ driveFileId,
                   setResumeToast(null);
                 }
               }}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold transition-all border shadow-2xs active:scale-95 ${
+              className={`flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[11px] font-bold transition-all border shadow-2xs active:scale-95 cursor-pointer ${
                 settings.trackVideoWatchTime
                   ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
                   : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 border-slate-300 dark:border-slate-700"
@@ -292,26 +305,42 @@ export const DriveVideoPlayer: React.FC<DriveVideoPlayerProps> = ({ driveFileId,
             >
               {settings.trackVideoWatchTime ? (
                 <>
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
                   <span>Theo dõi: BẬT</span>
                 </>
               ) : (
                 <>
-                  <EyeOff className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                  <span>Theo dõi: ĐÃ TẮT</span>
+                  <EyeOff className="w-3 h-3 text-slate-400 shrink-0" />
+                  <span>Theo dõi: TẮT</span>
                 </>
               )}
             </button>
           </div>
 
           <div className="flex items-center gap-2">
+            {onToggleComplete && (
+              <button
+                type="button"
+                onClick={onToggleComplete}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold transition-all border shadow-2xs active:scale-95 cursor-pointer ${
+                  isCompleted
+                    ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                    : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700"
+                }`}
+                title="Đánh dấu đã xem xong video này"
+              >
+                <CheckCircle2 className={`w-3.5 h-3.5 ${isCompleted ? "text-emerald-500" : "text-slate-400"}`} />
+                <span>{isCompleted ? "Đã xong ✓" : "Xong video này"}</span>
+              </button>
+            )}
+
             <button
               onClick={() => setIsTheaterMode(true)}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 border border-orange-500/30 text-xs font-extrabold transition-all"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 border border-orange-500/30 text-xs font-extrabold transition-all cursor-pointer"
               title="Mở rộng không gian xem video Rạp chiếu"
             >
               <Maximize2 className="w-3.5 h-3.5" />
-              <span>Bật Rạp Chiếu (Theater)</span>
+              <span>Rạp Chiếu</span>
             </button>
 
             {driveFileId && (
@@ -322,14 +351,14 @@ export const DriveVideoPlayer: React.FC<DriveVideoPlayerProps> = ({ driveFileId,
                 className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-orange-500 transition-colors"
                 title="Mở tab mới trên Google Drive"
               >
-                <ExternalLink className="w-4 h-4" />
+                <ExternalLink className="w-3.5 h-3.5" />
               </a>
             )}
           </div>
         </div>
 
-        {/* 16:9 Video Container */}
-        <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black border border-slate-800 shadow-xl group">
+        {/* 16:9 Video Container with smart max-height to fit within viewport */}
+        <div className="relative w-full aspect-video max-h-[calc(100vh-210px)] rounded-2xl overflow-hidden bg-black border border-slate-800/80 shadow-lg group mx-auto">
           <iframe
             src={iframeSrc}
             className="w-full h-full border-0"
@@ -338,24 +367,6 @@ export const DriveVideoPlayer: React.FC<DriveVideoPlayerProps> = ({ driveFileId,
             title={title}
           />
         </div>
-
-        {/* Account Identity Reminder Banner */}
-        {showSignInBanner && driveFileId && (
-          <div className="flex items-start justify-between gap-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs">
-            <div className="flex items-start gap-2">
-              <Info className="w-4 h-4 shrink-0 mt-0.5" />
-              <div>
-                <span className="font-bold">Lưu ý quyền xem Google Drive:</span> Trình phát video sử dụng iframe chính chủ Google. Hãy đảm bảo trình duyệt của bạn đã đăng nhập tài khoản Google có quyền truy cập thư mục khóa học này.
-              </div>
-            </div>
-            <button
-              onClick={() => setShowSignInBanner(false)}
-              className="text-amber-500 hover:text-amber-700 font-bold px-1.5 py-0.5 rounded text-[10px]"
-            >
-              Đã hiểu
-            </button>
-          </div>
-        )}
       </div>
     </>
   );

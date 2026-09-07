@@ -7,8 +7,12 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind-4.0-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Discord](https://img.shields.io/badge/Discord-Tham%20Gia%20C%E1%BB%99ng%20%C4%90%E1%BB%93ng-5865F2?logo=discord&logoColor=white)](https://discord.gg/84FUJWUR6s)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**Hệ thống LMS tiếng Nhật hiện đại — Tích hợp Google Drive, Luyện viết Kanji, Ôn tập ngắt quãng SM-2 và Thi thử JLPT N5–N1.**
+**Hệ thống LMS tiếng Nhật hiện đại phong cách Playful Bento — Tích hợp Google Drive, Trợ lý AI Sensei, Luyện viết Kanji, Ôn tập ngắt quãng SM-2 và Thi thử JLPT N5–N1.**
+
+[Hình Ảnh Giao Diện](#-hình-ảnh-giao-diện--trải-nghiệm-thực-tế) • [Bắt Đầu Nhanh](#-bắt-đầu-nhanh) • [Cộng Đồng Discord](https://discord.gg/84FUJWUR6s)
 
 ---
 
@@ -27,14 +31,14 @@
 ## 📸 Hình Ảnh Giao Diện & Trải Nghiệm Thực Tế
 
 ### 1. 🎓 Giao Diện Học Tập (Learner Experience)
-Phát video bài giảng chất lượng cao, tài liệu đính kèm, danh sách từ vựng & Kanji theo bài học, cùng trình phát âm thanh hỗ trợ luyện nghe Chōkai chuyên sâu.
+Phát video bài giảng chất lượng cao, tài liệu đính kèm, danh sách từ vựng & Kanji theo bài học, trình phát âm thanh Bento hỗ trợ luyện nghe Chōkai chuyên sâu và **Trợ lý AI Sensei** giải thích trực tiếp.
 
 <p align="center">
   <img src="demo/course.png" alt="Giao diện học tập DriveLearn" width="95%" />
 </p>
 
-### 2. 🛠️ Course Builder CMS & Auto-Suggest
-Quản lý cây bài học phân cấp (Khóa học $\rightarrow$ Chặng $\rightarrow$ Bài học), kéo thả tự do, và công cụ **Auto-Suggest** tự động gom nhóm tài nguyên Google Drive thành bài học chỉ với 1 click.
+### 2. 🛠️ Course Builder CMS & Auto-Suggest / AI Builder
+Quản lý cây bài học phân cấp (Khóa học $\rightarrow$ Chặng $\rightarrow$ Bài học), kéo thả tự do, công cụ **Auto-Suggest** và **AI Auto Course Builder** tự động cấu trúc giáo trình chỉ với 1 click.
 
 <p align="center">
   <img src="demo/CMS.png" alt="Course Builder CMS" width="95%" />
@@ -105,8 +109,17 @@ npm run dev
 * Frontend: `http://localhost:3000`
 * Backend API: `http://localhost:5222`
 * Swagger UI: `http://localhost:5222/swagger`
+* Quản trị Cài đặt: `http://localhost:3000/admin/settings`
+
+---
+
+## 💬 Cộng Đồng & Hỗ Trợ
+
+* 💬 **Discord:** [https://discord.gg/84FUJWUR6s](https://discord.gg/84FUJWUR6s)
+* 🐛 **GitHub Issues:** [Báo lỗi & Yêu cầu tính năng](https://github.com/nihongo-drive-lms/issues)
 
 ---
 
 ## 📄 Giấy Phép (License)
 Phát hành theo giấy phép mã nguồn mở **MIT License**.
+

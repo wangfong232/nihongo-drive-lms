@@ -84,7 +84,22 @@ export interface VocabularyEntry {
   strokeOrderDriveNodeId?: string;
   strokeOrderDriveFileId?: string;
   tagsJson?: string;
+  isFallback?: boolean;
   createdAtUtc: string;
+}
+
+export interface LessonVocabulariesResponse {
+  lessonId: string;
+  courseLevel: string;
+  isFallback: boolean;
+  items: VocabularyEntry[];
+}
+
+export interface LessonKanjisResponse {
+  lessonId: string;
+  courseLevel: string;
+  isFallback: boolean;
+  items: any[];
 }
 
 export interface SrsDueItem {
@@ -1092,7 +1107,56 @@ export const api = {
     );
   },
 
-  // ─── Vocabulary APIs ──────────────────────────────────────────────────────
+  // ─── Lesson-Specific Vocabulary & Kanji with JLPT N-Level Random Fallback ─
+  async getLessonVocabularies(lessonId: string, fallbackLevel?: string) {
+    const defaultLevel = fallbackLevel || "N3";
+    if (!isGuid(lessonId)) {
+      const pool = FALLBACK_VOCABULARY.filter((v) => v.jlptLevel === defaultLevel);
+      const items = pool.length > 0 ? pool.slice(0, 10) : FALLBACK_VOCABULARY.slice(0, 10);
+      return {
+        lessonId,
+        courseLevel: defaultLevel,
+        isFallback: true,
+        items: items.map((v) => ({ ...v, isFallback: true })),
+      };
+    }
+
+    return safeFetch<LessonVocabulariesResponse>(
+      `${API_BASE}/learner/lessons/${lessonId}/vocabularies`,
+      undefined,
+      {
+        lessonId,
+        courseLevel: defaultLevel,
+        isFallback: true,
+        items: FALLBACK_VOCABULARY.slice(0, 10).map((v) => ({ ...v, isFallback: true })),
+      }
+    );
+  },
+
+  async getLessonKanjis(lessonId: string, fallbackLevel?: string) {
+    const defaultLevel = fallbackLevel || "N3";
+    return safeFetch<LessonKanjisResponse>(
+      `${API_BASE}/learner/lessons/${lessonId}/kanjis`,
+      undefined,
+      {
+        lessonId,
+        courseLevel: defaultLevel,
+        isFallback: true,
+        items: [],
+      }
+    );
+  },
+
+  async getKanjis(jlptLevel?: string, search?: string, radical?: string) {
+    const params = new URLSearchParams({
+      ...(jlptLevel ? { jlptLevel } : {}),
+      ...(search ? { search } : {}),
+      ...(radical ? { radical } : {}),
+    });
+    return safeFetch<any[]>(`${API_BASE}/kanji?${params.toString()}`, undefined, []);
+  },
+
+  // ─── Vocabulary Master Library APIs ───────────────────────────────────────
   // FIX: Filter logic separated — fallback filters locally, API returns server data
   async getVocabulary(lessonId?: string, jlptLevel?: string, search?: string) {
     // If lessonId is non-GUID mock ID (e.g. les-1), return fallback directly
@@ -1336,6 +1400,100 @@ export const api = {
       `${API_BASE}/progress/${lessonId}`,
       undefined,
       null
+    );
+  },
+
+  async getLessonMicroProgress(lessonId: string) {
+    if (!isGuid(lessonId)) {
+      return {
+        lessonId,
+        isLessonCompleted: false,
+        completedCount: 0,
+        totalResourceCount: 0,
+        completedVideoCount: 0,
+        totalVideoCount: 0,
+        resourceProgresses: [],
+      };
+    }
+    return safeFetch<LessonMicroProgressSummary>(
+      `${API_BASE}/progress/lesson/${lessonId}/resources`,
+      { method: "GET" },
+      {
+        lessonId,
+        isLessonCompleted: false,
+        completedCount: 0,
+        totalResourceCount: 0,
+        completedVideoCount: 0,
+        totalVideoCount: 0,
+        resourceProgresses: [],
+      }
+    );
+  },
+
+  async toggleResourceComplete(resourceId: string, targetState?: boolean) {
+    const fallbackIsCompleted = targetState ?? true;
+    if (!isGuid(resourceId)) {
+      return {
+        resourceProgress: {
+          resourceId,
+          lessonId: "",
+          isCompleted: fallbackIsCompleted,
+        },
+        isLessonCompleted: false,
+        completedCount: 0,
+        totalResourceCount: 0,
+        completedVideoCount: 0,
+        totalVideoCount: 0,
+      };
+    }
+    return safeFetch<ToggleResourceProgressResult>(
+      `${API_BASE}/progress/resource/${resourceId}/toggle`,
+      { method: "POST" },
+      {
+        resourceProgress: {
+          resourceId,
+          lessonId: "",
+          isCompleted: fallbackIsCompleted,
+        },
+        isLessonCompleted: false,
+        completedCount: 0,
+        totalResourceCount: 0,
+        completedVideoCount: 0,
+        totalVideoCount: 0,
+      }
+    );
+  },
+
+  async markResourceComplete(resourceId: string) {
+    if (!isGuid(resourceId)) {
+      return {
+        resourceProgress: {
+          resourceId,
+          lessonId: "",
+          isCompleted: true,
+        },
+        isLessonCompleted: false,
+        completedCount: 0,
+        totalResourceCount: 0,
+        completedVideoCount: 0,
+        totalVideoCount: 0,
+      };
+    }
+    return safeFetch<ToggleResourceProgressResult>(
+      `${API_BASE}/progress/resource/${resourceId}/complete`,
+      { method: "POST" },
+      {
+        resourceProgress: {
+          resourceId,
+          lessonId: "",
+          isCompleted: true,
+        },
+        isLessonCompleted: false,
+        completedCount: 0,
+        totalResourceCount: 0,
+        completedVideoCount: 0,
+        totalVideoCount: 0,
+      }
     );
   },
 
@@ -1769,7 +1927,45 @@ export const api = {
       }
     );
   },
+
+  async askAiSensei(request: SenseiChatRequest): Promise<SenseiChatResponse> {
+    return safeFetch<SenseiChatResponse>(
+      `${API_BASE}/ai/sensei-chat`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(request),
+      },
+      {
+        reply: "Kon'nichiwa Kenji-san! 🎌 Sensei luôn sẵn sàng đồng hành cùng bạn. Bạn cần giải thích thêm về ngữ pháp, chữ Hán hay từ vựng nào trong bài học này?",
+        suggestedQuestions: [
+          "Tại sao 3 chữ 木 thành 森?",
+          "Cách nhớ nhanh 50 bộ thủ đầu",
+          "Giải thích ngữ pháp bài học này"
+        ]
+      }
+    );
+  },
 };
+
+export interface SenseiChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface SenseiChatRequest {
+  message: string;
+  lessonTitle?: string;
+  courseTitle?: string;
+  sectionTitle?: string;
+  jlptLevel?: string;
+  history?: SenseiChatMessage[];
+}
+
+export interface SenseiChatResponse {
+  reply: string;
+  suggestedQuestions?: string[];
+}
 
 export interface AiSettings {
   isConfigured: boolean;
@@ -1867,4 +2063,35 @@ export interface WeeklyPacing {
   weekStartDateUtc: string;
   weekEndDateUtc: string;
   statusMessage: string;
+}
+
+export interface ResourceProgress {
+  id?: string;
+  userId?: string;
+  resourceId: string;
+  lessonId: string;
+  isCompleted: boolean;
+  lastPlaybackPositionSeconds?: number;
+  totalDurationSeconds?: number;
+  completedAtUtc?: string;
+  lastAccessedAtUtc?: string;
+}
+
+export interface ToggleResourceProgressResult {
+  resourceProgress: ResourceProgress;
+  isLessonCompleted: boolean;
+  completedCount: number;
+  totalResourceCount: number;
+  completedVideoCount: number;
+  totalVideoCount: number;
+}
+
+export interface LessonMicroProgressSummary {
+  lessonId: string;
+  isLessonCompleted: boolean;
+  completedCount: number;
+  totalResourceCount: number;
+  completedVideoCount: number;
+  totalVideoCount: number;
+  resourceProgresses: ResourceProgress[];
 }
