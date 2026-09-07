@@ -178,12 +178,9 @@ dotnet ef database update --project src/NihongoLms.Infrastructure --startup-proj
 
 ### 🚀 4. Khởi Chạy Ứng Dụng
 
-#### ⚡ Cách 1: Khởi chạy 1-Click tự động (Windows)
-Nhấp đúp vào file [`start.bat`](start.bat) hoặc chạy:
-```cmd
-.\start.bat
-```
-Script sẽ tự động kiểm tra PostgreSQL container, khởi chạy Backend API (port `5222`) và Frontend Next.js (port `3000`) trên 2 cửa sổ riêng biệt.
+#### ⚡ Cách 1: Khởi chạy & Cập nhật 1-Click tự động (Windows)
+- **Khởi chạy LMS:** Nhấp đúp vào file [`start.bat`](start.bat) hoặc chạy `.\start.bat`.
+- **Cập nhật code mới:** Khi có bản cập nhật mới từ GitHub, chỉ cần nhấp đúp file [`update.bat`](update.bat) để tự động pull code mới, chạy database migration và cài đặt dependencies frontend.
 
 #### 🛠️ Cách 2: Khởi chạy thủ công từng phần
 
