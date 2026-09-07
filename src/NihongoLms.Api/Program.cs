@@ -110,59 +110,48 @@ app.UseCors("AllowFrontend");
 app.UseAuthorization();
 app.MapControllers();
 
-// DB Health Check and Schema Verification on startup
+// DB Health Check and Automatic Schema Migration on startup
 using (var scope = app.Services.CreateScope())
 {
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-    try
+    var db = scope.ServiceProvider.GetRequiredService<LmsDbContext>();
+
+    if (db.Database.IsRelational())
     {
-        var db = scope.ServiceProvider.GetRequiredService<LmsDbContext>();
-        var canConnect = await db.Database.CanConnectAsync();
-        if (canConnect)
+        // Retry logic to wait for PostgreSQL container initialization
+        int maxRetries = 5;
+        for (int attempt = 1; attempt <= maxRetries; attempt++)
         {
-            logger.LogInformation("[DriveLearn] PostgreSQL connected: {Host}", connectionString.Split(';')[0]);
-
-            // Ensure UserResourceProgresses table and indexes exist
-            const string createTableSql = @"
-CREATE TABLE IF NOT EXISTS ""UserResourceProgresses"" (
-    ""Id"" uuid NOT NULL PRIMARY KEY,
-    ""UserId"" text NOT NULL,
-    ""ResourceId"" uuid NOT NULL,
-    ""LessonId"" uuid NOT NULL,
-    ""IsCompleted"" boolean NOT NULL,
-    ""LastPlaybackPositionSeconds"" integer,
-    ""TotalDurationSeconds"" integer,
-    ""CompletedAtUtc"" timestamp with time zone,
-    ""LastAccessedAtUtc"" timestamp with time zone NOT NULL,
-    CONSTRAINT ""FK_UserResourceProgresses_Resources_ResourceId"" FOREIGN KEY (""ResourceId"") REFERENCES ""Resources"" (""Id"") ON DELETE CASCADE,
-    CONSTRAINT ""FK_UserResourceProgresses_Lessons_LessonId"" FOREIGN KEY (""LessonId"") REFERENCES ""Lessons"" (""Id"") ON DELETE CASCADE
-);
-CREATE UNIQUE INDEX IF NOT EXISTS ""IX_UserResourceProgresses_UserId_ResourceId"" ON ""UserResourceProgresses"" (""UserId"", ""ResourceId"");
-CREATE INDEX IF NOT EXISTS ""IX_UserResourceProgresses_UserId_LessonId"" ON ""UserResourceProgresses"" (""UserId"", ""LessonId"");
-CREATE INDEX IF NOT EXISTS ""IX_UserResourceProgresses_ResourceId"" ON ""UserResourceProgresses"" (""ResourceId"");
-CREATE INDEX IF NOT EXISTS ""IX_UserResourceProgresses_LessonId"" ON ""UserResourceProgresses"" (""LessonId"");
-
-CREATE TABLE IF NOT EXISTS ""SystemSettings"" (
-    ""Id"" uuid NOT NULL PRIMARY KEY,
-    ""Key"" text NOT NULL,
-    ""EncryptedValue"" text NOT NULL,
-    ""Description"" text,
-    ""CreatedAtUtc"" timestamp with time zone NOT NULL,
-    ""UpdatedAtUtc"" timestamp with time zone NOT NULL
-);
-CREATE UNIQUE INDEX IF NOT EXISTS ""IX_SystemSettings_Key"" ON ""SystemSettings"" (""Key"");
-";
-            await db.Database.ExecuteSqlRawAsync(createTableSql);
-            logger.LogInformation("[DriveLearn] UserResourceProgresses and SystemSettings tables verified/created.");
-        }
-        else
-        {
-            logger.LogWarning("[DriveLearn] PostgreSQL CanConnect returned false.");
+            try
+            {
+                logger.LogInformation("[DriveLearn] Connecting to PostgreSQL (Attempt {Attempt}/{MaxRetries})...", attempt, maxRetries);
+                var canConnect = await db.Database.CanConnectAsync();
+                if (canConnect)
+                {
+                    logger.LogInformation("[DriveLearn] PostgreSQL connected successfully! Applying EF Core Migrations...");
+                    await db.Database.MigrateAsync();
+                    logger.LogInformation("[DriveLearn] All database tables and migrations are up to date! 🚀");
+                    break;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (attempt == maxRetries)
+                {
+                    logger.LogError(ex, "[DriveLearn] PostgreSQL connection/migration FAILED after {MaxRetries} attempts. Verify Port 5433 and Docker container status.", maxRetries);
+                }
+                else
+                {
+                    logger.LogWarning("[DriveLearn] Database not ready yet ({Message}). Retrying in 2 seconds...", ex.Message);
+                    await Task.Delay(2000);
+                }
+            }
         }
     }
-    catch (Exception ex)
+    else
     {
-        logger.LogError(ex, "[DriveLearn] PostgreSQL connection/setup FAILED. Verify Port=5433 and Docker container is running.");
+        await db.Database.EnsureCreatedAsync();
+        logger.LogInformation("[DriveLearn] In-Memory Database initialized.");
     }
 }
 

@@ -104,9 +104,9 @@ cd nihongo-drive-lms
 ### 🗄️ 3. Cài đặt Cơ sở dữ liệu (PostgreSQL Database)
 
 #### 🔸 Cách 1: Sử dụng Docker (Nhanh nhất - Khuyên dùng)
-Khởi tạo container PostgreSQL chỉ với 1 dòng lệnh:
+Khởi tạo container PostgreSQL với volume lưu trữ dữ liệu bền vững chỉ với 1 dòng lệnh:
 ```bash
-docker run --name nihongo-postgres -e POSTGRES_DB=nihongo_lms -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -p 5433:5432 -d postgres:16-alpine
+docker run --name nihongo-postgres -v nihongo_pgdata:/var/lib/postgresql/data -e POSTGRES_DB=nihongo_lms -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -p 5433:5432 -d postgres:16-alpine
 ```
 *(Nếu sau này máy khởi động lại, bạn chỉ cần chạy: `docker start nihongo-postgres`)*
 
@@ -120,7 +120,7 @@ docker run --name nihongo-postgres -e POSTGRES_DB=nihongo_lms -e POSTGRES_USER=p
    ```
 
 #### ⚙️ Cập nhật Database Schema (EF Core Migration)
-Chạy lệnh sau để tự động tạo toàn bộ bảng trong cơ sở dữ liệu:
+> 💡 **Lưu ý:** Khi Backend .NET khởi chạy, hệ thống sẽ **tự động chạy migration** (`MigrateAsync()`) và tạo đầy đủ bảng dữ liệu. Bạn cũng có thể chạy lệnh thủ công nếu muốn:
 ```bash
 # Cài đặt công cụ dotnet-ef (nếu chưa có)
 dotnet tool install --global dotnet-ef
