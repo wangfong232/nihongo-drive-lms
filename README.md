@@ -178,8 +178,9 @@ dotnet ef database update --project src/NihongoLms.Infrastructure --startup-proj
 
 ### 🚀 4. Khởi Chạy Ứng Dụng
 
-#### ⚡ Cách 1: Khởi chạy & Cập nhật 1-Click tự động (Windows)
+#### ⚡ Cách 1: Khởi chạy, Dừng & Cập nhật 1-Click tự động (Windows)
 - **Khởi chạy LMS:** Nhấp đúp vào file [`start.bat`](start.bat) hoặc chạy `.\start.bat`.
+- **Dừng toàn bộ hệ thống:** Nhấp đúp vào file [`end.bat`](end.bat) để đóng an toàn Backend, Frontend và Docker PostgreSQL.
 - **Cập nhật code mới:** Khi có bản cập nhật mới từ GitHub, chỉ cần nhấp đúp file [`update.bat`](update.bat) để tự động pull code mới, chạy database migration và cài đặt dependencies frontend.
 
 #### 🛠️ Cách 2: Khởi chạy thủ công từng phần
