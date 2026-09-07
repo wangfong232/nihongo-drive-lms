@@ -127,56 +127,94 @@ DriveLearn_v1.0/
 
 ---
 
-## 🚀 Hướng Dẫn Cài Đặt & Chạy Dự Án (Quick Start)
+## 🚀 Hướng Dẫn Cài Đặt & Chạy Dự Án Chi Tiết (Step-by-Step Setup)
 
-### Yêu Cầu Hệ Thống
-- **.NET 10 SDK** (hoặc .NET 9+)
-- **Node.js 18+** & **npm**
-- **Docker Desktop** (cho PostgreSQL)
+### 📋 1. Yêu Cầu Môi Trường (Prerequisites)
+- **.NET 10 SDK** (hoặc .NET 9+): [Tải .NET SDK](https://dotnet.microsoft.com/download)
+- **Node.js 18+** & **npm**: [Tải Node.js](https://nodejs.org/)
+- **Docker Desktop** (khuyên dùng để chạy PostgreSQL): [Tải Docker Desktop](https://www.docker.com/products/docker-desktop/) *(hoặc cài đặt PostgreSQL 16+ trực tiếp trên máy)*
+- **Git**: [Tải Git](https://git-scm.com/)
 
 ---
 
-### Khởi Chạy Tự Động 1-Click (Windows)
-Chỉ cần nhấp đúp file [`start.bat`](start.bat) hoặc chạy lệnh trong terminal:
+### 📦 2. Clone Dự Án (Clone Repository)
+Mở Terminal / PowerShell và chạy lệnh:
 ```bash
-.\start.bat
+git clone https://github.com/wangfong232/nihongo-drive-lms.git
+cd nihongo-drive-lms
 ```
-Hệ thống sẽ tự động khởi động cơ sở dữ liệu PostgreSQL container, biên dịch Backend .NET API (port `5222`) và chạy Frontend Next.js (port `3000`).
 
 ---
 
-### Khởi Chạy Thủ Công
+### 🗄️ 3. Thiết Lập Cơ Sở Dữ Liệu (Database Setup)
 
-#### 1. Khởi động PostgreSQL Container
+#### 🔸 Lựa chọn A: Sử dụng Docker (Khuyên dùng - Nhanh nhất)
+Chạy 1 dòng lệnh sau để khởi tạo container PostgreSQL:
 ```bash
 docker run --name nihongo-postgres -e POSTGRES_DB=nihongo_lms -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -p 5433:5432 -d postgres:16-alpine
 ```
+*(Nếu đã có container từ trước, bạn chỉ cần chạy `docker start nihongo-postgres`)*
 
-#### 2. Khởi chạy Backend .NET 10
+#### 🔸 Lựa chọn B: Sử dụng PostgreSQL cài trực tiếp trên máy (Native Postgres)
+1. Mở pgAdmin hoặc công cụ quản trị PostgreSQL của bạn và tạo một database mới có tên: `nihongo_lms`.
+2. Mở file `src/NihongoLms.Api/appsettings.json` và chỉnh sửa chuỗi kết nối khớp với cấu hình máy bạn:
+   ```json
+   "ConnectionStrings": {
+     "DefaultConnection": "Host=localhost;Port=5432;Database=nihongo_lms;Username=postgres;Password=YOUR_PASSWORD;"
+   }
+   ```
+
+#### ⚙️ Cập nhật Database Schema (EF Core Migration)
+Chạy lệnh sau để Entity Framework Core tự động tạo toàn bộ bảng và cấu trúc quan hệ:
 ```bash
+# Cài đặt công cụ dotnet-ef (nếu máy bạn chưa có)
+dotnet tool install --global dotnet-ef
+
+# Áp dụng migration vào database
 dotnet ef database update --project src/NihongoLms.Infrastructure --startup-project src/NihongoLms.Api
+```
+
+---
+
+### 🚀 4. Khởi Chạy Ứng Dụng
+
+#### ⚡ Cách 1: Khởi chạy 1-Click tự động (Windows)
+Nhấp đúp vào file [`start.bat`](start.bat) hoặc chạy:
+```cmd
+.\start.bat
+```
+Script sẽ tự động kiểm tra PostgreSQL container, khởi chạy Backend API (port `5222`) và Frontend Next.js (port `3000`) trên 2 cửa sổ riêng biệt.
+
+#### 🛠️ Cách 2: Khởi chạy thủ công từng phần
+
+**Khởi chạy Backend (.NET API):**
+```bash
 dotnet run --project src/NihongoLms.Api/NihongoLms.Api.csproj
 ```
-* Backend API: `http://localhost:5222`
-* Swagger UI: `http://localhost:5222/swagger`
+- API Endpoint: `http://localhost:5222`
+- Swagger UI (Test API trực tiếp): `http://localhost:5222/swagger`
 
-#### 3. Khởi chạy Frontend Next.js 16
+**Khởi chạy Frontend (Next.js 16):**
+Mở thêm một cửa sổ Terminal mới:
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-* Ứng dụng Web: `http://localhost:3000`
+- Truy cập LMS: `http://localhost:3000`
+- Giao diện Quản trị: `http://localhost:3000/admin`
 
 ---
 
-## 🔑 Cấu Hình Google Drive API & Private Token
+### ⚙️ 5. Cấu Hình Ban Đầu Sau Khi Cài Đặt
 
-1. **Cách 1 (Nhanh nhất):** Chia sẻ thư mục khóa học trên Google Drive ở chế độ **"Bất kỳ ai có đường liên kết" (Anyone with link)** $\rightarrow$ Hệ thống tự stream ngay lập tức.
-2. **Cách 2 (Private Drive):**
-   - Vào [Google Cloud Console](https://console.cloud.google.com/) tạo **OAuth 2.0 Client ID** và lấy `Client ID` + `Client Secret`.
-   - Vào [Google OAuth Playground](https://developers.google.com/oauthplayground) cấp quyền `https://www.googleapis.com/auth/drive.readonly` để lấy `refresh_token`.
-   - Mở trang **Cài Đặt Hệ Thống (`/admin/settings`)** của DriveLearn và dán Client ID, Secret, Refresh Token $\rightarrow$ Nhấn **"Lưu Cấu Hình Drive"**.
+1. **Cấu hình AI Sensei & Google Drive:**
+   - Truy cập `http://localhost:3000/admin/settings`
+   - Nhập **AI Provider API Key** (OpenAI GPT-4o-mini hoặc Gemini Flash) để kích hoạt trợ lý AI Sensei và AI Course Builder.
+   - Nhập thông tin **Google OAuth Client & Refresh Token** nếu bạn muốn phát audio/video từ thư mục riêng tư (Private Google Drive).
+2. **Tạo / Quản lý Khóa học:**
+   - Truy cập `http://localhost:3000/admin/builder`
+   - Nhấn **"Import Syllabus"** để nạp cấu trúc giáo trình mẫu N5–N1, hoặc nhấn **"✨ Auto Course Builder"** để AI tự động xây dựng cây bài học.
 
 ---
 

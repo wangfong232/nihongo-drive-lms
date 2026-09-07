@@ -83,33 +83,83 @@ Tra cứu, lọc theo cấp độ JLPT, chỉnh sửa nghĩa, phiên âm Hiragan
 
 ---
 
-## 🚀 Bắt Đầu Nhanh
+## 🚀 Hướng Dẫn Cài Đặt & Chạy Dự Án Chi Tiết (Step-by-Step)
 
-### 1. Yêu cầu hệ thống
-- **Backend**: .NET 10 / ASP.NET Core
-- **Frontend**: Next.js 16 / React 19 / TypeScript
-- **Database**: PostgreSQL 16+
-- **Storage**: Google Drive API access
+### 📋 1. Yêu cầu môi trường
+- **.NET 10 SDK** (hoặc .NET 9+): [Tải .NET SDK](https://dotnet.microsoft.com/download)
+- **Node.js 18+** & **npm**: [Tải Node.js](https://nodejs.org/)
+- **Docker Desktop** (khuyên dùng để chạy PostgreSQL): [Tải Docker Desktop](https://www.docker.com/products/docker-desktop/) *(hoặc PostgreSQL 16+ cài trên máy)*
+- **Git**: [Tải Git](https://git-scm.com/)
 
-### 2. Khởi Chạy 1-Click (Windows)
+---
+
+### 📦 2. Clone dự án về máy
+```bash
+git clone https://github.com/wangfong232/nihongo-drive-lms.git
+cd nihongo-drive-lms
+```
+
+---
+
+### 🗄️ 3. Cài đặt Cơ sở dữ liệu (PostgreSQL Database)
+
+#### 🔸 Cách 1: Sử dụng Docker (Nhanh nhất - Khuyên dùng)
+Khởi tạo container PostgreSQL chỉ với 1 dòng lệnh:
+```bash
+docker run --name nihongo-postgres -e POSTGRES_DB=nihongo_lms -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -p 5433:5432 -d postgres:16-alpine
+```
+*(Nếu sau này máy khởi động lại, bạn chỉ cần chạy: `docker start nihongo-postgres`)*
+
+#### 🔸 Cách 2: Sử dụng PostgreSQL cài sẵn trên máy (Native Postgres)
+1. Mở pgAdmin hoặc công cụ quản trị SQL của bạn và tạo database có tên: `nihongo_lms`.
+2. Mở file `src/NihongoLms.Api/appsettings.json` và cập nhật chuỗi kết nối:
+   ```json
+   "ConnectionStrings": {
+     "DefaultConnection": "Host=localhost;Port=5432;Database=nihongo_lms;Username=postgres;Password=YOUR_PASSWORD;"
+   }
+   ```
+
+#### ⚙️ Cập nhật Database Schema (EF Core Migration)
+Chạy lệnh sau để tự động tạo toàn bộ bảng trong cơ sở dữ liệu:
+```bash
+# Cài đặt công cụ dotnet-ef (nếu chưa có)
+dotnet tool install --global dotnet-ef
+
+# Cập nhật schema database
+dotnet ef database update --project src/NihongoLms.Infrastructure --startup-project src/NihongoLms.Api
+```
+
+---
+
+### 🚀 4. Khởi chạy ứng dụng
+
+#### ⚡ Cách 1: Khởi chạy 1-Click (Windows)
 Chạy file [`start.bat`](start.bat) để tự động khởi động toàn bộ dịch vụ (PostgreSQL + .NET Backend + Next.js Frontend).
 
-### 3. Cài đặt Thủ công
+#### 🛠️ Cách 2: Khởi chạy thủ công
 ```bash
-# 1. Chạy Backend
-dotnet ef database update --project src/NihongoLms.Infrastructure --startup-project src/NihongoLms.Api
+# 1. Chạy Backend API (Port 5222)
 dotnet run --project src/NihongoLms.Api/NihongoLms.Api.csproj
 
-# 2. Chạy Frontend
+# 2. Mở terminal mới và chạy Frontend (Port 3000)
 cd frontend
 npm install
 npm run dev
 ```
 
-* Frontend: `http://localhost:3000`
-* Backend API: `http://localhost:5222`
-* Swagger UI: `http://localhost:5222/swagger`
-* Quản trị Cài đặt: `http://localhost:3000/admin/settings`
+* Ứng dụng Web Học viên: `http://localhost:3000`
+* Giao diện Quản trị CMS: `http://localhost:3000/admin`
+* Trang Cài Đặt Hệ Thống: `http://localhost:3000/admin/settings`
+* Backend Swagger UI: `http://localhost:5222/swagger`
+
+---
+
+### ⚙️ 5. Cấu hình sau khi cài đặt
+
+1. **Cấu hình AI & Google Drive:**
+   - Truy cập `/admin/settings` để nhập API Key AI (OpenAI/Gemini) và thiết lập OAuth/Refresh Token cho Google Drive riêng tư.
+2. **Tạo bài học:**
+   - Vào `/admin/builder` bấm **"Import Syllabus"** để nạp khung giáo trình mẫu N5–N1 hoặc kết nối thư mục Google Drive để tự động đồng bộ bài giảng.
 
 ---
 
