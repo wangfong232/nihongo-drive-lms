@@ -114,6 +114,20 @@ public class CourseController : ControllerBase
         return Ok(new { message = "Resources reordered successfully." });
     }
 
+    [HttpPost("move-resource")]
+    public async Task<IActionResult> MoveResource([FromBody] MoveResourceDto dto, CancellationToken cancellationToken)
+    {
+        await _curatorService.MoveResourceAsync(dto, cancellationToken);
+        return Ok(new { message = "Resource moved successfully." });
+    }
+
+    [HttpPost("move-lesson")]
+    public async Task<IActionResult> MoveLesson([FromBody] MoveLessonDto dto, CancellationToken cancellationToken)
+    {
+        await _curatorService.MoveLessonAsync(dto, cancellationToken);
+        return Ok(new { message = "Lesson moved successfully." });
+    }
+
     [HttpPost("assign-quiz")]
     public async Task<IActionResult> AssignQuiz([FromBody] AssignQuizRequestDto dto, CancellationToken cancellationToken)
     {

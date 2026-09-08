@@ -1047,6 +1047,31 @@ export const api = {
     );
   },
 
+  async assignDriveNodesBatch(data: {
+    lessonId: string;
+    items: { driveNodeId: string; title?: string; resourceType: number }[];
+  }) {
+    return safeFetch<{ count: number; resources: Resource[] }>(
+      `${API_BASE}/curator/assign-batch`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      },
+      {
+        count: data.items.length,
+        resources: data.items.map((i, idx) => ({
+          id: `res-${Date.now()}-${idx}`,
+          lessonId: data.lessonId,
+          title: i.title || "Assigned File",
+          resourceType: i.resourceType,
+          driveNodeId: i.driveNodeId,
+          displayOrder: idx + 1,
+        })),
+      }
+    );
+  },
+
   async removeResource(resourceId: string) {
     return safeFetch(`${API_BASE}/curator/resources/${resourceId}`, { method: "DELETE" }, { success: true });
   },
@@ -1559,6 +1584,30 @@ export const api = {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ lessonId, resourceIds }),
+      },
+      { success: true }
+    );
+  },
+
+  async moveResource(resourceId: string, targetLessonId: string, targetIndex?: number) {
+    return safeFetch(
+      `${API_BASE}/course/move-resource`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ resourceId, targetLessonId, targetIndex }),
+      },
+      { success: true }
+    );
+  },
+
+  async moveLesson(lessonId: string, targetSectionId: string, targetIndex?: number) {
+    return safeFetch(
+      `${API_BASE}/course/move-lesson`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lessonId, targetSectionId, targetIndex }),
       },
       { success: true }
     );

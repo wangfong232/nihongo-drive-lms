@@ -40,6 +40,7 @@ builder.Services.AddDbContext<LmsDbContext>(options =>
     {
         options.UseInMemoryDatabase("NihongoLmsDev");
     }
+    options.ConfigureWarnings(warnings => warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
 });
 
 // ASP.NET Core Data Protection for Secrets & Keys Encryption
@@ -110,6 +111,10 @@ app.UseCors("AllowFrontend");
 app.UseAuthorization();
 app.MapControllers();
 
+// Health check endpoints for startup scripts and monitoring
+app.MapGet("/health", () => Results.Ok(new { status = "Healthy", timestamp = DateTime.UtcNow }));
+app.MapGet("/api/health", () => Results.Ok(new { status = "Healthy", timestamp = DateTime.UtcNow }));
+
 // DB Health Check and Automatic Schema Migration on startup
 using (var scope = app.Services.CreateScope())
 {
@@ -118,8 +123,8 @@ using (var scope = app.Services.CreateScope())
 
     if (db.Database.IsRelational())
     {
-        // Retry logic to wait for PostgreSQL container initialization
-        int maxRetries = 5;
+        // Retry logic to wait for PostgreSQL container initialization (15 retries x 2s = 30s)
+        int maxRetries = 15;
         for (int attempt = 1; attempt <= maxRetries; attempt++)
         {
             try

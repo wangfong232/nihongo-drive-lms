@@ -255,6 +255,63 @@ public class CuratorService : ICuratorService
         };
     }
 
+    public async Task<BatchAssignDriveNodesResultDto> BatchAssignDriveNodesAsync(BatchAssignDriveNodesRequestDto dto, CancellationToken cancellationToken = default)
+    {
+        var lesson = await _dbContext.Lessons.FirstOrDefaultAsync(l => l.Id == dto.LessonId, cancellationToken);
+        if (lesson == null) throw new KeyNotFoundException($"Lesson {dto.LessonId} not found.");
+
+        var nodeIds = dto.Items.Select(i => i.DriveNodeId).Distinct().ToList();
+        var driveNodes = await _dbContext.DriveNodes
+            .Where(n => nodeIds.Contains(n.Id))
+            .ToDictionaryAsync(n => n.Id, cancellationToken);
+
+        var newResources = new List<Resource>();
+        var resultDtos = new List<ResourceDto>();
+
+        foreach (var item in dto.Items)
+        {
+            if (driveNodes.TryGetValue(item.DriveNodeId, out var dn))
+            {
+                var res = new Resource
+                {
+                    LessonId = dto.LessonId,
+                    Title = string.IsNullOrWhiteSpace(item.Title) ? dn.Name : item.Title,
+                    ResourceType = item.ResourceType,
+                    DriveNodeId = item.DriveNodeId,
+                    CreatedAtUtc = DateTime.UtcNow
+                };
+                newResources.Add(res);
+            }
+        }
+
+        if (newResources.Count > 0)
+        {
+            _dbContext.Resources.AddRange(newResources);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            foreach (var r in newResources)
+            {
+                driveNodes.TryGetValue(r.DriveNodeId ?? Guid.Empty, out var dn);
+                resultDtos.Add(new ResourceDto
+                {
+                    Id = r.Id,
+                    LessonId = r.LessonId,
+                    Title = r.Title,
+                    ResourceType = r.ResourceType,
+                    DriveNodeId = r.DriveNodeId,
+                    DriveFileId = dn?.DriveFileId,
+                    WebViewLink = dn?.WebViewLink
+                });
+            }
+        }
+
+        return new BatchAssignDriveNodesResultDto
+        {
+            Count = resultDtos.Count,
+            Resources = resultDtos
+        };
+    }
+
     public async Task RemoveResourceAsync(Guid resourceId, CancellationToken cancellationToken = default)
     {
         var res = await _dbContext.Resources.FirstOrDefaultAsync(r => r.Id == resourceId, cancellationToken);
@@ -352,6 +409,92 @@ public class CuratorService : ICuratorService
                 res.DisplayOrder = i + 1;
             }
         }
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task MoveResourceAsync(MoveResourceDto dto, CancellationToken cancellationToken = default)
+    {
+        var resource = await _dbContext.Resources.FirstOrDefaultAsync(r => r.Id == dto.ResourceId, cancellationToken);
+        if (resource == null) throw new KeyNotFoundException($"Resource {dto.ResourceId} not found.");
+
+        var oldLessonId = resource.LessonId;
+        var targetLesson = await _dbContext.Lessons.FirstOrDefaultAsync(l => l.Id == dto.TargetLessonId, cancellationToken);
+        if (targetLesson == null) throw new KeyNotFoundException($"Target lesson {dto.TargetLessonId} not found.");
+
+        resource.LessonId = dto.TargetLessonId;
+
+        // Reorder target lesson resources
+        var targetResources = await _dbContext.Resources
+            .Where(r => r.LessonId == dto.TargetLessonId && r.Id != dto.ResourceId)
+            .OrderBy(r => r.DisplayOrder)
+            .ToListAsync(cancellationToken);
+
+        int insertIndex = dto.TargetIndex ?? targetResources.Count;
+        if (insertIndex < 0) insertIndex = 0;
+        if (insertIndex > targetResources.Count) insertIndex = targetResources.Count;
+
+        targetResources.Insert(insertIndex, resource);
+        for (int i = 0; i < targetResources.Count; i++)
+        {
+            targetResources[i].DisplayOrder = i + 1;
+        }
+
+        // If moved from another lesson, reorder old lesson resources
+        if (oldLessonId != dto.TargetLessonId)
+        {
+            var oldResources = await _dbContext.Resources
+                .Where(r => r.LessonId == oldLessonId && r.Id != dto.ResourceId)
+                .OrderBy(r => r.DisplayOrder)
+                .ToListAsync(cancellationToken);
+
+            for (int i = 0; i < oldResources.Count; i++)
+            {
+                oldResources[i].DisplayOrder = i + 1;
+            }
+        }
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task MoveLessonAsync(MoveLessonDto dto, CancellationToken cancellationToken = default)
+    {
+        var lesson = await _dbContext.Lessons.FirstOrDefaultAsync(l => l.Id == dto.LessonId, cancellationToken);
+        if (lesson == null) throw new KeyNotFoundException($"Lesson {dto.LessonId} not found.");
+
+        var oldSectionId = lesson.SectionId;
+        var targetSection = await _dbContext.Sections.FirstOrDefaultAsync(s => s.Id == dto.TargetSectionId, cancellationToken);
+        if (targetSection == null) throw new KeyNotFoundException($"Target section {dto.TargetSectionId} not found.");
+
+        lesson.SectionId = dto.TargetSectionId;
+
+        var targetLessons = await _dbContext.Lessons
+            .Where(l => l.SectionId == dto.TargetSectionId && l.Id != dto.LessonId)
+            .OrderBy(l => l.DisplayOrder)
+            .ToListAsync(cancellationToken);
+
+        int insertIndex = dto.TargetIndex ?? targetLessons.Count;
+        if (insertIndex < 0) insertIndex = 0;
+        if (insertIndex > targetLessons.Count) insertIndex = targetLessons.Count;
+
+        targetLessons.Insert(insertIndex, lesson);
+        for (int i = 0; i < targetLessons.Count; i++)
+        {
+            targetLessons[i].DisplayOrder = i + 1;
+        }
+
+        if (oldSectionId != dto.TargetSectionId)
+        {
+            var oldLessons = await _dbContext.Lessons
+                .Where(l => l.SectionId == oldSectionId && l.Id != dto.LessonId)
+                .OrderBy(l => l.DisplayOrder)
+                .ToListAsync(cancellationToken);
+
+            for (int i = 0; i < oldLessons.Count; i++)
+            {
+                oldLessons[i].DisplayOrder = i + 1;
+            }
+        }
+
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 

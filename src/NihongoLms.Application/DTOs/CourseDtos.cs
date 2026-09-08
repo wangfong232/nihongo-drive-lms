@@ -64,6 +64,20 @@ public class ReorderResourcesDto
     public List<Guid> ResourceIds { get; set; } = new();
 }
 
+public class MoveResourceDto
+{
+    public Guid ResourceId { get; set; }
+    public Guid TargetLessonId { get; set; }
+    public int? TargetIndex { get; set; }
+}
+
+public class MoveLessonDto
+{
+    public Guid LessonId { get; set; }
+    public Guid TargetSectionId { get; set; }
+    public int? TargetIndex { get; set; }
+}
+
 public class AssignQuizRequestDto
 {
     public Guid QuizId { get; set; }
@@ -114,6 +128,25 @@ public class AssignDriveNodeRequestDto
     public Guid DriveNodeId { get; set; }
     public string Title { get; set; } = string.Empty;
     public ResourceType ResourceType { get; set; }
+}
+
+public class BatchAssignDriveNodeItemDto
+{
+    public Guid DriveNodeId { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public ResourceType ResourceType { get; set; }
+}
+
+public class BatchAssignDriveNodesRequestDto
+{
+    public Guid LessonId { get; set; }
+    public List<BatchAssignDriveNodeItemDto> Items { get; set; } = new();
+}
+
+public class BatchAssignDriveNodesResultDto
+{
+    public int Count { get; set; }
+    public List<ResourceDto> Resources { get; set; } = new();
 }
 
 // ═══════════════════════════════════════════════════════════

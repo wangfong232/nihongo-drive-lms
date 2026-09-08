@@ -23,12 +23,24 @@ import {
 } from "lucide-react";
 
 // ─── Drag payload (mirrors RawDriveTree's dataTransfer) ─────────────────────
-interface DragPayload {
+interface DragPayloadItem {
   driveNodeId: string;
+  driveFileId?: string;
   name: string;
   mimeType: string;
   fileExtension?: string;
   resourceType: number;
+}
+
+interface DragPayload {
+  type?: string;
+  driveNodeId?: string;
+  driveFileId?: string;
+  name?: string;
+  mimeType?: string;
+  fileExtension?: string;
+  resourceType?: number;
+  items?: DragPayloadItem[];
 }
 
 // ─── Delete state union ──────────────────────────────────────────────────────
@@ -151,6 +163,16 @@ export default function CourseBuilderPage() {
     }
   }, []);
 
+  // Fast courses-only refresh: Never unmounts or re-fetches Drive nodes
+  const refreshCoursesOnly = useCallback(async () => {
+    try {
+      const coursesData = await api.getCourses();
+      setCourses(coursesData);
+    } catch (err) {
+      console.error("Failed to refresh courses", err);
+    }
+  }, []);
+
   useEffect(() => {
     loadData();
     const savedRoot = localStorage.getItem("nihongo_drive_root_folder_id");
@@ -185,7 +207,7 @@ export default function CourseBuilderPage() {
       await api.createCourse({ title: newCourseTitle, jlptLevel: newCourseLevel });
       setNewCourseTitle("");
       setShowAddCourse(false);
-      loadData();
+      refreshCoursesOnly();
     } catch (err: any) {
       alert(`Error creating course: ${err.message}`);
     }
@@ -197,7 +219,7 @@ export default function CourseBuilderPage() {
       await api.createSection({ courseId: addSectionCourseId, title: newSectionTitle });
       setNewSectionTitle("");
       setAddSectionCourseId(null);
-      loadData();
+      refreshCoursesOnly();
     } catch (err: any) {
       alert(`Error creating section: ${err.message}`);
     }
@@ -209,7 +231,7 @@ export default function CourseBuilderPage() {
       await api.createLesson({ sectionId: addLessonSectionId, title: newLessonTitle });
       setNewLessonTitle("");
       setAddLessonSectionId(null);
-      loadData();
+      refreshCoursesOnly();
     } catch (err: any) {
       alert(`Error creating lesson: ${err.message}`);
     }
@@ -224,7 +246,7 @@ export default function CourseBuilderPage() {
         jlptLevel: editCourseLevel,
       });
       setEditingCourse(null);
-      loadData();
+      refreshCoursesOnly();
     } catch (err: any) {
       alert(`Error updating course: ${err.message}`);
     }
@@ -237,7 +259,7 @@ export default function CourseBuilderPage() {
         title: editSectionTitle,
       });
       setEditingSection(null);
-      loadData();
+      refreshCoursesOnly();
     } catch (err: any) {
       alert(`Error updating section: ${err.message}`);
     }
@@ -250,7 +272,7 @@ export default function CourseBuilderPage() {
         title: editLessonTitle,
       });
       setEditingLesson(null);
-      loadData();
+      refreshCoursesOnly();
     } catch (err: any) {
       alert(`Error updating lesson: ${err.message}`);
     }
@@ -268,7 +290,7 @@ export default function CourseBuilderPage() {
       setManualResourceLesson(null);
       setManualResourceTitle("");
       setManualResourceUrl("");
-      loadData();
+      refreshCoursesOnly();
     } catch (err: any) {
       alert(`Error adding resource: ${err.message}`);
     }
@@ -285,33 +307,235 @@ export default function CourseBuilderPage() {
         resourceType: assignResourceType,
       });
       setAssignDriveNode(null);
-      loadData();
+      refreshCoursesOnly();
     } catch (err: any) {
       alert(`Error assigning drive node: ${err.message}`);
     }
   };
 
   const handleRemoveResource = async (resourceId: string) => {
+    // Optimistic UI update
+    setCourses((prev) =>
+      prev.map((c) => ({
+        ...c,
+        sections: c.sections.map((s) => ({
+          ...s,
+          lessons: s.lessons.map((l) => ({
+            ...l,
+            resources: l.resources.filter((r) => r.id !== resourceId),
+          })),
+        })),
+      }))
+    );
     try {
       await api.removeResource(resourceId);
-      loadData();
     } catch (err: any) {
-      alert(`Error removing resource: ${err.message}`);
+      console.error("Error removing resource", err);
+      refreshCoursesOnly();
     }
   };
 
-  // ─── Drag & Drop file into Lesson ─────────────────────────────────────────
+  // ─── Drag & Drop file(s) into Lesson ─────────────────────────────────────
   const handleDropFile = async (lessonId: string, payload: DragPayload) => {
     try {
-      await api.assignDriveNode({
-        lessonId,
-        driveNodeId: payload.driveNodeId,
-        title: payload.name,
-        resourceType: payload.resourceType,
-      });
-      loadData();
+      if (payload.items && payload.items.length > 0) {
+        // Multi-select batch assign
+        const res = await api.assignDriveNodesBatch({
+          lessonId,
+          items: payload.items.map((i) => ({
+            driveNodeId: i.driveNodeId,
+            title: i.name,
+            resourceType: i.resourceType,
+          })),
+        });
+
+        if (res && res.resources && res.resources.length > 0) {
+          setCourses((prev) =>
+            prev.map((c) => ({
+              ...c,
+              sections: c.sections.map((s) => ({
+                ...s,
+                lessons: s.lessons.map((l) => {
+                  if (l.id !== lessonId) return l;
+                  return {
+                    ...l,
+                    resources: [...l.resources, ...res.resources],
+                  };
+                }),
+              })),
+            }))
+          );
+        } else {
+          refreshCoursesOnly();
+        }
+      } else if (payload.driveNodeId) {
+        // Single file assign
+        const newRes = await api.assignDriveNode({
+          lessonId,
+          driveNodeId: payload.driveNodeId,
+          title: payload.name || "Assigned File",
+          resourceType: payload.resourceType ?? 0,
+        });
+        if (newRes && newRes.id) {
+          setCourses((prev) =>
+            prev.map((c) => ({
+              ...c,
+              sections: c.sections.map((s) => ({
+                ...s,
+                lessons: s.lessons.map((l) => {
+                  if (l.id !== lessonId) return l;
+                  return {
+                    ...l,
+                    resources: [...l.resources, newRes as Resource],
+                  };
+                }),
+              })),
+            }))
+          );
+        } else {
+          refreshCoursesOnly();
+        }
+      }
     } catch (err: any) {
-      alert(`Error assigning file via drag & drop: ${err.message}`);
+      alert(`Error assigning file(s) via drag & drop: ${err.message}`);
+      refreshCoursesOnly();
+    }
+  };
+
+  // ─── Move Resource across lessons / reorder ───────────────────────────────
+  const handleMoveResource = async (resourceId: string, targetLessonId: string, targetIndex?: number) => {
+    setCourses((prevCourses) => {
+      let movedResource: Resource | null = null;
+      const withoutResource = prevCourses.map((c) => ({
+        ...c,
+        sections: c.sections.map((s) => ({
+          ...s,
+          lessons: s.lessons.map((l) => {
+            const res = l.resources.find((r) => r.id === resourceId);
+            if (res) movedResource = { ...res, lessonId: targetLessonId };
+            return {
+              ...l,
+              resources: l.resources.filter((r) => r.id !== resourceId),
+            };
+          }),
+        })),
+      }));
+
+      if (!movedResource) return prevCourses;
+
+      return withoutResource.map((c) => ({
+        ...c,
+        sections: c.sections.map((s) => ({
+          ...s,
+          lessons: s.lessons.map((l) => {
+            if (l.id !== targetLessonId) return l;
+            const resources = [...l.resources];
+            const idx = targetIndex ?? resources.length;
+            resources.splice(idx, 0, movedResource!);
+            return { ...l, resources };
+          }),
+        })),
+      }));
+    });
+
+    try {
+      await api.moveResource(resourceId, targetLessonId, targetIndex);
+    } catch (err: any) {
+      console.error("Failed to move resource", err);
+      await refreshCoursesOnly();
+    }
+  };
+
+  // ─── Move Lesson across sections / reorder ────────────────────────────────
+  const handleMoveLesson = async (lessonId: string, targetSectionId: string, targetIndex?: number) => {
+    setCourses((prevCourses) => {
+      let movedLesson: Lesson | null = null;
+      const withoutLesson = prevCourses.map((c) => ({
+        ...c,
+        sections: c.sections.map((s) => {
+          const les = s.lessons.find((l) => l.id === lessonId);
+          if (les) movedLesson = { ...les, sectionId: targetSectionId };
+          return {
+            ...s,
+            lessons: s.lessons.filter((l) => l.id !== lessonId),
+          };
+        }),
+      }));
+
+      if (!movedLesson) return prevCourses;
+
+      return withoutLesson.map((c) => ({
+        ...c,
+        sections: c.sections.map((s) => {
+          if (s.id !== targetSectionId) return s;
+          const lessons = [...s.lessons];
+          const idx = targetIndex ?? lessons.length;
+          lessons.splice(idx, 0, movedLesson!);
+          return { ...s, lessons };
+        }),
+      }));
+    });
+
+    try {
+      await api.moveLesson(lessonId, targetSectionId, targetIndex);
+    } catch (err: any) {
+      console.error("Failed to move lesson", err);
+      await refreshCoursesOnly();
+    }
+  };
+
+  // ─── Reorder Sections List ────────────────────────────────────────────────
+  const handleReorderSectionsList = async (courseId: string, sectionIds: string[]) => {
+    setCourses((prevCourses) =>
+      prevCourses.map((c) => {
+        if (c.id !== courseId) return c;
+        const sectionMap = new Map(c.sections.map((s) => [s.id, s]));
+        const sorted: Section[] = [];
+        for (const id of sectionIds) {
+          const sec = sectionMap.get(id);
+          if (sec) sorted.push(sec);
+        }
+        for (const sec of c.sections) {
+          if (!sorted.some((s) => s.id === sec.id)) sorted.push(sec);
+        }
+        return { ...c, sections: sorted };
+      })
+    );
+
+    try {
+      await api.reorderSections(courseId, sectionIds);
+    } catch (err: any) {
+      console.error("Failed to reorder sections", err);
+      await refreshCoursesOnly();
+    }
+  };
+
+  // ─── Reorder Lessons List ─────────────────────────────────────────────────
+  const handleReorderLessonsList = async (sectionId: string, lessonIds: string[]) => {
+    setCourses((prevCourses) =>
+      prevCourses.map((c) => ({
+        ...c,
+        sections: c.sections.map((s) => {
+          if (s.id !== sectionId) return s;
+          const lessonMap = new Map(s.lessons.map((l) => [l.id, l]));
+          const sorted: Lesson[] = [];
+          for (const id of lessonIds) {
+            const les = lessonMap.get(id);
+            if (les) sorted.push(les);
+          }
+          for (const les of s.lessons) {
+            if (!sorted.some((l) => l.id === les.id)) sorted.push(les);
+          }
+          return { ...s, lessons: sorted };
+        }),
+      }))
+    );
+
+    try {
+      await api.reorderLessons(sectionId, lessonIds);
+    } catch (err: any) {
+      console.error("Failed to reorder lessons", err);
+      await refreshCoursesOnly();
     }
   };
 
@@ -334,7 +558,7 @@ export default function CourseBuilderPage() {
       await api.reorderSections(course.id, newIds);
     } catch (err: any) {
       console.error("Failed to reorder sections", err);
-      await loadData();
+      await refreshCoursesOnly();
     }
   };
 
@@ -356,7 +580,7 @@ export default function CourseBuilderPage() {
       await api.reorderSections(course.id, newIds);
     } catch (err: any) {
       console.error("Failed to reorder sections", err);
-      await loadData();
+      await refreshCoursesOnly();
     }
   };
 
@@ -382,7 +606,7 @@ export default function CourseBuilderPage() {
       await api.reorderLessons(section.id, newIds);
     } catch (err: any) {
       console.error("Failed to reorder lessons", err);
-      await loadData();
+      await refreshCoursesOnly();
     }
   };
 
@@ -407,13 +631,12 @@ export default function CourseBuilderPage() {
       await api.reorderLessons(section.id, newIds);
     } catch (err: any) {
       console.error("Failed to reorder lessons", err);
-      await loadData();
+      await refreshCoursesOnly();
     }
   };
 
   // ─── Reorder Resources inside Lesson ─────────────────────────────────────
   const handleReorderResources = async (lessonId: string, resourceIds: string[]) => {
-    // Optimistic UI update
     setCourses((prevCourses) =>
       prevCourses.map((c) => ({
         ...c,
@@ -442,7 +665,7 @@ export default function CourseBuilderPage() {
       await api.reorderResources(lessonId, resourceIds);
     } catch (err: any) {
       console.error("Failed to reorder resources", err);
-      await loadData();
+      await refreshCoursesOnly();
     }
   };
 
@@ -459,7 +682,7 @@ export default function CourseBuilderPage() {
         await api.deleteLesson(deleteTarget.entity.id);
       }
       setDeleteTarget(null);
-      loadData();
+      refreshCoursesOnly();
     } catch (err: any) {
       alert(`Error deleting: ${err.message}`);
     } finally {
@@ -544,7 +767,7 @@ export default function CourseBuilderPage() {
         {/* ── 2-Column Resizable Workspace ──────────────────── */}
         <div
           ref={workspaceRef}
-          className="flex flex-col lg:flex-row gap-0 h-[calc(100vh-80px)] min-h-[620px] pb-1 min-h-0 relative select-none"
+          className="flex flex-col lg:flex-row gap-0 h-[calc(100vh-80px)] min-h-[620px] pb-1 min-h-0 relative"
         >
           {/* Left Column: Raw Drive Tree */}
           <div
@@ -626,6 +849,10 @@ export default function CourseBuilderPage() {
               }}
               onRemoveResource={handleRemoveResource}
               onReorderResources={handleReorderResources}
+              onMoveResource={handleMoveResource}
+              onMoveLesson={handleMoveLesson}
+              onReorderSections={handleReorderSectionsList}
+              onReorderLessons={handleReorderLessonsList}
               onDeleteCourse={(course) => setDeleteTarget({ type: "course", entity: course })}
               onDeleteSection={(section) => setDeleteTarget({ type: "section", entity: section })}
               onDeleteLesson={(lesson) => setDeleteTarget({ type: "lesson", entity: lesson })}

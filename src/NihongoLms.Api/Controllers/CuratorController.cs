@@ -29,6 +29,13 @@ public class CuratorController : ControllerBase
         return Ok(resource);
     }
 
+    [HttpPost("assign-batch")]
+    public async Task<IActionResult> BatchAssignDriveNodes([FromBody] BatchAssignDriveNodesRequestDto dto, CancellationToken cancellationToken)
+    {
+        var result = await _curatorService.BatchAssignDriveNodesAsync(dto, cancellationToken);
+        return Ok(result);
+    }
+
     [HttpDelete("resources/{id:guid}")]
     public async Task<IActionResult> RemoveResource(Guid id, CancellationToken cancellationToken)
     {

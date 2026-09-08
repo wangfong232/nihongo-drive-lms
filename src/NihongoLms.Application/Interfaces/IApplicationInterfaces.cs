@@ -24,12 +24,15 @@ public interface ICuratorService
     Task DeleteLessonAsync(Guid id, CancellationToken cancellationToken = default);
 
     Task<ResourceDto> AssignDriveNodeAsync(AssignDriveNodeRequestDto dto, CancellationToken cancellationToken = default);
+    Task<BatchAssignDriveNodesResultDto> BatchAssignDriveNodesAsync(BatchAssignDriveNodesRequestDto dto, CancellationToken cancellationToken = default);
     Task RemoveResourceAsync(Guid resourceId, CancellationToken cancellationToken = default);
 
     Task<int> ApplyAutoSuggestAsync(ApplyAutoSuggestRequestDto dto, CancellationToken cancellationToken = default);
     Task ReorderLessonsAsync(ReorderLessonsDto dto, CancellationToken cancellationToken = default);
     Task ReorderSectionsAsync(ReorderSectionsDto dto, CancellationToken cancellationToken = default);
     Task ReorderResourcesAsync(ReorderResourcesDto dto, CancellationToken cancellationToken = default);
+    Task MoveResourceAsync(MoveResourceDto dto, CancellationToken cancellationToken = default);
+    Task MoveLessonAsync(MoveLessonDto dto, CancellationToken cancellationToken = default);
     Task AssignQuizToLessonAsync(AssignQuizRequestDto dto, CancellationToken cancellationToken = default);
 
     // AI Auto-Course Builder (Drive Folder -> Standard Course with 5 Pedagogical Lessons)
