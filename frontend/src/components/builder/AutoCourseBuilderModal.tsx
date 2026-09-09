@@ -40,6 +40,7 @@ import {
   Check,
   Edit3,
   Search,
+  HardDrive,
 } from "lucide-react";
 
 interface AutoCourseBuilderModalProps {
@@ -56,7 +57,12 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
   driveNodes = [],
 }) => {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
-  const [scanMode, setScanMode] = useState<"folder" | "pdf">("folder");
+  const [scanMode, setScanMode] = useState<"folder" | "local" | "pdf">("folder");
+
+  // Local Folder State
+  const [localFolderPath, setLocalFolderPath] = useState<string>("");
+  const [isScanningLocal, setIsScanningLocal] = useState(false);
+  const [scannedLocalPath, setScannedLocalPath] = useState<string | null>(null);
 
   // Step 1 State: Source Selection & Presets
   const [selectedRootFolderId, setSelectedRootFolderId] = useState<string>("");
@@ -216,6 +222,38 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
     }
   };
 
+  // ── Auto-Detect when Local Folder is scanned ──
+  const handleScanLocalFolder = async () => {
+    if (!localFolderPath.trim()) {
+      setError("Vui lòng nhập đường dẫn thư mục trên máy tính (ví dụ: E:\\TiengNhat\\N3_Shinkanzen).");
+      return;
+    }
+
+    setIsScanningLocal(true);
+    setError(null);
+    setAiFeedbackRationale(null);
+    try {
+      const res = await api.scanLocalFolder({
+        localPath: localFolderPath.trim(),
+        courseTitle: config.courseTitle || undefined,
+        jlptLevel: config.jlptLevel || undefined,
+      });
+
+      setSelectedRootFolderId(res.rootFolderNodeId);
+      setDetectResult(res.detectionResult);
+      setSelectedPreset(res.detectionResult.detectedPreset || "minna-lesson");
+      setScannedLocalPath(res.localPath);
+      setConfig({
+        ...res.detectionResult.suggestedConfig,
+        rootFolderNodeId: res.rootFolderNodeId,
+      });
+    } catch (err: any) {
+      setError(err.message || "Lỗi khi quét thư mục trên ổ cứng cục bộ.");
+    } finally {
+      setIsScanningLocal(false);
+    }
+  };
+
   // ── Preset Selection Handler ──
   const handleSelectPreset = (preset: FolderPresetInfo) => {
     setSelectedPreset(preset.presetId);
@@ -234,7 +272,7 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
   // ── AI Tree Analysis Helper ──
   const handleAiAnalyze = async () => {
     if (!selectedRootFolderId) {
-      setError("Vui lòng chọn thư mục nguồn trước.");
+      setError("Vui lòng chọn hoặc quét thư mục nguồn trước.");
       return;
     }
 
@@ -274,9 +312,9 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
     try {
       let res: AutoBuildScanResult;
 
-      if (scanMode === "folder") {
+      if (scanMode === "folder" || scanMode === "local") {
         if (!config.rootFolderNodeId) {
-          setError("Vui lòng chọn thư mục Drive nguồn.");
+          setError(scanMode === "local" ? "Vui lòng quét thư mục ổ cứng cục bộ trước." : "Vui lòng chọn thư mục Drive nguồn.");
           setLoading(false);
           return;
         }
@@ -510,7 +548,19 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                   }`}
                 >
                   <FolderTree className="w-4 h-4" />
-                  <span>Quét Thư mục Google Drive</span>
+                  <span>Google Drive</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setScanMode("local")}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                    scanMode === "local"
+                      ? "bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-sm"
+                      : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                  }`}
+                >
+                  <HardDrive className="w-4 h-4 text-emerald-500" />
+                  <span>Ổ cứng Cục bộ (Local Disk)</span>
                 </button>
                 <button
                   type="button"
@@ -522,11 +572,66 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                   }`}
                 >
                   <FileText className="w-4 h-4" />
-                  <span>Bóc tách Lộ trình PDF</span>
+                  <span>Lộ trình PDF</span>
                 </button>
               </div>
 
-              {scanMode === "folder" ? (
+              {scanMode === "local" && (
+                <div className="space-y-4 p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                  <div>
+                    <label className="block text-xs font-black text-slate-800 dark:text-slate-200 mb-1">
+                      1. Nhập Đường Dẫn Thư Mục Khóa Học Trên Ổ Cứng
+                    </label>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-3">
+                      Hệ thống sẽ đọc trực tiếp video/audio từ ổ cứng máy tính (E:\, D:\, /Users/...). Video sẽ phát tức thì 0ms độ trễ không cần tải lên Google Drive.
+                    </p>
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <HardDrive className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="text"
+                          value={localFolderPath}
+                          onChange={(e) => setLocalFolderPath(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleScanLocalFolder();
+                            }
+                          }}
+                          placeholder="VD: E:\TiengNhat\N3_Shinkanzen hoặc D:\Khóa học\Minna"
+                          className="w-full pl-9 pr-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-mono text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleScanLocalFolder}
+                        disabled={isScanningLocal || !localFolderPath.trim()}
+                        className="px-5 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 text-white text-xs font-black shadow-md flex items-center gap-2 transition-all cursor-pointer shrink-0 active:scale-95"
+                      >
+                        {isScanningLocal ? (
+                          <>
+                            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                            <span>Đang Quét...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-3.5 h-3.5" />
+                            <span>Quét Thư Mục</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                    {scannedLocalPath && (
+                      <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold mt-2 flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Đã quét xong: <span className="font-mono">{scannedLocalPath}</span></span>
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {scanMode === "folder" && (
                 <>
                   {/* Quick-Pick Chips for Top Course Roots */}
                   {topCourseFolders.length > 0 && (
@@ -606,16 +711,20 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                       ))}
                     </select>
                   </div>
+                </>
+              )}
 
+              {(scanMode === "folder" || scanMode === "local") && (
+                <>
                   {/* Auto-Detect Status / Analysis Banner */}
-                  {isDetecting && (
+                  {(isDetecting || isScanningLocal) && (
                     <div className="p-4 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border border-purple-100 dark:border-purple-900 flex items-center gap-3 text-xs font-bold text-purple-700 dark:text-purple-300">
                       <RefreshCw className="w-4 h-4 animate-spin shrink-0 text-purple-600" />
                       <span>Đang phân tích cấu trúc cây thư mục và độ sâu dữ liệu...</span>
                     </div>
                   )}
 
-                  {detectResult && !isDetecting && (
+                  {detectResult && !isDetecting && !isScanningLocal && (
                     <div className="space-y-4 animate-in fade-in">
                       {detectResult.totalSubFolders === 0 && detectResult.totalFiles === 0 ? (
                         <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 text-xs flex items-start gap-2.5">
@@ -623,7 +732,7 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                           <div>
                             <p className="font-bold">Thư mục nguồn không có dữ liệu</p>
                             <p className="mt-1 text-[11px] text-amber-600/90 dark:text-amber-400/90">
-                              Thư mục này hiện không có thư mục con hoặc file media nào. Vui lòng kiểm tra lại quá trình Sync Drive hoặc chọn thư mục khác.
+                              Thư mục này hiện không có thư mục con hoặc file media nào. Vui lòng kiểm tra lại đường dẫn thư mục.
                             </p>
                           </div>
                         </div>
@@ -704,7 +813,9 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                     </div>
                   )}
                 </>
-              ) : (
+              )}
+
+              {scanMode === "pdf" && (
                 /* PDF Dropzone Mode */
                 <div className="space-y-4">
                   <div className="text-center space-y-1">
@@ -767,15 +878,19 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
                 <button
                   type="button"
                   disabled={
-                    (scanMode === "folder" && (!selectedRootFolderId || isDetecting || (detectResult?.totalSubFolders === 0 && detectResult?.totalFiles === 0))) ||
+                    ((scanMode === "folder" || scanMode === "local") && (!selectedRootFolderId || isDetecting || isScanningLocal || (detectResult?.totalSubFolders === 0 && detectResult?.totalFiles === 0))) ||
                     (scanMode === "pdf" && (!selectedPdfFile || isDetecting))
                   }
                   onClick={() => {
+                    if (scanMode === "local" && !selectedRootFolderId) {
+                      setError("Vui lòng nhập đường dẫn và bấm 'Quét Thư Mục' trước.");
+                      return;
+                    }
                     if (scanMode === "folder" && !selectedRootFolderId) {
                       setError("Vui lòng chọn thư mục Drive nguồn.");
                       return;
                     }
-                    if (scanMode === "folder" && detectResult && detectResult.totalSubFolders === 0 && detectResult.totalFiles === 0) {
+                    if ((scanMode === "folder" || scanMode === "local") && detectResult && detectResult.totalSubFolders === 0 && detectResult.totalFiles === 0) {
                       setError("Thư mục này hiện không có thư mục con hoặc file media nào.");
                       return;
                     }
@@ -800,7 +915,7 @@ export const AutoCourseBuilderModal: React.FC<AutoCourseBuilderModalProps> = ({
           {step === 2 && (
             <div className="space-y-5 max-w-2xl mx-auto py-2">
               {/* ✨ AI Prompt Helper Card */}
-              {scanMode === "folder" && (
+              {(scanMode === "folder" || scanMode === "local") && (
                 <div className="p-4.5 rounded-3xl bg-purple-50/70 dark:bg-purple-950/20 border border-purple-200/80 dark:border-purple-900/50 space-y-2.5">
                   <div className="flex items-center gap-2 text-purple-950 dark:text-purple-200">
                     <Wand2 className="w-4 h-4 text-purple-600 dark:text-purple-400 animate-pulse" />

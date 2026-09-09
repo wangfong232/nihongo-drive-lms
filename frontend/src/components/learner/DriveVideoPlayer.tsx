@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Video, ExternalLink, Info, Tv, Maximize2, Minimize2, X, BookmarkCheck, EyeOff, CheckCircle2 } from "lucide-react";
+import { Video, ExternalLink, Info, Tv, Maximize2, Minimize2, X, BookmarkCheck, EyeOff, CheckCircle2, HardDrive, Zap } from "lucide-react";
 import { api } from "@/lib/api";
 import { useUserSettings } from "@/lib/userSettings";
 
@@ -34,6 +34,8 @@ export const DriveVideoPlayer: React.FC<DriveVideoPlayerProps> = ({
   const [totalDurationSecs, setTotalDurationSecs] = useState<number>(0);
   const [showResumeModal, setShowResumeModal] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const theaterVideoRef = useRef<HTMLVideoElement>(null);
   const saveIntervalRef = useRef<NodeJS.Timeout | null>(null);
   // Elapsed seconds accumulator — Drive iframe can't expose currentTime
   const elapsedRef = useRef<number>(0);
@@ -117,14 +119,25 @@ export const DriveVideoPlayer: React.FC<DriveVideoPlayerProps> = ({
     );
   }
 
-  const iframeSrc = driveFileId
+  const isLocalStream =
+    (driveFileId?.startsWith("local://") ?? false) ||
+    (customUrl?.includes("/curator/stream/local") ?? false) ||
+    (customUrl?.endsWith(".mp4") ?? false) ||
+    (customUrl?.endsWith(".webm") ?? false) ||
+    (customUrl?.endsWith(".mkv") ?? false);
+
+  const mediaSrc = driveFileId?.startsWith("local://")
+    ? api.getLocalStreamUrl(undefined, driveFileId)
+    : customUrl
+    ? customUrl
+    : driveFileId
     ? `https://drive.google.com/file/d/${driveFileId}/preview`
-    : customUrl;
+    : "";
 
   return (
     <>
-      {/* Resume Modal - Show only when tracking is enabled and saved position exists */}
-      {showResumeModal && settings.trackVideoWatchTime && settings.showResumePrompt && savedPositionSecs > 0 && (
+      {/* Resume Modal - Show only when tracking is enabled and saved position exists (for Drive iframe only, since native video resumes auto) */}
+      {showResumeModal && !isLocalStream && settings.trackVideoWatchTime && settings.showResumePrompt && savedPositionSecs > 0 && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-md w-full border-2 border-emerald-500/30 shadow-2xl flex flex-col gap-4">
             <div className="flex items-center gap-3">
@@ -171,13 +184,13 @@ export const DriveVideoPlayer: React.FC<DriveVideoPlayerProps> = ({
                   setShowResumeModal(false);
                   setResumeToast(null);
                 }}
-                className="flex-1 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold transition-colors"
+                className="flex-1 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold transition-colors cursor-pointer"
               >
                 Xem Lại Từ Đầu
               </button>
               <button
                 onClick={() => setShowResumeModal(false)}
-                className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-sm font-extrabold shadow-lg transition-all active:scale-95"
+                className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-sm font-extrabold shadow-lg transition-all active:scale-95 cursor-pointer"
               >
                 Tiếp Tục Xem
               </button>
@@ -192,8 +205,9 @@ export const DriveVideoPlayer: React.FC<DriveVideoPlayerProps> = ({
           {/* Header toolbar */}
           <div className="flex items-center justify-between p-4 bg-slate-900/80 border-b border-slate-800 text-white">
             <div className="flex items-center gap-3">
-              <span className="px-2.5 py-0.5 rounded-full bg-orange-500 text-white font-extrabold text-[10px] uppercase">
-                Rạp Chiếu • Theater Mode
+              <span className="px-2.5 py-0.5 rounded-full bg-orange-500 text-white font-extrabold text-[10px] uppercase flex items-center gap-1">
+                {isLocalStream ? <HardDrive className="w-3 h-3" /> : null}
+                <span>{isLocalStream ? "Rạp Chiếu • Ổ Cứng Local" : "Rạp Chiếu • Drive HD"}</span>
               </span>
               <h2 className="font-extrabold text-sm truncate max-w-md">{title}</h2>
             </div>
@@ -233,7 +247,7 @@ export const DriveVideoPlayer: React.FC<DriveVideoPlayerProps> = ({
                 )}
               </button>
 
-              {driveFileId && (
+              {!isLocalStream && driveFileId && (
                 <a
                   href={`https://drive.google.com/file/d/${driveFileId}/view`}
                   target="_blank"
@@ -245,7 +259,7 @@ export const DriveVideoPlayer: React.FC<DriveVideoPlayerProps> = ({
               )}
               <button
                 onClick={() => setIsTheaterMode(false)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-extrabold transition-all"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-extrabold transition-all cursor-pointer"
               >
                 <Minimize2 className="w-4 h-4" /> Thoát Rạp Chiếu
               </button>
@@ -255,13 +269,37 @@ export const DriveVideoPlayer: React.FC<DriveVideoPlayerProps> = ({
           {/* Full Screen Viewport Video */}
           <div className="flex-1 w-full h-full p-4 flex items-center justify-center">
             <div className="w-full max-w-6xl aspect-video rounded-2xl overflow-hidden border border-slate-800 shadow-2xl bg-black">
-              <iframe
-                src={iframeSrc}
-                className="w-full h-full border-0"
-                allow="autoplay; encrypted-media; picture-in-picture"
-                allowFullScreen
-                title={title}
-              />
+              {isLocalStream ? (
+                <video
+                  ref={theaterVideoRef}
+                  src={mediaSrc}
+                  controls
+                  autoPlay
+                  playsInline
+                  className="w-full h-full object-contain bg-black"
+                  onLoadedMetadata={(e) => {
+                    const dur = e.currentTarget.duration;
+                    if (dur && !isNaN(dur)) setTotalDurationSecs(dur);
+                    if (savedPositionSecs > 0 && e.currentTarget.currentTime < 1) {
+                      e.currentTarget.currentTime = savedPositionSecs;
+                    }
+                  }}
+                  onTimeUpdate={(e) => {
+                    elapsedRef.current = Math.floor(e.currentTarget.currentTime);
+                  }}
+                  onEnded={() => {
+                    onVideoEnded?.();
+                  }}
+                />
+              ) : (
+                <iframe
+                  src={mediaSrc}
+                  className="w-full h-full border-0"
+                  allow="autoplay; encrypted-media; picture-in-picture"
+                  allowFullScreen
+                  title={title}
+                />
+              )}
             </div>
           </div>
         </div>
@@ -272,10 +310,17 @@ export const DriveVideoPlayer: React.FC<DriveVideoPlayerProps> = ({
         {/* Video Control Top Bar */}
         <div className="flex items-center justify-between px-1 text-xs">
           <div className="flex items-center gap-2.5">
-            <span className="font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5 text-xs">
-              <Tv className="w-3.5 h-3.5 text-[#f97316]" />
-              <span>Drive Player HD</span>
-            </span>
+            {isLocalStream ? (
+              <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 text-xs bg-emerald-500/10 px-2.5 py-0.5 rounded-lg border border-emerald-500/30">
+                <HardDrive className="w-3.5 h-3.5 text-emerald-500" />
+                <span>Ổ Cứng Cục Bộ (0ms Delay)</span>
+              </span>
+            ) : (
+              <span className="font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5 text-xs">
+                <Tv className="w-3.5 h-3.5 text-[#f97316]" />
+                <span>Drive Player HD</span>
+              </span>
+            )}
             {resumeToast && settings.showResumePrompt && (
               <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/30 animate-pulse">
                 <BookmarkCheck className="w-3 h-3" />
@@ -343,7 +388,7 @@ export const DriveVideoPlayer: React.FC<DriveVideoPlayerProps> = ({
               <span>Rạp Chiếu</span>
             </button>
 
-            {driveFileId && (
+            {!isLocalStream && driveFileId && (
               <a
                 href={`https://drive.google.com/file/d/${driveFileId}/view`}
                 target="_blank"
@@ -359,15 +404,41 @@ export const DriveVideoPlayer: React.FC<DriveVideoPlayerProps> = ({
 
         {/* 16:9 Video Container with smart max-height to fit within viewport */}
         <div className="relative w-full aspect-video max-h-[calc(100vh-210px)] rounded-2xl overflow-hidden bg-black border border-slate-800/80 shadow-lg group mx-auto">
-          <iframe
-            src={iframeSrc}
-            className="w-full h-full border-0"
-            allow="autoplay; encrypted-media; picture-in-picture"
-            allowFullScreen
-            title={title}
-          />
+          {isLocalStream ? (
+            <video
+              ref={videoRef}
+              src={mediaSrc}
+              controls
+              playsInline
+              className="w-full h-full object-contain bg-black"
+              onLoadedMetadata={(e) => {
+                const dur = e.currentTarget.duration;
+                if (dur && !isNaN(dur)) setTotalDurationSecs(dur);
+                if (savedPositionSecs > 0 && e.currentTarget.currentTime < 1) {
+                  e.currentTarget.currentTime = savedPositionSecs;
+                  setResumeToast(`Đã tự động tiếp tục từ ${formatTime(savedPositionSecs)}`);
+                  setTimeout(() => setResumeToast(null), 6000);
+                }
+              }}
+              onTimeUpdate={(e) => {
+                elapsedRef.current = Math.floor(e.currentTarget.currentTime);
+              }}
+              onEnded={() => {
+                onVideoEnded?.();
+              }}
+            />
+          ) : (
+            <iframe
+              src={mediaSrc}
+              className="w-full h-full border-0"
+              allow="autoplay; encrypted-media; picture-in-picture"
+              allowFullScreen
+              title={title}
+            />
+          )}
         </div>
       </div>
     </>
   );
 };
+

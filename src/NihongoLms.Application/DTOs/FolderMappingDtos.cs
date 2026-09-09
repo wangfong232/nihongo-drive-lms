@@ -149,3 +149,25 @@ public class DetectFolderRequestDto
 {
     public Guid FolderId { get; set; }
 }
+
+/// <summary>
+/// Request quét thư mục cục bộ trên máy chủ/máy người dùng
+/// </summary>
+public class ScanLocalFolderRequestDto
+{
+    public string LocalPath { get; set; } = string.Empty;
+    public string? CourseTitle { get; set; }
+    public string? JlptLevel { get; set; }
+}
+
+/// <summary>
+/// Kết quả quét thư mục cục bộ
+/// </summary>
+public class ScanLocalFolderResponseDto
+{
+    public Guid RootFolderNodeId { get; set; }
+    public string LocalPath { get; set; } = string.Empty;
+    public string RootFolderName { get; set; } = string.Empty;
+    public AutoDetectFolderResultDto DetectionResult { get; set; } = new();
+}
+

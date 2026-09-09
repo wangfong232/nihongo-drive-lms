@@ -11,15 +11,18 @@ public class CuratorController : ControllerBase
     private readonly ICuratorService _curatorService;
     private readonly IAutoSuggestPatternEngine _autoSuggestEngine;
     private readonly IFolderCourseBuilderService _folderCourseBuilder;
+    private readonly ILocalFolderScannerService _localFolderScanner;
 
     public CuratorController(
         ICuratorService curatorService,
         IAutoSuggestPatternEngine autoSuggestEngine,
-        IFolderCourseBuilderService folderCourseBuilder)
+        IFolderCourseBuilderService folderCourseBuilder,
+        ILocalFolderScannerService localFolderScanner)
     {
         _curatorService = curatorService;
         _autoSuggestEngine = autoSuggestEngine;
         _folderCourseBuilder = folderCourseBuilder;
+        _localFolderScanner = localFolderScanner;
     }
 
     [HttpPost("assign")]
@@ -119,4 +122,56 @@ public class CuratorController : ControllerBase
         var course = await _folderCourseBuilder.MaterializeCourseAsync(dto, cancellationToken);
         return Ok(course);
     }
+
+    // ═════════════════════════════════════════════════════════════════════════
+    //  Local Folder & Media Streaming Endpoints (Offline-First / Local Storage)
+    // ═════════════════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// Quét thư mục từ ổ cứng cục bộ (ví dụ: E:\TiengNhat\N3) và lập chỉ mục vào CSDL
+    /// </summary>
+    [HttpPost("local/scan")]
+    public async Task<IActionResult> ScanLocalFolder([FromBody] ScanLocalFolderRequestDto dto, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(dto.LocalPath))
+        {
+            return BadRequest(new { message = "Vui lòng nhập đường dẫn thư mục trên máy." });
+        }
+
+        try
+        {
+            var result = await _localFolderScanner.ScanAndIndexLocalFolderAsync(dto, cancellationToken);
+            return Ok(result);
+        }
+        catch (DirectoryNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = $"Lỗi quét thư mục cục bộ: {ex.Message}" });
+        }
+    }
+
+    /// <summary>
+    /// Phát stream video/audio/pdf trực tiếp từ ổ cứng với hỗ trợ Range processing (HTTP 206 Partial Content)
+    /// </summary>
+    [HttpGet("stream/local")]
+    public async Task<IActionResult> StreamLocalMedia(
+        [FromQuery] Guid? nodeId,
+        [FromQuery] string? driveFileId,
+        CancellationToken cancellationToken)
+    {
+        var fileInfo = await _localFolderScanner.ResolveLocalPhysicalFileAsync(nodeId, driveFileId, cancellationToken);
+        if (fileInfo == null)
+        {
+            return NotFound(new { message = "Không tìm thấy tệp tin hoặc tệp không tồn tại trên ổ cứng." });
+        }
+
+        var (physicalPath, mimeType) = fileInfo.Value;
+
+        // PhysicalFile with enableRangeProcessing: true handles HTTP 206 Partial Content, seeking, buffering effortlessly
+        return PhysicalFile(physicalPath, mimeType, enableRangeProcessing: true);
+    }
 }
+

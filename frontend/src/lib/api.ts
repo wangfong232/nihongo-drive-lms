@@ -315,6 +315,19 @@ export interface AutoDetectFolderResult {
   availablePresets: FolderPresetInfo[];
 }
 
+export interface ScanLocalFolderRequest {
+  localPath: string;
+  courseTitle?: string;
+  jlptLevel?: string;
+}
+
+export interface ScanLocalFolderResponse {
+  rootFolderNodeId: string;
+  localPath: string;
+  rootFolderName: string;
+  detectionResult: AutoDetectFolderResult;
+}
+
 // Global server connection state tracking
 export let isBackendConnected = false;
 
@@ -1804,6 +1817,25 @@ export const api = {
       }
     );
   },
+
+  async scanLocalFolder(data: ScanLocalFolderRequest) {
+    return safeFetch<ScanLocalFolderResponse>(
+      `${API_BASE}/curator/local/scan`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      }
+    );
+  },
+
+  getLocalStreamUrl(nodeId?: string, driveFileId?: string) {
+    const params = new URLSearchParams();
+    if (nodeId) params.set("nodeId", nodeId);
+    if (driveFileId) params.set("driveFileId", driveFileId);
+    return `${API_BASE}/curator/stream/local?${params.toString()}`;
+  },
+
 
   async getWeeklyPacing() {
     return safeFetch<WeeklyPacing>(

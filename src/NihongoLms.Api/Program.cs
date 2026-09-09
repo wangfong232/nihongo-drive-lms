@@ -69,6 +69,7 @@ builder.Services.AddScoped<ISystemSettingsService, SystemSettingsService>();
 builder.Services.AddScoped<ISyllabusParserService, SyllabusParserService>();
 builder.Services.AddScoped<IRoadmapService, RoadmapService>();
 builder.Services.AddScoped<IFolderCourseBuilderService, FolderCourseBuilderService>();
+builder.Services.AddScoped<ILocalFolderScannerService, LocalFolderScannerService>();
 builder.Services.AddScoped<IAiSenseiService, AiSenseiService>();
 
 // Quartz.NET Background Sync Job Setup
